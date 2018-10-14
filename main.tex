@@ -1,0 +1,387 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The Legrand Orange Book
+% LaTeX Template
+% Version 2.3 (8/8/17)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Mathias Legrand (legrand.mathias@gmail.com) with modifications by:
+% Vel (vel@latextemplates.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+% Compiling this template:
+% This template uses biber for its bibliography and makeindex for its index.
+% When you first open the template, compile it from the command line with the 
+% commands below to make sure your LaTeX distribution is configured correctly:
+%
+% 1) pdflatex main
+% 2) makeindex main.idx -s StyleInd.ist
+% 3) biber main
+% 4) pdflatex main x 2
+%
+% After this, when you wish to update the bibliography/index use the appropriate
+% command above and make sure to compile with pdflatex several times 
+% afterwards to propagate your changes to the document.
+%
+% This template also uses a number of packages which may need to be
+% updated to the newest versions for the template to compile. It is strongly
+% recommended you update your LaTeX distribution if you have any
+% compilation errors.
+%
+% Important note:
+% Chapter heading images should have a 2:1 width:height ratio,
+% e.g. 920px width and 460px height.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Forum: https://latex.org/forum/app.php/tag/legrand-orange-book
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+% INSTRUCCIONS D'´US
+% Cada capitol a un fitxer separat
+% Faig servir \chapter, \section, \subsection i \subsubsection
+% Sota cada apartat hi ha un \label amb etiqueta ch:<nom>, sec:<nom>, sub:<nom> o subsub:<nom>
+% Les funcions les poso amb negreta iles indexo amb \index: {\bf funcio()}\index{funcio()}
+% Referen ies entre seccions amb \fullref{<nom>}
+% Llistats amb \begin{lstlisting}[style=customc,caption={<titol>},label=<etiqueta>]
+% Cites a articles, llibres, DS, etc. sempre amb numero de pàgina \cite[p. 5]{CITA}
+
+
+\documentclass[11pt,fleqn]{book} % Default font size and left-justified equations
+
+%----------------------------------------------------------------------------------------
+\input{structure} % Insert the commands.tex file which contains the majority of the structure behind the template
+\usepackage{listings}
+\renewcommand{\lstlistingname}{Llistat}
+\renewcommand*{\lstlistlistingname}{Índex de llistats}
+\renewcommand{\listfigurename}{Índex de figures}
+\usepackage[acronym,toc,footnote,nopostdot]{glossaries}
+\usepackage{textcomp}
+\usepackage{parskip} % More space between paragraphs
+\usepackage{colortbl}
+
+% Style for glossary index (https://en.wikibooks.org/wiki/LaTeX/Glossary)
+\setglossarystyle{altlist}
+
+
+% Table borders in ``ocre`` color
+\arrayrulecolor{ocre} 
+
+%% Href use ocre color
+\let\oldhref\href
+\renewcommand*{\href}[2]{\oldhref{#1}{\color{ocre}{#2}}}
+
+
+%% Font style for C code
+\usepackage{courier}
+
+% \renewcommand{\lstlistingname}{Llistat}
+\lstdefinestyle{customc}{
+  breaklines=true,
+ frame=single,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+  framesep=8pt,
+  float
+}
+
+\lstset{
+  rulecolor=\color{ocre},
+  rulesepcolor=\color{ocre}
+}
+
+\definecolor{cccolor}{rgb}{.67,.7,.67}
+
+\usepackage{nameref}
+
+
+
+\makeglossaries
+\loadglsentries{acronyms}
+
+%----------------------------------------------------------------------------------------
+% Watermark ''Esborrany''
+%----------------------------------------------------------------------------------------
+%\usepackage{draftwatermark}
+%\SetWatermarkText{Esborrany}
+
+%----------------------------------------------------------------------------------------
+% New command, \fullref with full reference to a part/section/figure, etc.
+%----------------------------------------------------------------------------------------
+\newcommand*{\fullref}[1]{\hyperref[{#1}]{\bf  \color{ocre}\autoref*{#1} - \nameref*{#1}}} % One single link
+
+% \renewcommand{\ref}[1]{\bf \color{ocre}\ref{#1}}
+% \let\origref\ref
+% \def\ref#1{\textbf{\color{ocre}\origref{#1}}}
+
+
+%----------------------------------------------------------------------------------------
+% Pàgina en blanc amb text per avisar que tot OK
+% No surt espres de l'inici de cada part, no se pq
+%----------------------------------------------------------------------------------------
+\newcommand*{\blankpage}{%
+\vspace*{\fill}
+{\centering Aquesta pàgina està en blanc expressament, tot va bé.\par}
+\vspace{\fill}}
+\makeatletter
+\renewcommand*{\cleardoublepage}{\clearpage\if@twoside \ifodd\c@page\else
+\blankpage
+\thispagestyle{empty}
+\newpage
+\if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\makeatother
+
+
+%----------------------------------------------------------------------------------------
+% Pàgina dedicatòria
+%----------------------------------------------------------------------------------------
+\newenvironment{dedication}
+  {%\clearpage           % we want a new page          %% I commented this
+   \cleardoublepage % Forces the first chapter to start on an odd page so it's on the right
+   \pagestyle{empty} % No headers
+   \thispagestyle{empty}% no header and footer
+   \vspace*{\stretch{1}}% some space at the top
+   \itshape             % the text is in italics
+   \raggedleft          % flush to the right margin
+  }
+  {\par % end the paragraph
+   \vspace{\stretch{3}} % space at bottom is three times that at the top
+   \clearpage           % finish off the page
+  }
+
+%----------------------------------------------------------------------------------------
+% Posem color i negreta a les etiquetes de figura, llistat i taula
+%----------------------------------------------------------------------------------------
+\usepackage{caption}
+% \renewcommand{\figurename}{Figurabb}
+\captionsetup[figure]{labelfont={color=ocre,bf}}
+\captionsetup[lstlisting]{labelfont={color=ocre,bf}}
+\captionsetup[table]{labelfont={color=ocre,bf}}
+
+%----------------------------------------------------------------------------------------
+% Només fem index de part i chapter, no sections ni subsections ni res
+%----------------------------------------------------------------------------------------
+\setcounter{tocdepth}{0}
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\begingroup
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+\node[inner sep=0pt] (background) at (current page.center) {\includegraphics[width=\paperwidth]{background}};
+\draw (current page.center) node [fill=ocre!30!white,fill opacity=0.6,text opacity=1,inner sep=1cm]{\Huge\centering\bfseries\sffamily\parbox[c][][t]{\paperwidth}{\centering Curs de programació de sistemes encastat\\[15pt] % Book title
+{\Large Un altre llibre sobre el mateix}\\[20pt] % Subtitle
+% {\LARGE Màrius Montón, PhD}\\{\large Amb contribucions de: Lluís Gesa}}}; % Author name
+{\LARGE Màrius Montón, PhD}}}; % Author name
+\end{tikzpicture}
+\vfill
+\endgroup
+
+%----------------------------------------------------------------------------------------
+%	COPYRIGHT PAGE
+%----------------------------------------------------------------------------------------
+\cleardoublepage
+\newpage
+~\vfill
+\thispagestyle{empty}
+
+\noindent Copyright \copyright\ 2018 Màrius Montón\\ % Copyright notice
+% \noindent Copyright \copyright\ 2018 del captítol \ref{part:test} Lluís Gesa
+
+\noindent \textit{Versió: 1.0} % Printing/edition date
+
+\par
+
+\begin{mdframed}[outerlinecolor=black,outerlinewidth=2pt,linecolor=cccolor,middlelinewidth=3pt,roundcorner=10pt]
+  Distribuit segons la llicència Creative Commons Reconeixement-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0) (\href{https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode}{link al text de la llicència})
+  \begin{center}
+    \includegraphics[scale=0.2]{imatges/1280px-CC-BY-NC-SA}
+  \end{center}
+\end{mdframed}
+
+\noindent Sou lliure de:
+\begin{description}[leftmargin=\parindent]
+ \item {\bf Compartir} — copiar i redistribuir el material en qualsevol mitjà i format
+ \item {\bf Adaptar} — remesclar, transformar i crear a partir del material
+\end{description}
+
+\noindent Amb els termes següents:
+\begin{description}[leftmargin=\parindent]
+ \item {\bf Reconeixement} — Heu de reconèixer l'autoria de manera apropiada, proporcionar un enllaç a la llicència i indicar si heu fet algun canvi. Podeu fer-ho de qualsevol manera raonable, però no d'una manera que suggereixi que el llicenciador us dóna suport o patrocina l'ús que en feu.
+ \item {\bf NoComercial} — No podeu utilitzar el material per a finalitats comercials.
+ \item {\bf CompartirIgual} — Si remescleu, transformeu o creeu a partir del material, heu de difondre les vostres creacions amb la mateixa llicència que l'obra original.
+\end{description}
+
+\noindent Latex Template based on \href{https://www.latextemplates.com/template/the-legrand-orange-book}{The Legrand Orange Book} by Mathias Legrand.
+
+
+%----------------------------------------------------------------------------------------
+%	DEDICATÒRIA
+%----------------------------------------------------------------------------------------
+\begin{dedication}
+ A tots els meus alumnes, que m'han ajudat a entendre i aprendre.
+ \par   %% or a blank line
+%     \vspace{2\baselineskip}
+    \vspace{\baselineskip}
+%     \usefont{T1}{LobsterTwo-LF}{bx}{it}
+    \usefont{T1}{Arial}{bx}{it}
+    Màrius
+
+    \vspace{4\baselineskip}
+    \vspace{4\baselineskip}
+    Vull agrair a Borja Martínez, Lluís Gesa, Cristina Cano, Francisco Vázquez, Pere Tuset, Xose Pérez i Jordi Binefa pels comentaris i correccions fetes al text. Com de costum tots els errors que encara hi hagi al text i al codi son cosa meva i no pas seva.
+    
+    \vspace{\baselineskip}
+    Màrius
+\end{dedication}
+
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS
+%----------------------------------------------------------------------------------------
+
+%\usechapterimagefalse % If you don't want to include a chapter image, use this to toggle images off - it can be enabled later with \usechapterimagetrue
+
+\chapterimage{chapter_head_1.pdf} % Table of contents heading image
+
+\pagestyle{empty} % No headers
+
+\tableofcontents % Print the table of contents itself
+
+\cleardoublepage % Forces the first chapter to start on an odd page so it's on the right
+
+\pagestyle{fancy} % Print headers again
+
+%----------------------------------------------------------------------------------------
+%	PART
+%----------------------------------------------------------------------------------------
+
+\part{Nocions bàsiques}
+
+%----------------------------------------------------------------------------------------
+%	CHAPTER 1
+%----------------------------------------------------------------------------------------
+
+\chapterimage{chapter_head_2.pdf} % Chapter heading image
+
+
+%----------------------------------------------------------------------------------------
+% 1a Part:  Introducció & Breu introducció als sistemes encastats
+%----------------------------------------------------------------------------------------s
+\include{capitol_1}
+\include{capitol_2}
+
+%----------------------------------------------------------------------------------------
+% 2a i 3a Part: Programació de perifèrics
+%----------------------------------------------------------------------------------------s
+\part{Programació de perifèrics I}
+\label{part:programacio}
+\include{capitol_3}
+
+%----------------------------------------------------------------------------------------
+% 4a Part: FreeRTOS
+%----------------------------------------------------------------------------------------s
+\part{FreeRTOS}
+\label{part:freertos}
+\include{capitol_4}
+
+%----------------------------------------------------------------------------------------
+% 5a Part: Temes avançats
+%----------------------------------------------------------------------------------------s
+\part{Temes avançats}
+\label{part:avançats}
+\include{capitol_5}
+
+%----------------------------------------------------------------------------------------
+% 6a Part: Test
+%----------------------------------------------------------------------------------------s
+% \part{Test i Qualitat}
+% \label{part:test}
+% \include{capitol_6}
+
+%----------------------------------------------------------------------------------------
+% 7a Part: Indexs
+%----------------------------------------------------------------------------------------s
+\part{Índex, Bibliografia, Glossari}
+
+%----------------------------------------------------------------------------------------
+% Enllaços dels exemples
+%----------------------------------------------------------------------------------------s
+\include{links}
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\chapter*{Bibliografia}
+\addcontentsline{toc}{chapter}{\textcolor{ocre}{Bibliografia}}
+
+%------------------------------------------------
+
+%\section*{Articles}
+%\addcontentsline{toc}{section}{Articles}
+\printbibliography[heading=bibempty, type=misc]
+
+%------------------------------------------------
+
+\section*{Llibres}
+\addcontentsline{toc}{section}{Llibres}
+\printbibliography[heading=bibempty,type=book]
+
+%----------------------------------------------------------------------------------------
+%	GLOSSARY
+%----------------------------------------------------------------------------------------
+% \chapter*{Glossari}
+\cleardoublepage
+
+\printglossary[title=Glossari,toctitle={\textcolor{ocre}{Glossari}}]
+\printglossary[type=\acronymtype, title=Acrònims,toctitle={\textcolor{ocre}{Acrònims}}]
+
+%----------------------------------------------------------------------------------------
+%	Índex de figures
+%----------------------------------------------------------------------------------------
+\cleardoublepage
+\listoffigures
+\addcontentsline{toc}{chapter}{\textcolor{ocre}{\listfigurename}}
+
+%----------------------------------------------------------------------------------------
+%	Llistats
+%----------------------------------------------------------------------------------------
+% \chapter*{Llistats}
+% \clearpage\addcontentsline{toc}{chapter}{\lstlistlistingname}
+\cleardoublepage
+\addcontentsline{toc}{chapter}{\textcolor{ocre}{\lstlistlistingname}}
+\lstlistoflistings
+
+%----------------------------------------------------------------------------------------
+%	INDEX
+%----------------------------------------------------------------------------------------
+
+\renewcommand\indexname{Index de funcions}
+\cleardoublepage
+\phantomsection
+\setlength{\columnsep}{0.75cm}
+\addcontentsline{toc}{chapter}{\textcolor{ocre}{Índex de funcions}}
+\printindex
+
+%----------------------------------------------------------------------------------------
+
+\end{document}
+
+
+
+% https://www.embedded.com/design/mcus-processors-and-socs/4026075/Building-Bare-Metal-ARM-Systems-with-GNU-Part-2
