@@ -607,6 +607,96 @@ void printf_int(int val) {
 }
 \end{lstlisting}
 
+\chapter{Empaquetant estructures}
+\label{ch:estructures}
+
+L'ús d'estructures ({\em struct} en C) per emmagatzemar dades que estan relacionades és força habitual. Per fer-ho, només cal definir una estructura i cada camp es defineix amb el tipus desitjat. Tota l'estructura funciona com un paquet de dades, que es pot moure, copiar i accedir com un tot.
+
+Però si volem accedir a baix nivell a aquestes estructures per, per exemple, enviar les dades que conté per un port sèrie, inserir-la a un paquet de xarxa o enviar-ho a un altre dispositiu via SPI o I2C, cal que tinguem compte el problema de l'empaquetament.
+
+Quan definim una estructura en C, el compilador ha de decidir com l'emmagatzema a la memòria. Segons les característiques dels busos i l'arquitectura del microcontrolador, pot ser que els accessos a memòria només es puguin fer a nivell de paraula (en el cas d'ARM una paraula és de 32 bits) i que no es pugui accedir a un byte individual de la memòria.
+
+I com afecta això a les estructures? Doncs que el compilador pot optar a col·locar els diferents camps de l'estructura ocupant cada un una posició de memòria enlloc d'empaquetar-los tant com pugui.
+
+Així, si tenim una estructura definida com es veu al Llistat~\ref{unpacket_struct} el compilador guardarà l'estructura a la memòria tal com es veu a la Figura~\ref{fig:UnpackedMemoryStructure}. 
+
+\begin{lstlisting}[style=customc,caption={Estructura d'exemple},label=unpacket_struct]
+ struct {
+	uint8_t fieldS1;
+	uint16_t fieldS1b;
+	uint32_t fieldL1;
+	uint32_t fieldL2;
+	uint8_t fieldS2;
+} unpacket_struct;
+\end{lstlisting}
+
+
+\begin{figure}
+ \centering
+ \fbox{\color{ocre}\includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/Estructures.png}}
+ \caption{Disposició de l'estructura a la memòria}
+ \label{fig:UnpackedMemoryStructure}
+\end{figure}
+
+Que com es pot veure aquesta organització no és la que ens podríem esperar, ja que el camp {\bf fieldS1b} no està enganxat al camp {\bf fieldS1} i es per una posició de memòria per allà enmig. Aquesta operació s'anomena {\em padding} i és força habitual en totes les arquitectures. En aquest cas fa que aquesta estructura ocupi 16 bytes a la memòria enlloc dels 12 que podria ocupar si estigues tot ben empaquetat.
+
+Això no s'acostuma a tenir gaire en compte alhora de programar sistemes encastats, però pot ser força important si en algun moment una estructura d'aquest estil cal enviar-la byte a byte a algun mòdul o perifèric. Anem a suposar que enviarem aquesta estructura d'exemple pel port sèrie. Si fem una funció que vagi llegint byte a byte l'estructura, tindrem que llegirà uns buits a 0 enmig que ens esgarraran el resultat.
+
+En aquests casos, cal dir-li al compilador que volem que empaqueti tant com pugui l'estructura. Això és fa amb una comanda pròpia de cada compilador, en el cas de GCC és la comanda {\bf \_\_attribute\_\_} que es fa servir tal com es veu al Llistat~\ref{packet_struct}. Amb aquesta comanda l'estructura a memòria queda com es veu  a la Figura~\ref{fig:UnpackedMemoryStructure}.
+
+
+\begin{lstlisting}[style=customc,caption={Estructura d'exemple empaquetada},label=packet_struct]
+struct __attribute__ ((__packed__)) {
+	uint8_t fieldS1;
+	uint16_t fieldS1b;
+	uint32_t fieldL1;
+	uint32_t fieldL2;
+	uint8_t fieldS2;
+} packet_struct;
+\end{lstlisting}
+
+
+\begin{figure}
+ \centering
+ \fbox{\color{ocre}\includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/Estructures2.png}}
+ \caption{Disposició de l'estructura empaquetada a la memòria}
+ \label{fig:UnpackedMemoryStructure}
+\end{figure}
+
+Que ja es veu que està tot ben empaquetat i ens estalvia uns quants bytes. A més, s'han omplert tots els forats de manera que ara si que podrem accedir byte a byte l'estructura sense problemes.
+
+Cal dir que en força casos aquestes estructures empaquetades poden ser més lentes d'accedir-hi, ja que la CPU haurà d'accedir a diferents posicions de memòria i reconstruir el valor original movent bits amunt i avall (veure per exemple, com es reconstruiran els camps fieldL1 o fieldL2)
+
+\section{Un exemple senzill}
+
+A l'\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/Structures}{exemple del repositori} es defineixen dos estructures iguals, una amb l'atribut per empaquetar-la i l'altra amb les opcions per defecte.
+
+Primer es treuen per la consola les mides de totes dues estructures, que encaixen amb el que hem dit aquí i tot seguit es pinten byte a byte per observar els zeros enmig i com està emmagatzemada cada estructura.
+
+Cal destacar com s'accedeix byte a byte a l'estructura. Es defineix un apuntador a byte ({\em uint8\_t} *) i es fa apuntar a l'adreça d'inici de l'estructura que es vol analitzar. Tot seguit es va imprimint byte a byte el contingut de la memòria on està emmagatzemada l'estructura.
+
+\begin{lstlisting}[style=customc,caption={Estructura d'exemple empaquetada},label=struct_example]
+...
+  uint8_t *buffer;
+
+  buffer = (uint8_t*) &unpacket_struct;
+  printf("Unpacket structure: \t");
+  for(i = 0; i < sizeof(unpacket_struct); i++) {
+	  printf("0x%02X, ", buffer[i]);
+  }
+  printf("\n");
+...
+\end{lstlisting}
+
+
+També es pot analitzar directament el contingut de la memòria usant l'IDE Simplicity Studio fent servir l'eina de {\em dump} de la memòria tal com es veu a la Figura~\ref{fig:MemoryDumpStructure}.
+
+\begin{figure}
+ \centering
+ \fbox{\color{ocre}\includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/MemoryDumpStructure.png}}
+ \caption{Detall de la finestra de {\em memory dump} a Simplicity Studio}
+ \label{fig:UnpackedMemoryStructure}
+\end{figure}
 
 
 \chapter{CMSIS}
