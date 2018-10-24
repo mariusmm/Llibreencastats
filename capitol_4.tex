@@ -182,7 +182,7 @@ static void TaskLedToggle(void *pParameter) {
 }
 \end{lstlisting}
 
-Aquesta tasca fa servir una funció del RTOS ({\bf vTaskDelay()}\index{vTaskDelay()}) que bloqueja la tasca per un determinat temps. Així doncs, aquesta tasca tant sols farà Toggle al LED cada mig segon.
+Aquesta tasca fa servir una funció del RTOS ({\bf vTaskDelay()}\index{vTaskDelay()}) que bloqueja la tasca per un determinat temps. Així doncs, aquesta tasca tant sols farà Toggle al LED cada mig segon. Cal fixar-se que aquesta funció rep com a paràmetre el nombre de {\em ticks} a esperar-se. Aquest número es calcula amb la macro {\bf pdMS\_TO\_TICKS()}\index{pdMS\_TO\_TICKS()}, que passa de mil·lisegons a {\em ticks}.
 
 Al {\bf main()}\index{main()} el que veiem és que, després de la inicialització habitual hem de crear les tasques que tingui el nostre sistema i tot seguit engegar el FreeRTOS (Llistat \ref{HelloWorldFreeRTOSMain}).
 
@@ -294,7 +294,7 @@ Es pot provar d'implementar un codi que blinki el LED tantes vegades com vegades
 \label{sec:queue}
 Hem vist que els semàfors són útils per sincronitzar tasques i per protegir zones d'exclusió mútua, però no ens donen cap solució senzilla per enviar informació o dades d'una tasca a una altra. Aquesta comunicació és per les cues \cite[102]{FreeRTOSBook}.
 
-Ens podem imaginar una cua com un recurs compartit entre dues o més tasques, on unes poden escriure-hi i d'altres hi poden llegir-ne dades. Habitualment (en FreeRTOS és així), les cues s'implementen amb una estructura tipus FIFO (First-In First-Out) protegida de tal manera que no hi hagi cap \gls{race condition} durant el seu funcionament\footnote{S'anomena {\em race condition} al malfuncionament d'un codi donat que està executant-se en un entorn multitasca. Aquesta mena d'errors poden ser molt difícils de detectar i arreglar}.
+Ens podem imaginar una cua com un recurs compartit entre dues o més tasques, on unes poden escriure-hi i d'altres hi poden llegir dades. Habitualment (en FreeRTOS és així), les cues s'implementen amb una estructura tipus FIFO (First-In First-Out) protegida de tal manera que no hi hagi cap \gls{race condition} durant el seu funcionament\footnote{S'anomena {\em race condition} al malfuncionament d'un codi donat que està executant-se en un entorn multitasca. Aquesta mena d'errors poden ser molt difícils de detectar i arreglar}.
 
 A més, per tal de poder implementar sistemes d'una forma senzilla, els accessos a les cues poden ser bloquejants: la tasca que fa l'accés es quedarà bloquejada fins que pugui fer l'accés (esperar a poder escriure una dada, donat que no podia perquè la cua era plena) o esperar fins que hi hagi una dada (perquè s'ha intentat llegir de la cua quan aquesta era buida).
 
@@ -373,7 +373,7 @@ queue_buttons = xQueueCreate(QUEUE_LENGTH, sizeof(uint32_t));
 
 \section{Mutex}
 \label{sec:Mutex}
-Quan tenim un recurs, driver, memòria compartida, secció crítica o qualsevol altre recurs que només es pot fer servir per una sola tasca a cada moment, cal muntar un mecanisme d'exclusió mútua que ens asseguri que no tindrem cap problema \cite[244]{FreeRTOSBook}.
+Quan tenim un recurs, {\em driver}, memòria compartida, secció crítica o qualsevol altre recurs que només es pot fer servir per una sola tasca a cada moment, cal muntar un mecanisme d'exclusió mútua que ens asseguri que no tindrem cap problema \cite[244]{FreeRTOSBook}.
 
 Aquest mecanisme és molt similar a un semàfor binari però cal incloure algun mecanisme per prevenir la inversió de prioritats. Aquest mecanisme és el Mutex (d'aquí els ve el nom: {\em Mutual Exclusion}). Els Mutex implementen un mecanisme d'herència de prioritats de tal manera que si una tasca d'alta prioritat està esperant un Mutex que té una tasca de baixa prioritat, aquesta última veu augmentada la seva prioritat a la mateixa prioritat que la tasca d'alta prioritat mentre té el Mutex per tal que tingui més oportunitat d'alliberar-lo ja que altres tasques amb prioritats entre mig poden bloquejar la tasca de baixa prioritat \footnote{Aquest problema és el conegut {\em inversió de prioritats} que pot donar molts mal de caps si no es detecta a temps}.
 
@@ -492,7 +492,6 @@ static void UARTTask(void *pParameter) {
   char tx_char;
 
   for (;;) {
-    /* try to get new delay time from queue */
     if (xQueueReceive(USART_RX_queue, &recv_char, portMAX_DELAY)) {
       tx_char = recv_char;
       xQueueSend(USART_TX_queue, &tx_char, 0);
@@ -657,9 +656,9 @@ Mirant la Taula \ref{tb:bin_size} veure que l'aplicació amb FreeRTOS necessita 
 
 
 \chapter{Ús del {\bf watchdog} en RTOS}
-Quan es treballa en un entorn amb un RTOS, cal estudiar bé com fer servir el {\em watchdog}. La primera pensada pot ser d'afegir les crides per alimentar el {\em watchdog} a cada una de les tasques com si fossin mini-aplicacions individuals. Aquesta aproximació, però, faria que el sistema mai es reiniciï encara que una tasca deixi e funcionar o tingui algun problema greu, ja que la resta de tasques seguirien alimentant-lo.
+Quan es treballa en un entorn amb un RTOS, cal estudiar bé com fer servir el {\em watchdog}. La primera pensada pot ser d'afegir les crides per alimentar el {\em watchdog} a cada una de les tasques com si fossin mini-aplicacions individuals. Aquesta aproximació, però, faria que el sistema mai es reiniciï encara que una tasca deixi de funcionar o tingui algun problema greu, ja que la resta de tasques seguirien alimentant-lo.
 
-La solució més habitual és la de tenir una tasca dedicada a la tasca d'alimentar el {\em watchdog} i que rebi una mena d'OK de cada una de les tasques restants del sistema. D'aquesta forma, si una tasca deixa de funcionar, aquesta tasca dedicada ho detectarà i deixarà d'alimentar el {\em watchdog} provocant que el sistema es reiniciï (Llistat~\ref{Watchdog_RTOS}).
+La solució més habitual és la de tenir una tasca dedicada a alimentar el {\em watchdog} i que rebi una mena d'OK de cada una de les tasques restants del sistema. D'aquesta forma, si una tasca deixa de funcionar, aquesta tasca dedicada ho detectarà i deixarà d'alimentar el {\em watchdog} provocant que el sistema es reiniciï (Llistat~\ref{Watchdog_RTOS}).
 
 \index{SemaphoreHandle{\_}t}\index{xSemaphoreTake()}\index{xSemaphoreGive()}
 \index{watchdogTouch()}\index{watchdogClear()}\index{watchdogTask()}
@@ -707,4 +706,4 @@ El codi que es veu al Llistat~\ref{Watchdog_RTOS} proporciona la funció {\bf wa
 
 Com es pot veure a l'exemple, la variable local a la biblioteca {\em watchdog\_list} emmagatzema l'estat de totes les tasques i s'hi accedeix a la funció {\bf watchdogTouch()} que protegeix l'accés amb un {\em mutex}. La tasca {\bf watchdogTask()}\index{watchdogTask()} avalua aquesta variable d'estat i si tot ha anat correctament (totes les tasques han cridat la seva funció almenys un cop), alimenta el {\em watchdog} En cas contrari, la tasca no l'alimenta i acabarà per reiniciar el sistema.
 
-A l'exemple aquesta tasca s'executa un cop cada segon, i el {\em watchdog} s'ha de configurar d'acord a aquest temps (un temps de {\em watchdog} de 2 segons seria l'adequat). La resta de tasques haurien de cridar la funció {\bf watchdogTouch()} amb un període de temps per curt (per exemple cada 500 mil·lisegons) per tal de que tot el sistema s'executi correctament.
+A l'exemple aquesta tasca s'executa un cop cada segon, i el {\em watchdog} s'ha de configurar d'acord a aquest temps (un temps de {\em watchdog} de 2 segons seria l'adequat). La resta de tasques haurien de cridar la funció {\bf watchdogTouch()} amb un període de temps prou curt (per exemple cada 500 mil·lisegons) per tal de que tot el sistema s'executi correctament.
