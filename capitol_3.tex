@@ -33,7 +33,7 @@ En el cas de Simplicity, els caràcters rebuts es presenten directament a la con
 \label{sub:console_example}
 Tot i que això és força útil, podem fer servir una funció força coneguda i molt útil com és {\bf printf()}\index{printf()} per fer-nos-ho tot més senzill (a canvi d'alguna cosa, com veurem).
 
-La funció {\bf printf()} es una vella coneguda per qualsevol programador de C (o C++, o PHP, o …). Així que seria genial poder fer servir aquesta funció en el nostre sistema encastat i que la cadena aparegui a la consola del nostre PC. Això ho podem fer de la següent manera. Primer de tot cal saber que la funció {\bf printf()} fa servir la funció de sistema {\bf \_write()} per imprimir la cadena. Per tant, caldrà que implementem aquesta funció per tenir el nostre desitjat {\bf printf()}.
+La funció {\bf printf()} és una vella coneguda per qualsevol programador de C (o C++, o PHP, o …). Així que seria genial poder fer servir aquesta funció en el nostre sistema encastat i que la cadena aparegui a la consola del nostre PC. Això ho podem fer de la següent manera. Primer de tot cal saber que la funció {\bf printf()} fa servir la funció de sistema {\bf \_write()} per imprimir la cadena. Per tant, caldrà que implementem aquesta funció per tenir el nostre desitjat {\bf printf()}.
 
 \index{\_write()}\index{ITM{\_}SendChar()}
 \begin{lstlisting}[caption={Funció {\bf \_write()}},style=customc,label=write]

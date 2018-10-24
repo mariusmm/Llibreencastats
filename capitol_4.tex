@@ -39,9 +39,9 @@ Les tasques són les unitats bàsiques de funcionament i és on s'implementen le
 
 \section{Tasques}
 
-Una tasca és el que es coneix com a procés en els Sistemes Operatius de propòsit general. Per tant, una tasca serà l'estructura mínima de codi en que es divideix una aplicació. Aquestes tasques seran les que el planificador {\em scheduler} del Sistema Operatiu anirà executant i retirant d'execució segons certes condicions que veurem a continuació.
+Una tasca és el que es coneix com a procés en els Sistemes Operatius de propòsit general. Per tant, una tasca serà l'estructura mínima de codi en que es divideix una aplicació. Aquestes tasques seran les que el planificador o {\em scheduler} del Sistema Operatiu anirà executant i retirant d'execució segons certes condicions que veurem a continuació.
 
-Bàsicament una tasca pot estar en l'estat {\em Running} (executant-se), {\em Ready} (disponible per ser executada) o {\em Blocked} (no prepara perquè està esperant a algun esdeveniment)\footnote{També hi ha l'estat {\em Suspended} on la pròpia tasca demana sortir de la llista de {\em Ready}}. A la Figura~\ref{fig:taskstate} es pot veure quins estats pot tenir una tasca en FreeRTOS \cite[92]{FreeRTOSBook}.
+Bàsicament una tasca pot estar en l'estat {\em Running} (executant-se), {\em Ready} (disponible per ser executada) o {\em Blocked} (no preparada perquè està esperant a algun esdeveniment)\footnote{També hi ha l'estat {\em Suspended} on la pròpia tasca demana sortir de la llista de {\em Ready}}. A la Figura~\ref{fig:taskstate} es pot veure quins estats pot tenir una tasca en FreeRTOS \cite[92]{FreeRTOSBook}.
 
 
 \begin{figure}

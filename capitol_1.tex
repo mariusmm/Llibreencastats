@@ -29,7 +29,7 @@ La part pràctica del curs es basa en la placa de prototipat EFM32TG-STK3300 Sta
 
 Aquesta \gls{PCB} porta un parell de botons, un \gls{LED} i un connector on hi ha tot de pins amb diferents funcions que podrem utilitzar quan ho necessitem.
 
-Per treballar amb aquesta plataforma, cal instal·lar el conjunt d'aplicacions {\bf Simplicity Studio} versió 4 \cite{simplicityURL}). Hi ha versions per Linux, Mac i Windows.
+Per treballar amb aquesta plataforma, cal instal·lar el conjunt d'aplicacions {\bf Simplicity Studio} versió 4 \cite{simplicityURL}. Hi ha versions per Linux, Mac i Windows.
 
 \begin{figure}
  \centering
@@ -65,7 +65,7 @@ Per descarregar el fitxer binari a la ROM, cal un dispositiu extern al microcont
 
 A més, aquest programador sol afegir característiques de {\em debug}, de manera que podem controlar l'execució del microcontrolador, inspeccionar el valor de variables o posicions de memòria, accedir a la consola de {\em debug}, etc.
 
-\subsection{Toolchain}
+\subsection{{\em Toolchain}}
 Com per tot processador, cal un seguit d'eines que ajudin a traduir el nostre codi (normalment C o C++) en instruccions màquina que la CPU pugui processar. Aquestes eines son el compilador i el {\em linker}. El compilador fa aquesta traducció pròpiament dita i genera fitxers objecte i el {\em linker} recull tot de fitxers objecte per crear un sol fitxer executable o biblioteca.
 
 En el cas dels microcontroladors, hem d'acabar obtenint un fitxer executable que serà el que el microcontrolador començarà a executar quan s'engegui. Aquest fitxer haurà de tenir tot el conjunt de biblioteques i funcions necessàries per la correcta execució de l'aplicació, ja que en aquest context no tenim cap mena de sistema operatiu que ens proporcioni cap ajuda ni biblioteques.

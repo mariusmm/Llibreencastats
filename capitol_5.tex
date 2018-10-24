@@ -408,7 +408,7 @@ Per tant es compleixen les condicions perquè les tres tasques es puguin executa
 
 També val la pena observar que la part dreta de l'Equació~\ref{eq:RMA} té un límit:
 \begin{equation*}
- \lim_{x\to\infty} n \cdot (2^{1/n}-1) = ln(2) \approx 0.7
+ \lim_{n\to\infty} n \cdot (2^{1/n}-1) = ln(2) \approx 0.7
 \end{equation*}
 
 que ens indica que amb les condicions dites abans, un sistema amb moltes tasques no podrà tenir la CPU al 100\%, si no tant sols al 70\% d'ocupació total.
@@ -1093,7 +1093,7 @@ Per últim, succeeix sovint que certes connexions de l'esquemàtic es canvien en
 Un altre dels canvis importants és el de passar de treballar amb una placa de prototipat o de desenvolupament a poder-ho fer en una PCB pròpia. La placa de prototipat porta muntat cert nombre de dispositius externs que segurament no estaran presents a la nostra PCB.
 
 \subsection{Mecanisme de programació}
-Un dels canvis més notoris és de l'absència del programador integrat a la PCB pròpia. Les plaques de desenvolupament modernes acostumen a integrar el programador, de manera que la placa de prototipat s'alimenta i es programa a través d'un connector USB estàndard. Això amaga que a la pròpia placa de desenvolupament hi ha tota el circuit per programar el nostre. De fet, a la placa de prototipat que estem fent servir, hi ha un microcontrolador que rep les comandes del {\em debugger} per USB i les transforma a les comandes adequades per programar el microcontrolador principal a través del port {\em SWD} \cite[30]{USERMANUALDEVKIT}.
+Un dels canvis més notoris és de l'absència del programador integrat a la PCB pròpia. Les plaques de desenvolupament modernes acostumen a integrar el programador, de manera que la placa de prototipat s'alimenta i es programa a través d'un connector USB estàndard. Això amaga que a la pròpia placa de desenvolupament hi ha tota el circuit per programar el microcontrolador principal. De fet, a la placa de prototipat que estem fent servir, hi ha un microcontrolador que rep les comandes del {\em debugger} per USB i les transforma a les comandes adequades per programar el microcontrolador principal a través del port {\em SWD} \cite[30]{USERMANUALDEVKIT}.
 
 Aquest circuit no s'acostuma a posar les PCBs de productes finals, si no que es deixa disponible d'alguna manera (connector, pins, {\em pads}) a la PCB l'accés directe al port {\em SWD} del microcontrolador. Això provoca que calgui un programador extern a la PCB per tal de poder programar el microcontrolador. Això es pot fer comprant un dispositiu {\em debugger}, tot i que també es pot fer servir una de les plaques de prototipat perquè faci de programador de qualsevol microcontrolador extern connectat a través del port de DEBUG.
 
