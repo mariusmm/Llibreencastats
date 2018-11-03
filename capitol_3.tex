@@ -615,7 +615,7 @@ Els RTC varien força de fabricant a fabricant, així els STM32 tenen un RTC com
 
 Per contra, els RTCs de EFM32 són força més senzills, i és, de fet, un Timer de 24 bits de molt baix consum amb una entrada de rellotge pròpia i que es pot triar cada quan generen una interrupció \cite[285]{EFM32GRM}. Si triem fer una interrupció cada segon, podem manegar per SW la gestió de l'hora i el calendari.
 
-\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/RTC}{A l'exemple per EFM32} tant sols se selecciona el rellotge de 32 kHz extern (LFXO), el divisor a 32768 per tenir un tic cada segon i es configura per a que generi una interrupció cada 2 segons (veure Llistat~\ref{RTCInit}. En aquest exemple, a la \gls{ISR} només es canvia el LED (s'apaga o encén segons el seu estat actual) (veeure Llistat~\ref{RTCISR}).
+\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/RTC}{A l'exemple per EFM32} tant sols se selecciona el rellotge de 32 kHz extern (LFXO), el divisor a 32768 per tenir un tic cada segon i es configura per a que generi una interrupció cada 2 segons (veure Llistat~\ref{RTCInit}). En aquest exemple, a la \gls{ISR} només es canvia el LED (s'apaga o encén segons el seu estat actual) (veure Llistat~\ref{RTCISR}).
 
 \index{CMU{\_}ClockSelectSet()}\index{CMU{\_}ClockDivSet()}\index{NVIC{\_}EnableIRQ()}
 \index{RTC{\_}CompareSet()}\index{RTC{\_}IntEnable()}\index{NVIC{\_}ClearPendingIRQ()}
@@ -721,7 +721,7 @@ TIMER_CompareBufSet(TIMER1, 1, pwm_value);
 
 La resta del codi és senzill: es preparen les dues interrupcions per cada un dels botons, i quan algun dels dos es prem, la \gls{ISR} modifica el valor del registre {\bf CC} del Timer (un botó augmenta el duty cycle, l'altre el disminueix).
 
-Si veiem el senyal generada amb un oscil·loscopi veiem el que es mostra a la Figura~\ref{fig:DutyCycle1} (estat per defecte).
+Si veiem el senyal generat amb un oscil·loscopi veiem el que es mostra a la Figura~\ref{fig:DutyCycle1} (estat per defecte).
 \begin{figure}
  \centering
  \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/DutyCycle1.png}
@@ -824,7 +824,7 @@ Aquesta perifèric el que fa és llegir un senyal analògic (un voltatge) i conv
 \begin{itemize}
  \item Resolució: fa referència a quants bits dona la conversió de l'ADC. Un ADC de 16 bits, en principi, dona més detall del senyal d'entrada que un ADC de 8 bits. Actualment el més habitual és trobar ADCs d'entre 8 i 16 bits de resolució.
  \item {\em Sampling rate}: és la cadència amb la que l'ADC agafa una nova mostra del senyal i la converteix a digital. Els microcontroladors actuals incorporen ADCs que poden arribar al milió de mostres per segon.
- \item referència: pot ser que es compari el senyal segons una referència determinada i el ADC ens doni el valor respecte a aquesta referència.
+ \item Referència: pot ser que es compari el senyal segons una referència determinada i el ADC ens doni el valor respecte a aquesta referència.
 \end{itemize}
 
 En els microcontroladors moderns, és habitual que davant de l'ADC hi hagi un multiplexor analògic, de manera que es pugui convertir diverses senyals connectades a diferents pins amb un mateix perifèric.
@@ -861,9 +861,9 @@ D'aquesta manera, els 12 bits de resolució del ADC serviran per comparar la ten
  Els 3.3 Volts és el voltatge de funcionament de la placa d'avaluació. Els ADC normalment poden mesurar tensions fins a la seva tensió d'alimentació i és per això que en aquest cas podem mesurar fins a 3.3 Volts. Si l'alimentació fos menor, el rang de treball de l'ADC també ho seria. En el cas particular de l'ADC dels EFM32, poden tenir voltatges fixes com a referència \cite[378]{EFM32GRM}.
 \end{remark}
 
-El codi, un cop inicialitzat el ADC, realitza les següents accions:
+El codi, un cop inicialitzat el ADC, realitza les accions que es veuen al Llistat~\ref{ADCSimple}.
 \index{ADC{\_}Start()}\index{ADC{\_}DataSingleGet()}
-\begin{lstlisting}[frame=single,caption={Codi de lectura de l'ADC},style=customc]
+\begin{lstlisting}[frame=single,caption={Codi de lectura de l'ADC},style=customc, label=ADCSimple]
 while (1) {
   ADC_Start(ADC0, adcStartSingle);
   while (ADC0->STATUS & ADC_STATUS_SINGLEACT);
@@ -942,7 +942,7 @@ void main(void) {
 }
 \end{lstlisting}
 
-Si mesurem el voltatge de sortida amb un multímetre, oscil·loscopi o analitzador lògic (que tingui entrada analògica) podem veure com els valors de la variable provoquen el canvi en voltatge esperat segons la Fórmula~\ref{eq:DACFormula} tal com es veu a la Taula~\ref{tb:DACVoltages}. El pin de sortida del DAC està connectat al pin PB12, connectat al pin 13 del connector d'expansió. La Taula~\ref{tb:DACVoltages} es registren tots els valors possible de la variable {\bf DACvalue} i el voltatge mesurat amb un multímetre digital; la tercera columna presenta la diferència entre el voltatge de la fila i l'anterior, com es pot veure cada pas corresponent a poc més de 200 mV, tal com surt a la fórmula~\ref{eq:DACFormula}. A la última fila es calcula la mitjana aritmètica de tots aquestes diferències.
+Si mesurem el voltatge de sortida amb un multímetre, oscil·loscopi o analitzador lògic (que tingui entrada analògica) podem veure com els valors de la variable provoquen el canvi en voltatge esperat segons la Fórmula~\ref{eq:DACFormula} tal com es veu a la Taula~\ref{tb:DACVoltages}. El pin de sortida del DAC està connectat al pin PB12, connectat al pin 13 del connector d'expansió. La Taula~\ref{tb:DACVoltages} es registren tots els valors possible de la variable {\bf DACvalue} i el voltatge mesurat amb un multímetre digital; la tercera columna presenta la diferència entre el voltatge de la fila i l'anterior, com es pot veure cada pas corresponent a poc més de 200 mV, tal com surt a la fórmula~\ref{eq:DACFormula}. A l'última fila es calcula la mitjana aritmètica de totes aquestes diferències.
 
 
 \begin{table}
@@ -1037,11 +1037,11 @@ En cas que els valors del senyal estiguessin pre-calculats i emmagatzemats en un
 
 \chapter{UART}
 \label{sub:UART}
-El port sèrie es encara un dels ports d'entrada i sortida més comuns de trobar en un microcontrolador i en un sistema encastat. Encara avui multitud de dispositius fan servir aquest port per rebre o enviar dades i, per tant, els microcontroladors acostumen a incloure uns quants d'aquests ports.
+El port sèrie és encara un dels ports d'entrada i sortida més comuns de trobar en un microcontrolador i en un sistema encastat. Encara avui multitud de dispositius fan servir aquest port per rebre o enviar dades i, per tant, els microcontroladors acostumen a incloure uns quants d'aquests ports.
 
 Aquest port sèrie en els microcontroladors el gestiona un perifèric anomenat \gls{USART} (o \gls{UART}). El port sèrie habitual, basat en l'estàndard RS-232 només té dos fils, un per rebre dades (RX) i un per enviar-ne (TX). La velocitat i les característiques de la transmissió es poden configurar i habitualment s'envien 8 bits per caràcter amb 1 bit d'stop i sense paritat (tot i que es pot canviar). Les velocitats de transmissió més habituals són: 9600 \gls{bps}, 19200 bps, 56700 bps i 115200 bps. El que cal, com és obvi, és configurar el port sèrie del microcontrolador amb els mateixos paràmetres que el dispositiu extern que estiguem usant.
 
-L'altre aplicació pràctica del port sèrie és poder connectar el microcontrolador a un ordinador personal per poder interactuar amb ell, ja sigui per enviar dades, informació d'estatus o rebre comandes o paràmetres de configuració. Com que actualment la majoria d'ordinadors no tenen un port sèrie, s'han popularitzat molt uns petits dispositius que converteixen el port sèrie en un \gls{USB} de tipus sèrie. Aquest dispositiu el \gls{CP2102} i en parlarem més endavant..
+L'altre aplicació pràctica del port sèrie és poder connectar el microcontrolador a un ordinador personal per poder interactuar amb ell, ja sigui per enviar dades, informació d'estatus o rebre comandes o paràmetres de configuració. Com que actualment la majoria d'ordinadors no tenen un port sèrie, s'han popularitzat molt uns petits dispositius que converteixen el port sèrie en un \gls{USB} de tipus sèrie. D'aquest dispositiu conegut com \gls{CP2102} en parlarem més endavant.
 
 \section{Fent servir una USART}
 Com que la configuració d'un port sèrie és una mica complicada, sobretot perquè segons la velocitat de funcionament del rellotge del sistema caldrà dividir i multiplicar aquest senyal fins a tenir una velocitat adequada per la velocitat seleccionada pel port sèrie, els fabricants acostumen a donar-nos biblioteques que ens ajuden.
@@ -1252,7 +1252,7 @@ El primer que fem és definir les variables que ens caldran. La variable més es
 
 Un cop omplerta aquesta estructura s'engega la transacció amb la crida {\bf I2C\_TransferInit()}\index{I2C{\_}TransferInit()}, que retorna un {\bf I2C\_Status}. Després, tal com ens demana la biblioteca EMLIB, cal anar cridant la funció {\bf I2C\_Transfer()}\index{I2C{\_}Transfer()} mentre la variable {\bf I2C\_Status} valgui {\bf i2cTransferInProgress}. Això indica que la transferència pel bus s'ha acabat i cal veure com ha anat l'operació. Si tot ha anat bé la variable {\bf I2C\_Status} valdrà {\bf i2cTransferDone}. Així, el que tenim és una funció que li passem l'adreça del registre que volem llegir i ens retorna el valor que ens retorna el dispositiu.
 
-Ara tornem al nostre sensor de gestos. Quasi tots els dispositius I2C tenen un registre de tipus identificació, que ens permet validar que la comunicació es fa realment amb ell. En el cas del APDS-9960 té un registre anomenat ‘ID' a l'adreça 0x92 i que el valor que retorna al llegir-lo és 0xAB (pàgina 25 del {\em Datasheet} \cite{apds9960}). Ara toca, doncs, muntar una funció que comprovi que s'està correctament a aquest dispositiu:
+Ara tornem al nostre sensor de gestos. Quasi tots els dispositius I2C tenen un registre de tipus identificació, que ens permet validar que la comunicació es fa realment amb ell. En el cas del APDS-9960 té un registre anomenat ‘ID' a l'adreça 0x92 i que el valor que retorna al llegir-lo és 0xAB (pàgina 25 del {\em Datasheet} \cite{apds9960}). Ara toca, doncs, muntar una funció que comprovi que s'està correctament a aquest dispositiu com es veu al Llistat~\ref{testI2C}.
 
 \index{testI2C()}\index{I2C{\_}ReadRegister()}
 \begin{lstlisting}[style=customc,caption=Funció {\bf testI2C()},label=testI2C]
@@ -1364,7 +1364,7 @@ DMA_ActivateAuto(0, true, dst_buffer, src_buffer, BUFFER_SIZE - 1);
 
 Aquí la única particularitat és que cal especificar-li el nombre d'accessos a fer per completar la transferència, però restant-li un\footnote{Això és una particularitat de la biblioteca EMLIB de {\em Silicon Labs}} i altres biblioteques poden necessitar paràmetres lleugerament diferents.
 
-A l'exemple es fa servir una variable global (volatile!) de nom {\bf dma\_end} que la \gls{callback} posa a {\em true} per notificar que la transferència s'ha acabat a la funció {\bf main()}. Quan això passa, es comprova que els dos {\em buffers} són iguals (Llistat~\ref{Check_buffers}) i es presenta per la consola.
+A l'exemple es fa servir una variable global ({\em volatile}!) de nom {\bf dma\_end} que la \gls{callback} posa a {\em true} per notificar a la funció {\bf main()} que la transferència s'ha acabat. Quan això passa, es comprova que els dos {\em buffers} són iguals (Llistat~\ref{Check_buffers}) i es presenta per la consola.
 
 \index{check\_buffers\_copy()}
 \begin{lstlisting}[style=customc, caption={Comparació dels dos buffers de l'exemple DMA}, label=Check_buffers]
@@ -1420,7 +1420,7 @@ La resta del codi és prou auto-explicatiu (o ho hauria de ser!): no s'activa la
 
 Dins el bucle infinit del {\bf main()}\index{main()} s'espera a rebre un caràcter, es munta una cadena relativament llarga (17 bytes) amb el caràcter rebut i per acabar s'envia usant la nova funció.
 \index{AvailableData()}\index{PopData()}\index{sendUARTbyDMA()}\index{sprintf()}
-\begin{lstlisting}[style=customc, caption={funció {\bf main()} de l'exemple}]
+\begin{lstlisting}[style=customc, caption={Funció {\bf main()} de l'exemple}]
 void main() {
   ...
   while (1) {
@@ -1462,7 +1462,7 @@ typedef struct {
 } persistent_data_t;
 \end{lstlisting}
 
-Tot seguit es defineixen dues funcions per llegir i escriure a la \gls{FLASH} (Llistat~\ref{FLASH_functions}). Com es pot veure, cal cridar a funcions especials per escriure a la FLASH: la primera ({\bf MSC\_ErasePage()}\index{MSC\_ErasePage()}) esborra una pàgina de la FLASH i la segona ({\bf MSC\_WriteWord()}\index{MSC\_WriteWord()}) escriu a la FLASH les dades que se li passin. Aquesta funció d'escriptura necessita que la mida de les dades sigui divisible per 4 (en el cas de la nostra estructura, la seva mida es 16 bytes) \cite{FLASH_EFM32}\cite{EMLIB_MSC}.
+Tot seguit es defineixen dues funcions per llegir i escriure a la \gls{FLASH} (Llistat~\ref{FLASH_functions}). Com es pot veure, cal cridar a funcions especials per escriure a la FLASH: la primera ({\bf MSC\_ErasePage()}\index{MSC\_ErasePage()}) esborra una pàgina de la FLASH i la segona ({\bf MSC\_WriteWord()}\index{MSC\_WriteWord()}) escriu a la FLASH les dades que se li passin. Aquesta funció d'escriptura necessita que la mida de les dades sigui divisible per 4 (en el cas de la nostra estructura, la seva mida és de 16 bytes) \cite{FLASH_EFM32}\cite{EMLIB_MSC}.
 
 \index{Flash\_Write()}\index{Flash\_Read()}\index{MSC\_ErasePage()}\index{MSC\_WriteWord()}
 \begin{lstlisting}[style=customc,caption={Funcions per accedir a la FLASH},label=FLASH_functions]
@@ -1503,9 +1503,9 @@ Fins ara s'han introduït els perifèrics més habituals i que es poden trobar a
  \item Controlador de bus \gls{CAN} que permet connectar el dispositiu al bus CAN \cite[1076]{STM32F4RM}\cite[1899]{EFM32GG11RM} \cite{wiki:can}.
 \end{itemize}
 
-Treballar amb aquests perifèrics, tot i que no ho veurem en aquest llibre, és força similar a la resta de perifèrics que hem vist: estan mapats a memòria i tenen un conjunt de registres que permet controlar el perifèric a través de llegir i escriure aquests registres. Els fabricants proporcionen biblioteques per facilitar-ne l'ús com amb la resta de perifèrics que hem vist.
+Treballar amb aquests perifèrics, tot i que no ho veurem en aquest llibre, és força similar a la resta de perifèrics que hem vist: estan mapats a memòria i tenen un conjunt de registres que permet controlar el perifèric a través de llegir i escriure aquests registres. Els fabricants proporcionen llibreries per facilitar-ne l'ús com amb la resta de perifèrics que hem vist.
 
-Els perifèrics més complexos (per exemple USB o Ethernet) acostumen a portar associats una biblioteca proporcionada pel fabricant o per tercers per poder controlar el perifèric i simplificar-ne l'ús. Així, per exemple, és habitual fer servir la biblioteca LwIP per tenir funcionalitat de xarxa ({\em sockets}, TCP, UDP, IP, etc.) \cite{lwip}\cite{wiki:lwip} i que els fabricants proporcionin documentació o codi per enllaçar aquesta biblioteca amb el seu perifèric.
+Els perifèrics més complexos (per exemple USB o Ethernet) acostumen a portar associats una llibreria proporcionada pel fabricant o per tercers per poder controlar el perifèric i simplificar-ne l'ús. Així, per exemple, és habitual fer servir la llibreria LwIP per tenir funcionalitat de xarxa ({\em sockets}, TCP, UDP, IP, etc.) \cite{lwip}\cite{wiki:lwip} i que els fabricants proporcionin documentació o codi per enllaçar aquesta llibreria amb el seu perifèric.
 
 \chapter{Una aplicació completa}
 \label{ch:aplicaciosenzilla}
@@ -1513,7 +1513,7 @@ Ja va sent hora de fer una aplicació completa (senzilla) per il·lustrar tot el
 
 Anem a veure una \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/Barebone_App_1}{aplicació sencera} on ajuntarem unes quantes coses de les que hem vist fins ara. Farem una aplicació que segons la proximitat de la ma al sensor (o del sensor a una taula o un obstacle), faci pampallugues més ràpid o més lent el LED de la PCB. Farem servir el sensor de proximitat APDS-9960 connectat a la nostra placa de prototipat com ja vàrem fer a l'exemple d'I2C. Per tant, caldrà anar llegint cíclicament el sensor de proximitat i canviar el valor de \gls{PWM} del LED segons el valor llegit.
 
-Com que aquest projecte fa servir diferents perifèrics del microcontrolador i les seves llibreries, cal organitzar el codi perquè tot sigui entenedor i amb un manteniment senzill. Així, tindrem un conjunt de mòduls (se li mòdul a una parella de fitxers .c i .h) per manegar les diferents funcionalitats, sensors i perifèrics. Per últim, tindrem el fitxer {\em main.c} on hi ha la funcionalitat principal de l'aplicació.
+Com que aquest projecte fa servir diferents perifèrics del microcontrolador i les seves llibreries, cal organitzar el codi perquè tot sigui entenedor i amb un manteniment senzill. Així, tindrem un conjunt de mòduls (se li diu mòdul a una parella de fitxers .c i .h) per manegar les diferents funcionalitats, sensors i perifèrics. Per últim, tindrem el fitxer {\em main.c} on hi ha la funcionalitat principal de l'aplicació.
 
 \section{Biblioteques}
 Aquesta aplicació fa servir quatre biblioteques per organitzar el codi, anem a descriure-les amb detall.
@@ -1523,7 +1523,7 @@ Habitualment en aquest mòdul s'hi posen les configuracions i inicialitzacions d
 
 En aquest cas es gestiona algun dels rellotges del sistema, el pin corresponent al LED i es configura la sortida de la consola pel {\bf printf}.
 
-D'aquesta biblioteca es fa servir la funció {\bf setupSWOForPrint()}\index{setupSWOForPrint()} i la funció {\bf BSP\_Init()}\index{BSP{\_}Init()}. Aquesta segona funció tant sols crida la primera i inicialitza el LED de la placa (que no es fa servir).
+D'aquesta biblioteca es fa servir la funció {\bf setupSWOForPrint()}\index{setupSWOForPrint()} i la funció {\bf BSP\_Init()}\index{BSP{\_}Init()}. Aquesta segona funció tant sols crida la primera i inicialitza el LED de la placa.
 
 \subsection{I2C\_Wrapper}
 
@@ -1601,7 +1601,7 @@ bool APDS_9960_ReadProximity(uint8_t *p_data) {
 
 La funció {\bf APDS\_9960\_ReadProximity()}\index{APDS{\_}9960{\_}ReadProximity()} (Llistat~\ref{ReadProximity}) llegeix el registre d'estatus i si hi ha una dada disponible la llegeix, la retorna a travès del paràmetre per referència i el retorn de la funció valdrà {\bf True}; si no hi ha una dada disponible retorna {\bf False}.
 
-La biblioteca es basa en {\em polling} per saber si la dada a llegir és bona, comprovant el registre {\bf status} i retornant fals i no s'ha pogut llegir. Es podria millorar la biblioteca fent que el sensor llenci una interrupció cada cop que tingui una dada nova (es veurà més endavant a \fullref{sec:full_app_irq}).
+La biblioteca es basa en {\em polling} per saber si la dada a llegir és bona, comprovant el registre {\bf status} i retornant fals si no s'ha pogut llegir. Es podria millorar la biblioteca fent que el sensor llenci una interrupció cada cop que tingui una dada nova (es veurà més endavant a \fullref{sec:full_app_irq}).
 
 \section{Funció principal}
 La funció principal de l'aplicació està en el propi {\bf main()}\index{main()} i consta bàsicament d'un bucle sense fi on es va llegint el valor de proximitat del sensor (si està disponible) i s'ajusta el \gls{duty cycle} del \gls{PWM} segons aquest valor, de manera que el LED pampalluguegi més sovint quan més a prop estigui l'obstacle.
@@ -1629,7 +1629,7 @@ Com que hem escrit la funció {\bf APDS\_9960\_ReadProximity()}\index{APDS{\_}99
 
 \section{Afegint-hi interrupcions}
 \label{sec:full_app_irq}
-En els exemples que hem vist fins ara, tant de perifèrics integrats com de dispositius externs la comunicació es feia via {\em pollin}, això és, preguntant tota l'estona si el dispositiu o perifèric té alguna dada disponible. L'altre manera de comunicar-se és mitjançant interrupcions, fent que el dispositiu o perifèric llenci una \gls{IRQ} cada cop que té una dada disponible.
+En els exemples que hem vist fins ara, tant de perifèrics integrats com de dispositius externs la comunicació es feia via {\em polling}, això és, preguntant tota l'estona si el dispositiu o perifèric té alguna dada disponible. L'altre manera de comunicar-se és mitjançant interrupcions, fent que el dispositiu o perifèric llenci una \gls{IRQ} cada cop que té una dada disponible.
 
 Per això, ens calen almenys, fer els següents canvis al nostre sistema:
 \begin{itemize}
@@ -1641,7 +1641,7 @@ Per això, ens calen almenys, fer els següents canvis al nostre sistema:
 \subsection{Connexió del pin INT}
 Per aconseguir connectar el pin INT del sensor {\bf APDS-9960} només cal fer servir un cinquè cable Dupont entre la placa de prototipat del sensor i la nostra placa de desenvolupament. Si mirem el manual de la placa de Silicon Labs, veurem que el pin PB12 es pot fer servir com a un GPIO normal i que generi una interrupció cada cop que tinguem un flanc.
 
-Segons el {\em datasheet} \cite[3]{apds9960} del APDS-9960 el pin d'interrupció és de tipus \gls{open drain}. Això vol dir que aquest pin només pot forçar un valor '0' i li cal que el valor '1' estigui forçat per un \gls{pull-up}. En el cas de la placa que tenim, ja incorpora aquesta resistència de \gls{pull-up} Per tant, el pin de GPIO del microcontrolador no cal configurar-lo com entrada amb \gls{pull-up}.
+Segons el {\em datasheet} \cite[3]{apds9960} del APDS-9960 el pin d'interrupció és de tipus \gls{open drain}. Això vol dir que aquest pin només pot forçar un valor '0' i li cal que el valor '1' estigui forçat per un \gls{pull-up}. En el cas de la placa que tenim, ja incorpora aquesta resistència de \gls{pull-up}, per tant, el pin de GPIO del microcontrolador no cal configurar-lo com entrada amb \gls{pull-up}.
 \index{GPIO{\_}PinModeSet()}
 \begin{lstlisting}[style=customc]
 GPIO_PinModeSet(gpioPortB, 12, gpioModeInput, 1); /* IRQ from APDS_9960 */

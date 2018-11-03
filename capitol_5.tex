@@ -664,7 +664,7 @@ struct __attribute__ ((__packed__)) {
  \label{fig:UnpackedMemoryStructure}
 \end{figure}
 
-Que ja es veu que està tot ben empaquetat i ens estalvia uns quants bytes. A més, s'han omplert tots els forats de manera que ara si que podrem accedir byte a byte l'estructura sense problemes.
+Fent servir aquest atribut es veu que està tot ben empaquetat i ens estalvia uns quants bytes. A més, s'han omplert tots els forats de manera que ara si que podrem accedir byte a byte l'estructura sense problemes.
 
 Cal dir que en força casos aquestes estructures empaquetades poden ser més lentes d'accedir-hi, ja que la CPU haurà d'accedir a diferents posicions de memòria i reconstruir el valor original movent bits amunt i avall (veure per exemple, com es reconstruiran els camps fieldL1 o fieldL2)
 
@@ -690,7 +690,7 @@ Cal destacar com s'accedeix byte a byte a l'estructura. Es defineix un apuntador
 \end{lstlisting}
 
 
-També es pot analitzar directament el contingut de la memòria usant l'IDE Simplicity Studio fent servir l'eina de {\em dump} de la memòria tal com es veu a la Figura~\ref{fig:MemoryDumpStructure}.
+També es pot analitzar directament el contingut de la memòria usant l'IDE Simplicity Studio fent servir l'eina de {\em dump} de la memòria tal com es veu a la Figura~\ref{fig:UnpackedMemoryStructure}.
 
 \begin{figure}
  \centering
