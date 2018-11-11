@@ -39,7 +39,7 @@ Com ja hem dit, l'arquitectura \gls{Cortex} és actualment una de les més estes
  \item {\bf Cortex-M} (de {\bf M}icrocontrolador) CPUs dissenyats per microcontroladors i aplicacions de baix consum \cite{CortexM}.
 \end{itemize}
 
-En aquest llibre i curs ens centrarem exclusivament a parlar del Cortex-M i les seves version.
+En aquest llibre i curs ens centrarem exclusivament a parlar del Cortex-M i les seves versions.
 
 \begin{figure}
  \centering
@@ -116,7 +116,7 @@ Per exemple, en el Cortex-M3 de la nostra placa, el mapa de memòria és el seg�
 \item etc.
 \end{itemize}
 
-Dins de la primera zona hi trobem la zona DI ({\em Device Information}) de l’adreça 0x0FE0\_8000 fins a 0x0FE0\_8400. Aquesta zona guarda certs valors únics per a cada dispositiu. En aquest espai, els registres MEM\_INFO\_FLASH, MEM\_INFO\_RAM, i PART\_FAMILY els podem llegir fàcilment \cite[24]{EFM32GRM} (Figura~\ref{fig:EFM32_DI}):
+Dins de la primera zona hi trobem la zona DI ({\em Device Information}) de l’adreça 0x0FE0\_8000 fins a 0x0FE0\_8400. Aquesta zona guarda certs valors únics per a cada dispositiu. En aquest espai, els registres MEM\_INFO\_FLASH, MEM\_INFO\_RAM i PART\_FAMILY els podem llegir fàcilment \cite[24]{EFM32GRM} (Figura~\ref{fig:EFM32_DI}):
 
 \begin{figure}
  \centering
@@ -128,7 +128,7 @@ Dins de la primera zona hi trobem la zona DI ({\em Device Information}) de l’a
 
 
 \begin{lstlisting}[frame=single,caption={Accedint a memòria en C},label=memorymappedCode,style=customc]
-#define FLASH_INFO (*(unsigned char *)0x0FE081F8)
+#define FLASH_INFO  (*(unsigned char *)0x0FE081F8)
 #define RAM_INFO    (*(unsigned char *)0x0FE081FA)
 #define PART_INFO   (*(unsigned char *)0x0FE081FE)
 
@@ -137,8 +137,8 @@ volatile uint32_t aux;
 int main(void) {
   while (1) {
     aux = FLASH_INFO; /* 32 kB */
-    aux = RAM_INFO; /* 4 kB */
-    aux = PART_INFO; /* 73 = Tiny Gecko */
+    aux = RAM_INFO;   /* 4 kB */
+    aux = PART_INFO;  /* 73 = Tiny Gecko */
   }
 }
 \end{lstlisting}
@@ -153,24 +153,24 @@ una estructura d'aquest estil, com es veu al llistat~\ref {devinfo}.
 \begin{lstlisting}[label=devinfo,caption={Exemple de definició d'estructura per accedir a memòria},style=customc]
 typedef struct
 {
-  __IM uint32_t CAL; /**< Calibration temperature and checksum */
-  __IM uint32_t ADC0CAL0; /**< ADC0 Calibration register 0 */
-  __IM uint32_t ADC0CAL1; /**< ADC0 Calibration register 1 */
-  __IM uint32_t ADC0CAL2; /**< ADC0 Calibration register 2 */
-  uint32_t RESERVED0[2]; /**< Reserved */
-  __IM uint32_t DAC0CAL0; /**< DAC calibrartion register 0 */
-  __IM uint32_t DAC0CAL1; /**< DAC calibrartion register 1 */
-  __IM uint32_t DAC0CAL2; /**< DAC calibrartion register 2 */
-  __IM uint32_t AUXHFRCOCAL0; /**< AUXHFRCO calibration register 0 */
-  __IM uint32_t AUXHFRCOCAL1; /**< AUXHFRCO calibration register 1 */
-  __IM uint32_t HFRCOCAL0; /**< HFRCO calibration register 0 */
-  __IM uint32_t HFRCOCAL1; /**< HFRCO calibration register 1 */
-  __IM uint32_t MEMINFO; /**< Memory information */
-  uint32_t RESERVED2[2]; /**< Reserved */
-  __IM uint32_t UNIQUEL; /**< Low 32 bits of device unique number */
-  __IM uint32_t UNIQUEH; /**< High 32 bits of device unique number */
-  __IM uint32_t MSIZE; /**< Flash and SRAM Memory size in KiloBytes */
-  __IM uint32_t PART; /**< Part description */
+  __IM uint32_t CAL;            /**< Calibration temperature and checksum */
+  __IM uint32_t ADC0CAL0;       /**< ADC0 Calibration register 0 */
+  __IM uint32_t ADC0CAL1;       /**< ADC0 Calibration register 1 */
+  __IM uint32_t ADC0CAL2;       /**< ADC0 Calibration register 2 */
+  uint32_t RESERVED0[2];        /**< Reserved */
+  __IM uint32_t DAC0CAL0;       /**< DAC calibrartion register 0 */
+  __IM uint32_t DAC0CAL1;       /**< DAC calibrartion register 1 */
+  __IM uint32_t DAC0CAL2;       /**< DAC calibrartion register 2 */
+  __IM uint32_t AUXHFRCOCAL0;   /**< AUXHFRCO calibration register 0 */
+  __IM uint32_t AUXHFRCOCAL1;   /**< AUXHFRCO calibration register 1 */
+  __IM uint32_t HFRCOCAL0;      /**< HFRCO calibration register 0 */
+  __IM uint32_t HFRCOCAL1;      /**< HFRCO calibration register 1 */
+  __IM uint32_t MEMINFO;        /**< Memory information */
+  uint32_t RESERVED2[2];        /**< Reserved */
+  __IM uint32_t UNIQUEL;        /**< Low 32 bits of device unique number */
+  __IM uint32_t UNIQUEH;        /**< High 32 bits of device unique number */
+  __IM uint32_t MSIZE;          /**< Flash and SRAM Memory size in KiloBytes */
+  __IM uint32_t PART;           /**< Part description */
 } DEVINFO_TypeDef; /** @} */
 \end{lstlisting}
 

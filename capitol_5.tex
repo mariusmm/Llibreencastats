@@ -64,7 +64,7 @@ void my_HardFault_Handler(uint32_t *stack) {
 \end{figure}
 
 
-Per últim, es crida la macro {\bf DEBUG\_BREAK}\index{DEBUG{\_}BREAK}, que està definida com una instrucció en assemblador ({\bf BKPT \#01}) que posa el core en mode {\em Debug} i atura l'execució en aquest punt. Així, si tenim un {\em debugger} connectat, veurem com l'execució s'atura en aquest punt i torna el control a la nostra eina (veure Figura~\ref{fig:HardFaultDump}).
+Per últim, es crida la macro {\bf DEBUG\_BREAK}\index{DEBUG{\_}BREAK}, que està definida com una instrucció en assemblador ({\bf BKPT \#01}) que posa el {\em core} en mode {\em Debug} i atura l'execució en aquest punt. Així, si tenim un {\em debugger} connectat, veurem com l'execució s'atura en aquest punt i torna el control a la nostra eina (veure Figura~\ref{fig:HardFaultDump}).
 
 
 \begin{figure}
@@ -93,7 +93,7 @@ Cal repassar uns quants conceptes sobre el consum d'energia abans d'introduir-no
 \section{Consideracions prèvies}
 \label{sec:lowpowerintro}
 
-Per la pròpia natura dels circuits digitals, aquests consumeixen sobretot quan el seu rellotge principal està actiu. Això fa que l'estratègia principal per reduir el consum d'un circuit és desactivar-li precisament el rellotge o reduir la seva freqüència ja que el consum és proporcional a la velocitat de rellotge.
+Per la pròpia natura dels circuits digitals, aquests consumeixen sobretot quan el seu rellotge principal està actiu. Això fa que l'estratègia principal per reduir el consum d'un circuit és desactivar-li precisament el rellotge o reduir la seva freqüència, ja que el consum és proporcional a la velocitat de rellotge.
 \begin{remark}
  Donat que el consum és quasi proporcional a la freqüència de rellotge, els fabricants acostumen a donar el consum per MHz (típicament $\mu$A/MHz).
 \end{remark}
@@ -139,7 +139,7 @@ En canvi, els microcontroladors de ST tenen només 3 modes de baix consum\footno
 \label{tb:bin_size}
 \end{table}
 
-Els {\em core} Cortex-M es poden posar en mode de baix consum fent servir dues instruccions {\bf WFI} i {\bf WFE}. El primer que cal fer és configurar a quin mode d'adormir es vol posar el microcontrolador i després executar la instrucció que pertoqui. La CPU es quedarà en l'estat de baix consum que pertoqui fins que es generi una \gls{IRQ} per algun perifèric o generat per un senyal extern.
+Els {\em core} Cortex-M es poden posar en mode de baix consum fent servir dues instruccions {\bf WFI} i {\bf WFE}. El primer que cal fer és configurar a quin mode d'adormir es vol posar el microcontrolador i després executar la instrucció que pertoqui. La CPU es quedarà en l'estat de baix consum que s'hagi configurat fins que es generi una \gls{IRQ} per algun perifèric o generat per un senyal extern.
 
 \section{Estratègies de baix consum}
 \label{sec:lowpowerstrategies}
@@ -219,7 +219,7 @@ void main(void) {
 }
 \end{lstlisting}
 
-Aquest és un exemple senzill que fa servir un {\em timer} especial de la família EFM32 de Silicon Labs. Altres fabricants proporcionen {\em timers} similars. Així ST té un {\em timer} força similar, anomenat LPTIMER (\cite{ST_ANS4865}) i Fresscale te el LPTMR amb característiques similars \cite{Kinetis_LPTMR}. Els {\em timers} de ST i de Silicon Labs  poden generar senyals tipus \gls{PWM} mentre el microcontrolador està en modes de baix consum.
+Aquest és un exemple senzill que fa servir un {\em timer} especial de la família EFM32 de Silicon Labs. Altres fabricants proporcionen {\em timers} similars. Així ST té un {\em timer} força similar, anomenat LPTIMER (\cite{ST_ANS4865}) i Fresscale te el LPTMR amb característiques similars \cite{Kinetis_LPTMR}. Els {\em timers} de ST i de Silicon Labs  poden generar senyals tipus \gls{PWM} mentre el microcontrolador està en modes de baix consum (veure \fullref{sub:PWM}).
 
 \section{Baix consum i RTOS}
 \label{sec:lowpwerRTOS}
@@ -241,10 +241,10 @@ L'estratègia més senzilla és la d'activar un mode de baix consum quan s'execu
 Cal recordar que quan el {\em core} està en algun mode de baix consum, el {\em SysTick} també es desactiva. Per tant, per poder tenir un {\em tick} quan el {\em core} està en un mode de baix consum caldrà fer servir un altre Timer que si que funcioni en aquests modes de baix consum.
 \end{remark}
 
-Cal pensar que tot i que aquest mètode és molt senzill d'implementar, té la limitació de que a cada {\em tick} es treu la CPU del mode de baix consum per comprovar si hi ha alguna tasca en estat {\em Ready}. Podem imaginar-nos una aplicació que llegeixi d'un sensor cada 200 ms i processant les dades, com l'aplicació d'exemple XXXXX. Si es té en compte que el {\em tick} pot ser de 1000 Hz, és fàcil d'observar que es despertarà molts cops al {\em core} per tant sols que el planificador vegi que no hi ha cap tasca {\em Ready} i torni a adormir el processador.
+Cal pensar que tot i que aquest mètode és molt senzill d'implementar, té la limitació de que a cada {\em tick} es treu la CPU del mode de baix consum per comprovar si hi ha alguna tasca en estat {\em Ready}. Podem imaginar-nos una aplicació que llegeixi d'un sensor cada 200 ms i processant les dades, com l'aplicació d'exemple XXXXX. Si es té en compte que el {\em tick} pot ser de 1000 Hz, és fàcil d'observar que es despertarà molts cops al {\em core} perquè tant sols el planificador vegi que no hi ha cap tasca {\em Ready} i torni a adormir el processador.
 
 %% manual break a la ultima macro pq latex no ho fa be
-Aquesta característica es pot activar a FreeRTOS editant el fitxer ``FreeRTOSConfig.h'' i fixant a '0' la definició {\bf configUSE{\_}TICKLESS{\_}IDLE} i triant el valor '1' per {\bf configUSE\_SLEEP\_MODE\\\_IN\_IDLE}. En el cas de Silicon Labs, el microcontrolador es posa en el mode EM2 (veure \fullref{sec:sleepmodes}) i deixant en funcionament tant sols el RTC (veure \fullref{sub:RTC})i les \gls{IRQ} dels GPIOs que l'usuari hagi configurat (veure \fullref{ch:IRQ}).
+Aquesta característica es pot activar a FreeRTOS editant el fitxer ``FreeRTOSConfig.h'' i fixant a '0' la definició {\bf configUSE{\_}TICKLESS{\_}IDLE} i triant el valor '1' per {\bf configUSE\_SLEEP\_MODE\\\_IN\_IDLE}. En el cas de Silicon Labs, el microcontrolador es posa en el mode EM2 (veure \fullref{sec:sleepmodes}) i deixant en funcionament tant sols el RTC (veure \fullref{sub:RTC}) i les \gls{IRQ} dels GPIOs que l'usuari hagi configurat (veure \fullref{ch:IRQ}).
 
 \subsection{FreeRTOS sense {\em tick}}
 \label{sub:tickless}
@@ -261,7 +261,7 @@ En ambdós casos el codi que gestiona el baix consum i els {\em ticks} en el por
 \label{sec:documentant}
 Un tema recurrent en temes d'enginyeria del software és com documentar el codi font que es desenvolupa per tal d'afavorir, sobretot, el manteniment del codi durant el temps i algú altre (o nosaltres mateixos) haguem de modificar, re-uilitzar o arreglar algun problema. No farem aquí una discussió sobre els beneficis de documentar, quan fer-ho, etc.
 
-Hi diferents tècniques i mètodes de documentar el codi, aquí veurem només una, basada en Doxygen. Aquest programa processa la documentació inserida dins el propi codi font i genera diferents sortides, la més habitual és una carpeta html amb tota la documentació ben bonica i accessible amb un navegador (té altres formats de sortida, com .pdf, .doc, etc.). Per documentar el nostre codi, el que cal que fem és escriure la documentació dins el propi codi com a comentaris de codi seguint unes normes i tags molt senzills propis de Doxygen. (veure Figura~\ref{fig:doxygencode}). Aquest mètode de documentar ha esdevingut un estàndard de facto i es troba arreu. Per documentar-se sobre com treballar amb Doxygen, la seva pàgina web està força be amb exemples de tots tipus \cite{Doxygen}.
+Hi diferents tècniques i mètodes de documentar el codi, aquí veurem només una, basada en Doxygen. Aquest programa processa la documentació inserida dins el propi codi font i genera diferents sortides, la més habitual és una carpeta html amb tota la documentació ben bonica i accessible amb un navegador (té altres formats de sortida, com .pdf, .doc, etc.). Per documentar el nostre codi, el que cal que fem és escriure la documentació dins el propi codi com a comentaris de codi seguint unes normes i {\em tags} molt senzills propis de Doxygen. (veure Figura~\ref{fig:doxygencode}). Aquest mètode de documentar ha esdevingut un estàndard de facto i es troba arreu. Per documentar-se sobre com treballar amb Doxygen, la seva pàgina web està força bé amb exemples de tots tipus \cite{Doxygen}.
 
 \begin{figure}
  \centering
@@ -277,7 +277,7 @@ Una bona opcio és afegir un directori on ficar-hi el fitxer de configuració de
 \begin{figure}[h!]
  \centering
  \fbox{\color{ocre}\includegraphics[width=0.35\textwidth, keepaspectratio]{imatges/Doxygen_button.png}}
- \caption{Botons de Simplicity}
+ \caption{Botons de Simplicity, l'arroba blava permet executar Doxygen}
  \label{fig:doxygenbutton}
 \end{figure}
 
@@ -287,7 +287,7 @@ També podrem editar de forma visual el fitxer de configuració fent-hi doble-cl
 \begin{figure}
  \centering
  \fbox{\color{ocre}\includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/Doxygent_configuration.png}}
- \caption{Configuració de Doxygen}
+ \caption{Configuració de Doxygen dins de Simplicity}
  \label{fig:doxygenconfig}
 \end{figure}
 
@@ -298,7 +298,7 @@ A més, si configurem com cal github, podem pujar el codi html generat per Doxyg
 \begin{figure}
  \centering
  \fbox{\color{ocre}\includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/DoxygenEclipse.png}}
- \caption{Pàgina web de documentació vista dins de Simplicity Studio}
+ \caption{Pàgina web de documentació vista dins de Simplicity Studio, en aquest cas es visualitza un dels fitxers locals}
  \label{fig:doxygeneclipse}
 \end{figure}
 
@@ -340,6 +340,7 @@ Per evitar aquestes situacions, sovint complexes de detectar, hi ha dues recoman
 Amb aquests dues recomanacions es poden evitar la majoria de {\em deadlocks} generats per l'ús de {\em mutex} entre tasques.
 
 \section{Inversió de prioritats}
+\label{sec:priorityinv}
 Quan tenim un parell de tasques que comparteixen un recurs, una amb poca prioritat ($T_l$) i la segona amb més prioritat ($T_h$), si s'afegeix una tercera tasca amb una prioritat intermèdia ($T_m$) al sistema, podem tenir un problema d'inversió de prioritats. Això passarà quan la tasca de menys prioritat agafa el recurs compartit amb ($T_h$). En aquest moment, si la tasca de prioritat intermèdia està a l'estat {\em Ready}, passarà a executar-se, fent que la tasca ($T_l$) no s'executi i retardant l'execució de la tasca ($T_h$), fent que, de fet, la prioritat de $T_h$ i $T_m$ s'hagin invertit, ja que la tasca amb prioritat intermèdia es pot executar tot el temps que vulgui i la tasca més prioritària no té la oportunitat \cite[101]{RTEmbeddedSystems}.
 
 La manera més senzilla de resoldre aquest problema és usar {\em Mutex} amb herència de prioritats. Aquest mecanisme fa que, provisionalment, la tasca que agafa el {\em Mutex} pugi temporalment la seva prioritat a la mateixa de la tasca que l'està esperant \cite[106]{RTEmbeddedSystems}. FreeRTOS suporta aquest mecanisme als seus {\em Mutex}, i per tant fent un bon ús dels mateixos evitarem aquest fenomen d'inversió \cite[251]{FreeRTOSBook}.
@@ -408,7 +409,7 @@ Per tant es compleixen les condicions perquè les tres tasques es puguin executa
 
 També val la pena observar que la part dreta de l'Equació~\ref{eq:RMA} té un límit:
 \begin{equation*}
- \lim_{x\to\infty} n \cdot (2^{1/n}-1) = ln(2) \approx 0.7
+ \lim_{n\to\infty} n \cdot (2^{1/n}-1) = ln(2) \approx 0.7
 \end{equation*}
 
 que ens indica que amb les condicions dites abans, un sistema amb moltes tasques no podrà tenir la CPU al 100\%, si no tant sols al 70\% d'ocupació total.
@@ -663,7 +664,7 @@ struct __attribute__ ((__packed__)) {
  \label{fig:UnpackedMemoryStructure}
 \end{figure}
 
-Que ja es veu que està tot ben empaquetat i ens estalvia uns quants bytes. A més, s'han omplert tots els forats de manera que ara si que podrem accedir byte a byte l'estructura sense problemes.
+Fent servir aquest atribut es veu que està tot ben empaquetat i ens estalvia uns quants bytes. A més, s'han omplert tots els forats de manera que ara si que podrem accedir byte a byte l'estructura sense problemes.
 
 Cal dir que en força casos aquestes estructures empaquetades poden ser més lentes d'accedir-hi, ja que la CPU haurà d'accedir a diferents posicions de memòria i reconstruir el valor original movent bits amunt i avall (veure per exemple, com es reconstruiran els camps fieldL1 o fieldL2)
 
@@ -689,7 +690,7 @@ Cal destacar com s'accedeix byte a byte a l'estructura. Es defineix un apuntador
 \end{lstlisting}
 
 
-També es pot analitzar directament el contingut de la memòria usant l'IDE Simplicity Studio fent servir l'eina de {\em dump} de la memòria tal com es veu a la Figura~\ref{fig:MemoryDumpStructure}.
+També es pot analitzar directament el contingut de la memòria usant l'IDE Simplicity Studio fent servir l'eina de {\em dump} de la memòria tal com es veu a la Figura~\ref{fig:UnpackedMemoryStructure}.
 
 \begin{figure}
  \centering
@@ -1093,7 +1094,7 @@ Per últim, succeeix sovint que certes connexions de l'esquemàtic es canvien en
 Un altre dels canvis importants és el de passar de treballar amb una placa de prototipat o de desenvolupament a poder-ho fer en una PCB pròpia. La placa de prototipat porta muntat cert nombre de dispositius externs que segurament no estaran presents a la nostra PCB.
 
 \subsection{Mecanisme de programació}
-Un dels canvis més notoris és de l'absència del programador integrat a la PCB pròpia. Les plaques de desenvolupament modernes acostumen a integrar el programador, de manera que la placa de prototipat s'alimenta i es programa a través d'un connector USB estàndard. Això amaga que a la pròpia placa de desenvolupament hi ha tota el circuit per programar el nostre. De fet, a la placa de prototipat que estem fent servir, hi ha un microcontrolador que rep les comandes del {\em debugger} per USB i les transforma a les comandes adequades per programar el microcontrolador principal a través del port {\em SWD} \cite[30]{USERMANUALDEVKIT}.
+Un dels canvis més notoris és de l'absència del programador integrat a la PCB pròpia. Les plaques de desenvolupament modernes acostumen a integrar el programador, de manera que la placa de prototipat s'alimenta i es programa a través d'un connector USB estàndard. Això amaga que a la pròpia placa de desenvolupament hi ha tota el circuit per programar el microcontrolador principal. De fet, a la placa de prototipat que estem fent servir, hi ha un microcontrolador que rep les comandes del {\em debugger} per USB i les transforma a les comandes adequades per programar el microcontrolador principal a través del port {\em SWD} \cite[30]{USERMANUALDEVKIT}.
 
 Aquest circuit no s'acostuma a posar les PCBs de productes finals, si no que es deixa disponible d'alguna manera (connector, pins, {\em pads}) a la PCB l'accés directe al port {\em SWD} del microcontrolador. Això provoca que calgui un programador extern a la PCB per tal de poder programar el microcontrolador. Això es pot fer comprant un dispositiu {\em debugger}, tot i que també es pot fer servir una de les plaques de prototipat perquè faci de programador de qualsevol microcontrolador extern connectat a través del port de DEBUG.
 
