@@ -833,6 +833,15 @@ A l'hora de fer servir un \gls{ADC}, caldrà configurar-lo en els paràmetres de
 
 Com la majoria de perifèrics, l'ADC pot generar una o vàries \glspl{IRQ} segons certes condicions, habitualment quan s'ha acabat la conversió. D'aquesta manera la CPU no cal que faci {\em polling} del registre d'estat per saber si la conversió ha finalitzat.
 
+L'ADC acaba per donar-nos un valor dins el seu rang de treball proporcional al valor de voltatge d'entrada, aquest valor s'acostuma a anomenar {\em counts}. Per convertir aquest valor en {\em counts} al valor de voltatge corresponent, cal aplicar la fórmula \fullref{eq:ADCFormula}:
+\begin{equation}
+\label{eq:ADCFormula}
+ V_{ADC} = \frac{{counts} * V_{max} }{2^N-1}
+\end{equation}
+
+
+On $V_{max}$ és el voltatge màxim de l'entrada i $N$ el nombre de bits (resolució) de la conversió de l'ADC.\footnote{Això és vàlid per configuracions tipus {\em single-ended}}
+
 \section{Exemple d'ADC}
 \label{sub:ADC_example}
 \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/ADC_1s}{Per aquest exemple} ens cal per primer cop un petit HW addicional. Farem servir un potenciòmetre que ens donarà una tensió entre Vdd i 0 volts segons el seu recorregut. La sortida d'aquest potenciòmetre la connectarem al pin 16 del connector de Debug de la PCB. Els altres dos pins aniran a 19 i 20 del mateix connector (veure esquemàtic a la Figura~\ref{fig:sch_adc} i fotografia del sistema a Figura~\ref{fig:setup_adc}).
