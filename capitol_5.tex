@@ -365,7 +365,7 @@ Es defineix l'ús acumulat $\mu$ a:
  \mu = \sum^{n}_{i=1}\frac{c_i}{p_i}
 \end{equation*}
 
-S'ha de complir la condició \ref{eq:RMA} perquè es compleixin tots els {\em deadlines} de totes les tasques.
+S'ha de complir la condició \ref{eq:RMA} perquè es compleixin tots els {\em deadlines} de totes les tasques, sempre amb els supòsits inicials.
 \begin{equation}
 \label{eq:RMA}
  \mu \leq n (2^{1/n}-1)
@@ -412,13 +412,13 @@ També val la pena observar que la part dreta de l'Equació~\ref{eq:RMA} té un 
  \lim_{n\to\infty} n \cdot (2^{1/n}-1) = ln(2) \approx 0.7
 \end{equation*}
 
-que ens indica que amb les condicions dites abans, un sistema amb moltes tasques no podrà tenir la CPU al 100\%, si no tant sols al 70\% d'ocupació total.
+que ens indica que amb les condicions dites abans, un sistema amb moltes tasques hauria de dedicar el 70\% d'ocupació total per garantir tots els {\em deadlines} de les tasques.
 
 \section{Mida de les cues}
 \label{sec:mida_cues}
 Quan hem parlat de les cues en un \gls{RTOS} a \fullref{sec:queue}, hem dit que a l'hora de la seva creació cal especificar el tipus de dades que emmagatzemarà cada element de la mateixa i el nombre d'elements d'aquest tipus que la cua manegarà.
 
-Però, com saber quants elements cal atorgar a una cua en la seva creació. Aquest paràmetre serà clau, ja que si creem una cua amb pocs elements disponibles, la tasca productora potser es quedi bloquejada si la tasca consumidora no va prou de pressa. Tot i que es pot triar aquest valor d'una forma empírica, començant per un valor prou baix i fent proves i via successives aproximacions arribar a un valor prou bo.
+Però, com saber quants elements cal atorgar a una cua en la seva creació? Aquest paràmetre serà clau, ja que si creem una cua amb pocs elements disponibles, la tasca productora potser es quedi bloquejada si la tasca consumidora no va prou de pressa. Tot i que es pot triar aquest valor d'una forma empírica, començant per un valor prou baix i fent proves i via successives aproximacions arribar a un valor prou bo.
 
 Aquest mètode, però, no ens assegura que en qualsevol cas el sistema no acabi amb una cua plena. Per això, cal un anàlisi més analític del problema per trobar una solució.
 
@@ -433,9 +433,9 @@ Aquest model de cues és dels models estadístics més senzills però que ens po
  \item La cua és de tipus FIFO.
 \end{itemize}
 
-Amb aquestes suposicions ens cal trobar els paràmetres $\lambda$ i $\mu$ pel productor i el consumidor respectivament.
+Amb aquestes suposicions ens cal trobar els paràmetres $\lambda$ i $\mu$ pel productor i el consumidor respectivament, ara es veurà com.
 
-Si la nostra tasca consumidora genera un element nou a la cua cada certs $Pr$ temps tindrem:
+Si la nostra tasca consumidora genera un element nou a la cua de mitjana (seguint una distribució de Poisson) cada cert $Pr$ temps tindrem:
 \begin{equation}
  Pr = \text {temps mitjà a generar una dada}
 \end{equation}
@@ -444,7 +444,7 @@ i llavors tindrem que
  \lambda = \frac{1}{Pr}
 \end{equation}
 
-El mateix càlcul el podem fer pel temps de la tasca consumidora:
+El mateix càlcul el podem fer pel temps de la tasca consumidora (que segueix una distribució exponencial):
 \begin{equation}
 C = \text {temps mitjà a processar una dada}
 \end{equation}
@@ -456,36 +456,36 @@ i llavors tindrem que
 Amb aquestes dades, tenim les següents fórmules:
 
 \begin{equation}
- p = \frac{C}{Pr} = \frac{\lambda}{\mu}
+ \rho = \frac{C}{Pr} = \frac{\lambda}{\mu}
 \end{equation}
 
-Aquesta primer valor $p$ ens indica si el sistema és factible o no: si $p$ és més petit d'1 ($p < 1$), la cua té sentit, en cas contrari, el ritme de inserir elements a la cua és més ràpid que el ritme de treure'ls i, per tant. la cua acabarà col·lapsant en algun moment o altre.
+Aquesta primer valor $\rho$ ens indica si el sistema és factible o no: si $\rho$ és més petit d'1 ($\rho < 1$), la cua té sentit, en cas contrari, el ritme de inserir elements a la cua és més ràpid que el ritme de treure'ls i, per tant. la cua s'acabarà omplint en algun moment o altre i el productor haurà de llençar dades que no podrà inserir a la cua.
 
-Amb aquest valor $p$ (o amb $Pr$ i $C$) podem obtenir els següents càlculs:
+Amb aquest valor $\rho$ (o amb $Pr$ i $C$) podem obtenir els següents càlculs:
 
 Nombre mitjà d'elements a la cua
 \begin{equation}
- L_q = \frac{p^2}{(1-p)}  = (\frac{C}{Pr})^2 / (1 - \frac{C}{Pr})
+ L_q = \frac{\rho^2}{(1-\rho)}  = \left( \frac{C}{Pr} \right)^2 /  \left( 1 - \frac{C}{Pr}\right)
 \end{equation}
 Temps mitjà de vida a la cua
 \begin{equation}
- W_q =  \frac{p}{\mu - \lambda} = \frac{L_q}{\lambda} = L_q \cdot Pr
+ W_q =  \frac{\rho}{\mu - \lambda} = \frac{L_q}{\lambda} = L_q \cdot Pr
 \end{equation}
-Temps total d'una dada
+Temps total d'estada en el sistema (procés més espera a la cua)
 \begin{equation}
- W = W_q + \frac{1}{\mu} = W_q +C = \frac{C}{1-p}
+ W = W_q + \frac{1}{\mu} = W_q +C = \frac{C}{1-\rho}
 \end{equation}
 Nombre mitjà d'elements al sistema
 \begin{equation}
- L = \frac{p}{(1-p)}  = W \cdot \lambda = \frac{W}{Pr}
+ L = \frac{\rho}{(1-\rho)}  = W \cdot \lambda = \frac{W}{Pr}
 \end{equation}
 Probabilitat que la cua tingui més de K elements
 \begin{equation}
 \label{eq:Prob_queue_full}
- P(\geqslant K) = p^K =  (\frac{C}{Pr})^k
+ P(\geqslant K) = \rho^K =  \left( \frac{C}{Pr} \right)^k 
 \end{equation}
 
-Així si, per exemple, tenim una tasca productora que genera una dada cada 50 ms i una tasca consumidora que processa les dades en uns 30 ms de mitjana, tenim els següents resultats:
+Així si, per exemple, tenim una tasca productora que genera una dada cada 50 ms i una tasca consumidora que processa una dada en uns 30 ms de mitjana, tenim els següents resultats:
 \begin{equation*}
 Pr = 50 \text{ ms}
 \end{equation*}
@@ -493,10 +493,10 @@ Pr = 50 \text{ ms}
 C = 30 \text{ ms}
 \end{equation*}
 \begin{equation*}
-p = \frac{C}{Pr} = \frac{30}{50} = 0.6
+\rho = \frac{C}{Pr} = \frac{30}{50} = 0.6
 \end{equation*}
 \begin{equation*}
-\text{Nombre mitjà d'elements a la cua } L_q = (\frac{30}{50})^2 / (1 - \frac{30}{50})  = 0.9
+\text{Nombre mitjà d'elements a la cua } L_q = \left(\frac{30}{50}\right)^2 / \left(1 - \frac{30}{50}\right)  = 0.9
 \end{equation*}
 \begin{equation*}
 \text{Temps mitjà de vida a la cua } W_q = 0.9 \cdot 50 = 45 \text{ ms}
@@ -508,13 +508,14 @@ p = \frac{C}{Pr} = \frac{30}{50} = 0.6
 \text{Nombre mitjà d'elements al sistema } L =  \frac{75}{50} = 1.5
 \end{equation*}
 \begin{equation*}
-\text{Probabilitat que la cua tingui més de 10 elements } P(\geqslant 10) =  (\frac{30}{50})^{10} \approx 0,00605 \rightarrow 0.60 \%
+\text{Probabilitat que la cua tingui més de 10 elements } P(\geqslant 10) =  \left(\frac{30}{50}\right)^{10} \approx 0,00605 \rightarrow 0.60 \%
 \end{equation*}
 
 Aquestes equacions ens indiquen que durant bona part del temps de funcionament del sistema, la cua entre els dos processos tindrà tant sols 1 element, i que la probabilitat que tingui més de 10 elements en algun moment és de només el 0,60\%.
-Cal fer notar que aquest valor probabilístic té en compte que els processos es comporten com una variable aleatòria tipus Poisson i tipus exponencial. Si algun dels dos processos no es comporta com a tal, si no que el seu temps de procés o de generació de dades és fix, els valors $L_q$, $W_q$, $W$ i $L$ seran certs en tot moment.
+Cal fer notar que aquest valor probabilístic té en compte que els processos que generen dades es comporten com una variable aleatòria tipus Poisson i els temps de processat les dades s'ajusta a una variable alaatòria exponencial. 
+Si algun dels dos processos no es comporta com a tal, si no que el seu temps de procés o de generació de dades és fix, els valors $L_q$, $W_q$, $W$ i $L$ seran certs en tot moment.
 
-Manipulant una mica les fórmules, també podem esbrinar quin temps màxim de procés podem tenir per una tasca que genera dades cada 25 ms i volem menys d'un 0.1\% de probabilitats que s'ompli una cua de 8 elements.
+Manipulant una mica les fórmules, també podem esbrinar quin temps màxim de procés podem tenir per una tasca que genera dades cada 25 ms i volem menys d'un 0.1\% de probabilitats que la cua arribi a tenir 8 elements.
 
 Tenim, doncs:
 \begin{equation*}
@@ -525,7 +526,7 @@ Tenim, doncs:
 \end{equation*}
 Segons la fórmula \ref{eq:Prob_queue_full}:
 \begin{equation*}
- \text{Probabilitat que la cua tingui més de K elements} = p^K =  (\frac{C}{Pr})^K < 0.001 (0.1\%)
+ \text{Probabilitat que la cua tingui més de K elements} = \rho^K =  (\frac{C}{Pr})^K < 0.001 (0.1\%)
 \end{equation*}
 
 per tant tenim que
