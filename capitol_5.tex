@@ -11,35 +11,200 @@
 
 Fins ara hem vist com controlar els perifèrics més habituals que poden trobar a un microcontrolador, fent ús de les biblioteques dels fabricants. També hem vist els conceptes que hi ha al darrera d'un RTOS, amb els seus canals de comunicació i sincronització entre tasques, etc.
 
-\chapter{Polling d'esdeveniments}
+\chapter{Model d'interfície amb perifèrics}
+\label{ch:modelinterficie}
+
+Una primera classificació de com es planifica i s'acaba codificant la nostra aplicació és segons com es faci la interfície amb els diversos perifèrics. Aquesta classificació és independent de les següents classificacions que es faran, tal com es veurà més endavant.
+
+\section{{\em Polling} d'esdeveniments}
+\label{sec:polling}
+
 El primer model de programació i potser el més senzill és el d'un bucle infinit que està en una espera activa ({\em polling}) de certs esdeveniments per actuar com calgui segons l'aplicació. En aquest model no es fan servir les interrupcions i en tot moment es prova de fer la lectura dels perifèrics o sensors que han de permetre una lectura nova i potser provocar un canvi en el sistema. Per tant, aquest model consistirà bàsicament en un bucle infinit dins la funció {\em main} de l'aplicació. Aquest bucle anirà repetint indefinidament les lectures necessàries i les actuacions pertinents si s'han pogut fer.
 
 Un exemple d'aquesta mena d'estil de programació s'ha vist a \fullref{ch:aplicaciosenzilla}, on l'aplicació ha de llegir un sensor de distància per mostrar-la en un LEDs controlant la seva potència. En aquest exemple, el codi conté una funció {\bf main} que hi ha un bucle infinit on contínuament es prova de llegir el valor de proximitat del sensor i, si és el cas, variar la lluminositat del LED segons la lectura feta (veure també el codi~\ref{ProximityExample}).
 
 Aquesta mena de programació és suficient per múltiples aplicacions senzilles, on la lògica de l'aplicació depèn de poques variables o condicions i el concepte de {\em timeout} o de temps en general n'és absent. Si, per exemple, volem que transcorri algun temps entre algunes instruccions o esperar-se un determinat temps per realitzar una operació, caldrà introduir el temps al model.
 
-% AIxò pot ser un subaparta?
-\chapter{Mode seqüencial}
-\lipsum
+També cal tenir en compte que aquest model fa que tota l'estona el microcontrolador estigui treballant i, per tant, el consum energètic serà el màxim. Això per múltiples aplicacions no serà cap problema, però s'haurà de tenir en compte en aplicacions orientades al baix consum.
+
+\section{Interrupcions}
+\label{sec:interrupcions}
+
+L'altre opció és dissenyar l'aplicació de manera que els diversos perifèrics llencin interrupcions quan hagin fet les diverses tasques necessàries i el microcontrolador pugui estar {\em Idle} tot esperant per rebre les interrupcions i seguir amb l'aplicació.
+
+Normalment aquest mode de treballar fa el codi una mica més complex. (veure \fullref{gpio_isr} i \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_2}{\bf el repositori}).
+
+En aquest cas, el microcontrolador podrà estar en un mode de baix consum fins que no es generi una interrupció d'algun dels perifèrics, baixant considerablement el consum energètic de tot el sistema (vegeu \fullref{sec:lowpowerstrategies}).
 
 % AIxò pot ser un subaparta?
-\chapter{Flux de dades}
-\lipsum
+\chapter{Models de computació}
+\label{ch:modescomputacio}
 
-% AIxò pot ser un subaparta?
-\chapter{Bucle de control}
-\label{ch:buclecontrol}
+Segons com es dissenyi i codifiqui el còmput de les dades d'entrada per obtenir unes sortides determinades, tenim diferents models de computació. Anem a veure els més comuns.
 
-\lipsum
+\section{Bucle de control}
+\label{sec:buclecontrol}
 
-% AIxò pot ser un subaparta?
-\chapter{Màquines d'estats finits}
-\label{ch:maquinesstats}
+Una característica força diferent entre un codi de programa per un sistema encastat respecte a un codi per una aplicació habitual és que en el cas dels encastats el programa no pot acabar mai. I això és perquè el codi de programa és únic ,i per tant, si acaba el codi el microcontrolador no tindrà cap altre codi a executar i acabarà per reiniciar-se el sistema (que pot ser el comportament desitjat en algun cas).
 
-\lipsum
+Dit això, el cas més senzill d'estil de programació per sistemes encastats és un senzill bucle infinit on s'executen les operacions a realitzar per l'aplicació desitjada. Abans d'aquest bucle es configuren i preparen els dispositius i variables necessàries, tal com es pot veure a diferents exemples (\href{https://github.com/mariusmm/cursembedded/blob/master/Simplicity/GPIO_1/}{GPIO\_1}, \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/Printf_SWO}{Printf\_SWO}, \href{https://github.com/mariusmm/cursembedded/blob/master/Simplicity/PWM_1/}{PWM\_1}). 
 
-\chapter{Control per interrupcions}
-En aquest model, es codifica per tal de tenir el microcontrolador lliure en la major part del temps tot esperant a que una o vàries interrupcions facin saltar l'execució a la part de codi necessari. En aquest model és habitual configurar els perifèrics o dispositius per a que generin una interrupció quan necessitin certa atenció enlloc d'anar fent {\em polling} contínuament.
+L'exemple \fullref{gpio_example} \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_1}{\bf al repositori}) és un exemple senzill d'aquest tipus de codi.
+
+Quan l'aplicació es complica i comença a tenir més camins de decisió i condicions, s'acostuma a canviar el model cap a màquines d'estat finits, com es veurà al següent apartat
+
+Aquest model de programació és el que es fa servir en Arduino, on s'ha separat en dues funcions, una per configurar els perifèrics i demès (funció {\bf setup()} i la funció principal que es va cridant un cop i un altre (funció {\bf loop()}. La funció {\bf main()} del sistema Arduino bàsicament executa el que es veu al llistat~\ref{arduinomain} (es pot veure a \$ARDUINO/hardware/arduino/avr/cores/arduino/main.cpp).
+
+\begin{lstlisting}[style=customc, label=arduinomain, caption=funció main() d'Arduino]
+ int main(void)
+{
+  ...
+
+  setup();
+
+  for (;;) {
+    loop();
+    if (serialEventRun) serialEventRun();
+  }
+ return 0;
+} 
+\end{lstlisting}
+
+
+.
+
+\section{Màquines d'estat finits}
+\label{sec:FSM}
+
+Una màquina d'estats (\gls{FSM}, de {\em Finite State Machine} en anglès) és un model de màquina que reacciona a certes entrades i calcula el valor per les sortides, segons l'estat en que estigui. També es pot veure com un seguit d'estats possibles (finit!) en el que pot estar la màquina (el nostre programa) i que va canviant segons les entrades del moment. Les sortides a cada moment depenen de l'estat on s'està i/o de les entrades (segons el tipus de màquina que s'estigui modelant: màquina de Moore o de Mealy).\cite{wiki:FSM}
+
+\begin{remark}
+ Formalment un FSM es pot definir com una 6-tupla de $(S, I, O, F, H, s)$ tal que:
+\begin{itemize}
+ \item $S$ és un conjunt finit d'estats ${s_0,s_1, ..., s_n}$
+ \item $I$ és un conjunt d'entrades ${i_0, i_1, ..., i_m}$
+ \item $O$ és un conjunt de sortides ${o_0, o_1, ..., o_k}$
+ \item $F$ és la funció de transició del tipus: $F: S \times I \to S$
+ \item $H$ és la funció de sortida tal que:
+ \begin{itemize}
+  \item Si la màquina és del tipus Moore: $H$ és del tipus: $H: S \to O$
+  \item Si la màquina és del tipus Mealy, $H$ és del tipus: $H: S \times I \to O$ 
+ \end{itemize}
+ \item $s \in S$ és l'estat inicial 
+\end{itemize}
+\end{remark}
+
+Així, el diagrama d'estats de la FSM que implementaria l'exemple vist a (veure \fullref{gpio_example} i \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_1}{\bf el repositori}) seria el que es veu a la Figura~\ref{fig:FSM_GPIO1}.
+
+\begin{figure}[h!]
+\centering
+ \begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=3cm]
+  \node[initial,state, fill=ocre!30] (S)                     {$Off$};
+  \node[state, fill=ocre!30]         (q1) [right of=S]  {$On$};
+  \path[->] (S)   edge [loop above] node {'0'} (S)
+                        edge                     node {'1'} (q1)
+                (q1)  edge [bend left]    node {'0'} (S)
+                        edge [loop above] node {'1'} (q1);
+ \end{tikzpicture}
+ \caption{FSM per l'exemple GPIO 1}
+ \label{fig:FSM_GPIO1}
+\end{figure}
+
+On l'entrada ('1' o '0') es correspon amb l'entrada del pin corresponent i $On$ i $Off$ vol dir que en aquell està el LED encès o apagat. 
+
+Aquesta FSM es pot codificar de la manera que es veu al Llistat~\ref{gpio_example_FSMMoore}. En aquest codi es pot veure que dins el el bucle infinit de la funció {\em main} hi ha una estructura {\em switch-case} per cobrir tots els estats. Aquests es defineixen amb un {\em enum} amb els noms desitjats i es crea una variable d'aquest tipus, que s'inicialitza amb l'estat inicial (en aquest cas l'estat {\bf On}). Després, per cada estat s'avalua l'entrada i es pren la definició de quin ha de ser el proper estat. En aquest exemple la FSM és de tipus Moore, i per això la sortida del LED està fixada per cada estat. Si es vol implementar amb una màquina de Mealy el codi hauria de ser tal com es veu al Llistat~\ref{gpio_example_FSMMealy}, on la sortida depèn de l'estat i l'entrada actual.
+
+\begin{lstlisting}[style=customc,caption={Codi d'exemple de GPIO},label=gpio_example_FSMMoore]
+enum {On, Off} state;
+state = On;
+
+int input_value;
+...
+
+/* Infinite loop, FSM*/
+while (1) {
+  input_value = GPIO_PinInGet(gpioPortD, 8);
+  switch ( state ) {
+    case On:
+        GPIO_PinOutSet(gpioPortD, 7);
+        if (input_value == 0) {
+            state = Off;
+        } else {
+            state = On;
+        }
+        break;
+    case Off:
+        GPIO_PinOutClear(gpioPortD, 7);
+        if (input_value == 1) {
+            state = On;
+        } else {
+            state = Off;
+        }
+        break;
+    case default:
+        /* something wrong has happened */
+        GPIO_PinOutClear(gpioPortD, 7);
+        state = On;
+        break;
+  }
+}
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=customc,caption={Codi d'exemple de GPIO},label=gpio_example_FSMMealy]
+...
+  switch ( state ) {
+    case On:
+        if (input_value == 0) {
+            GPIO_PinOutClear(gpioPortD, 7);
+            state = Off;
+        } else {
+            GPIO_PinOutSet(gpioPortD, 7);
+            state = On;
+        }
+        break;
+    case Off:
+        if (input_value == 1) {
+            GPIO_PinOutSet(gpioPortD, 7);
+            state = On;
+        } else {
+            GPIO_PinOutClear(gpioPortD, 7);
+            state = Off;
+        }
+        break;
+    case default:
+        /* something wrong has happened */
+        GPIO_PinOutClear(gpioPortD, 7);
+        state = On;
+        break;
+  }
+}
+\end{lstlisting}
+
+\section{Màquina d'estats finits estesa}
+\label{sec:EFSM}
+
+Les màquines d'estats finits esteses (\gls{EFSM}) amplien el concepte de les FSM amb el de {\bf variables} que mantenen valors interns de manera que la funció de transició pot preguntar per valors d'aquestes variables.\cite{wiki:EFSM}
+
+\begin{remark}
+ Formalment un EFSM es pot definir com una 8-tupla de $(S, I, O, D, E, U, F, s)$ tal que:
+\begin{itemize}
+ \item $S$ és un conjunt finit d'estats ${s_0,s_1, ..., s_n}$
+ \item $I$ és un conjunt d'entrades ${i_0, i_1, ..., i_m}$
+ \item $O$ és un conjunt de sortides ${o_0, o_1, ..., o_k}$
+ \item $D$ és un espai lineal de j dimensions $D_1 \times D_2 \times ... \times D_j$
+ \item $E$ és un conjunt de funcions d'activació del tipus: $E: D \to {0, 1}$
+ \item $U$ és un conjunt  de funcions d'actualització del tipus: $U: D \to D$
+ \item $F$ és la funció de transició del tipus: $F: S \times I \times E \to S \times U \times O$
+ \item $s \in S$ és l'estat inicial 
+\end{itemize}
+\end{remark}
+
+Amb aquesta mena de màquines d'estats, es poden tenir variables que, per exemple, comptin fins a un cert valor i llavors permetre un canvi d'estat, o que una variable controli un interval de temps, etc. 
+
+
+\section{Flux de dades}
+\label{sec:dataflow}
 
 
 
