@@ -512,7 +512,7 @@ C = 30 \text{ ms}
 \end{equation*}
 
 Aquestes equacions ens indiquen que durant bona part del temps de funcionament del sistema, la cua entre els dos processos tindrà tant sols 1 element, i que la probabilitat que tingui més de 10 elements en algun moment és de només el 0,60\%.
-Cal fer notar que aquest valor probabilístic té en compte que els processos que generen dades es comporten com una variable aleatòria tipus Poisson i els temps de processat les dades s'ajusta a una variable alaatòria exponencial. 
+Cal fer notar que aquest valor probabilístic té en compte que els processos que generen dades es comporten com una variable aleatòria tipus Poisson i els temps de processat les dades s'ajusta a una variable aleatòria exponencial. 
 Si algun dels dos processos no es comporta com a tal, si no que el seu temps de procés o de generació de dades és fix, els valors $L_q$, $W_q$, $W$ i $L$ seran certs en tot moment.
 
 Manipulant una mica les fórmules, també podem esbrinar quin temps màxim de procés podem tenir per una tasca que genera dades cada 25 ms i volem menys d'un 0.1\% de probabilitats que la cua arribi a tenir 8 elements.
@@ -758,9 +758,9 @@ Tot i que un conjunt de normes de codificació ajuda a no inserir {\em bugs}, le
 
 En àmbits molt específics hi ha normes i estàndards propis, com el DO-178 per l'àmbit aeri i espacial; IEC 61508, ISO 26262 o SAE J3061 per automoció o IEC 62304 per l'industria mèdica.
 
-També hi ha normes genèriques, que no es centren a cap àmbit concret. Les normes genèriques més habituals i conegudes són MISRA-C \cite{MISRAHomepage} i ``Embedded C Coding Standard'' \cite{BARRGuidelines}.
+També hi ha normes genèriques, que no es centren a cap àmbit concret. Les normes genèriques més habituals i conegudes són MISRA-C \cite{MISRAHomepage} i ``Embedded C Coding Standard'' \cite{BARRGuidelines}. Per espai, la \gls{ESA} fa servir el document  ``C and C++ Coding Standards'' \cite{BSSC}.
 
-Aquestes dues es descriuen breument als apartats següents.
+Les dues es descriuen breument als apartats següents.
 
 \section{MISRA-C}
 \label{sec:MISRA}
