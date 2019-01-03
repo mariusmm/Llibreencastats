@@ -346,7 +346,7 @@ Les IRQs estan enumerades i tenen prioritats, així habitualment, un valor menor
 
 El controlador d'interrupcions gestiona quines interrupcions rebudes arriben al processador, segons les prioritats i si la interrupció concreta està activada o no.
 
-Veurem un cas amb els GPIO, el codi està disponible \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_2}{al repositori} . En aquest cas, el que es fa primer és configurar els pins perquè generin una interrupció HW al flanc de baixada (recordem el {\em pull-up} a la PCB, Figura~\ref{fig:pullup}). Tot seguit s'activen les interrupcions corresponents.
+Veurem un cas amb els GPIO, el codi està disponible \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_2}{al repositori}. En aquest cas, el que es fa primer és configurar els pins perquè generin una interrupció HW al flanc de baixada (recordem el {\em pull-up} a la PCB, Figura~\ref{fig:pullup}). Tot seguit s'activen les interrupcions corresponents.
 \index{NVIC{\_}EnableIRQ()}\index{GPIO{\_}IntConfig()}
 \begin{lstlisting}[style=customc]
  /* Set Interrupt configuration for both buttons */
@@ -362,7 +362,7 @@ En el cas dels Cortex-M de SiliconLabs, els pins de \gls{GPIO} poden generar nom
 
 En el cos de l'exemple, com que els botons estan connectats al pin D8 i B11 cada un d'ells activarà una de les dues interrupcions.
 
-La \gls{ISR} per la interrupció parell la veiem al Llistat~\ref{gpio_isr}.
+La \gls{ISR} per la interrupció parell la veiem al \fullref{gpio_isr}.
 \index{GPIO{\_}EVEN{\_}IRQHandler()}\index{GPIO{\_}IntClear()}\index{GPIO{\_}IntGet()}\index{GPIO{\_}PinOutClear()}
 \begin{lstlisting}[style=customc, label=gpio_isr, caption=Exemple d'ISR per GPIO]
 void GPIO_EVEN_IRQHandler(void) {

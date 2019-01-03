@@ -202,11 +202,63 @@ Les màquines d'estats finits esteses (\gls{EFSM}) amplien el concepte de les FS
 
 Amb aquesta mena de màquines d'estats, es poden tenir variables que, per exemple, comptin fins a un cert valor i llavors permetre un canvi d'estat, o que una variable controli un interval de temps, etc. 
 
-
 \section{Flux de dades}
 \label{sec:dataflow}
 
 
+\chapter{Tractament del temps}
+\label{ch:tractamenttemps}
 
+Tot i que el tractament del temps (deixar passar un cert temps, esperar per un esdeveniment un cert temps, etc.) es pot fer tant amb FSMs com amb un bucle de control senzill, hi ha models pensats que el tracten específicament.
+
+
+\section{Tasques periòdiques}
+\label{sec:tasquesperiodiques}
+
+Un model habitual de tractar el temps d'una forma senzilla és fent ús de tasques programades. Aquestes tasques, son funcions que es criden de forma periòdica i realitzen les tasques necessàries per l'aplicació final. No hi ha més funcionalitat afegida per part del {\em kernel} bàsic: cap comunicació entre processos com semàfors o cues. Així, podem tenir un codi similar al del Llistat~\ref{tasquesperiodiquesmain}
+
+\begin{lstlisting}[style=customc,caption={Estructura bàsica de les tasques programades},label=tasquesperiodiquesmain]
+void tasca1(void) {
+ // codi tasca 1
+}
+
+void tasca2(void) {
+  // codi tasca 2
+}
+
+void main(void) {
+  // inicialitzacions
+  ...
+  
+  // es registren les dues tasques, una es crida cada 5 segons, l'altra cada 15 segons
+  registra_tasca(tasca1, 5000);
+  registra_tasca(tasca2, 15000);
+
+  while(1) {
+    Executa_kernel();
+  }
+}
+\end{lstlisting}
+
+La funció \index{registra\_tasca()}{\bf registra\_tasca()} registra la funció que se li passa per a que es cridi cada cert temps. El {\em kernel} s'encarrega de programar algun {em timer} per a que notifiqui el microcontrolador el temps corresponent i, per exemple, pugui posar en un mode de baix consum el microcontrolador mentre aquest temps no arribi.
+Com que el microcontrolador es pot despertar per diversos esdeveniments, dins el bucle infinit de la funció \index{main()}{\bf main()} es crida a la funció per a que el {\em kernel} si s'escau torni a programar el {\em timer} com calgui i torni a dormir el microcontrolador. El pseudocodi per aquesta funció seria tal com es veu al Llistat~\ref{tasquesperiodiquestimers}.
+
+\begin{lstlisting}[style=customc,caption={Estructura bàsica de la funció Executa\_kernel()},label=tasquesperiodiquestimers]
+void Executa_kernel(void) {
+  Configurar els timers necessaris
+  Posar processador en mode de baix consum
+  /* Aqui el processador esta suspes esperant algun esdeveniment o que es dispari un timer */
+
+  Averiguar quina tasca toca executar-se
+  Executar tasca 
+  (Opcional) Cridar a una funcio generica de l'usuari
+}
+\end{lstlisting}
+
+
+
+\section{Multitasca}
+\label{sec:multitasca}
+Com ja hem vist a la \fullref{part:freertos}, és possible tenir multitasca en sistemes encastats. Donats l'ús de recursos que es fa i la complexitat a l'hora de programar per aquesta mena de sistemes fa que no sigui la solució idònia per tot tipus d'aplicació encastada.
 
 
