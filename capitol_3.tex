@@ -18,7 +18,7 @@ Aquest pin {\em SWO} forma part del sistema de Debug dels Cortex anomenat ITM ({
 
 Per poder fer servir aquesta funcionalitat, cal primer configurar el pin SWO per a que funcioni com a tal (es pot fer servir també com un \gls{GPIO} normal). Tot seguit es configura el dispositiu de trace i el mòdul ITM d'aquest. La configuració es fa a la funció {\bf setupSWOForPrint()}\index{setupSWOForPrint()}.
 
-Un cop configurat el mòdul ITM, la funció {\bf ITM\_SendChar()}\index{ITM{\_}SendChar()} permet enviar caràcter a caràcter el que vulguem presentar a la consola a l'altre costat.
+Un cop configurat el mòdul ITM, la funció {\bf ITM\_SendChar()}\index{ITM\_SendChar()} permet enviar caràcter a caràcter el que vulguem presentar a la consola a l'altre costat.
 
 En el cas de Simplicity, els caràcters rebuts es presenten directament a la consola de la part d'abaix del \gls{IDE} (Figura~\ref{fig:ITM}).
 
@@ -35,7 +35,7 @@ Tot i que això és força útil, podem fer servir una funció força coneguda i
 
 La funció {\bf printf()} és una vella coneguda per qualsevol programador de C (o C++, o PHP, o …). Així que seria genial poder fer servir aquesta funció en el nostre sistema encastat i que la cadena aparegui a la consola del nostre PC. Això ho podem fer de la següent manera. Primer de tot cal saber que la funció {\bf printf()} fa servir la funció de sistema {\bf \_write()} per imprimir la cadena. Per tant, caldrà que implementem aquesta funció per tenir el nostre desitjat {\bf printf()}.
 
-\index{\_write()}\index{ITM{\_}SendChar()}
+\index{\_write()}\index{ITM\_SendChar()}
 \begin{lstlisting}[caption={Funció {\bf \_write()}},style=customc,label=write]
 int _write(int file, const char *ptr, int len) {
   int x;
@@ -112,11 +112,11 @@ En la majoria de microcontroladors moderns la gestió dels rellotges és una qü
 
 Per aquesta tasca de controlar els rellotges, acostuma a existir un perifèric concret que fa tota la gestió, tant de manegar l'entrada de diferents senyals de rellotge com de preparar i enviar aquests senyals als diferents perifèrics. En els microcontroladors tant de SiliconLabs com de ST tenim diferents branques de rellotge per diferents perifèrics i la CPU. En termes generals podem dir que els perifèrics considerats lents (RTC, LEUART, etc.) reben un senyal de rellotge de baixa freqüència, els perifèrics considerats ràpids (USART, SPI, DAC, ADC, Timers, etc.) un senyal de rellotge d'alta freqüència i la CPU i els perifèrics més relacionats (DMA, Interrupcions, etc.) un altre rellotge \cite[94]{EFM32GRM}\cite[152]{STM32F4RM}.
 
-Al llarg dels diferents exemples s'anirà veient com es gestionen els rellotges. En els casos més senzills, tant sols cal activar el rellotge pel perifèric desitjat cridant a la funció {\bf CMU\_ClockEnable()}\index{CMU{\_}ClockEnable()}. aquesta funció rep com a paràmetre el perifèric al que se li vol enviar o desactivar el rellotge.
+Al llarg dels diferents exemples s'anirà veient com es gestionen els rellotges. En els casos més senzills, tant sols cal activar el rellotge pel perifèric desitjat cridant a la funció {\bf CMU\_ClockEnable()}\index{CMU\_ClockEnable()}. aquesta funció rep com a paràmetre el perifèric al que se li vol enviar o desactivar el rellotge.
 
-Altres funcions permeten decidir quin senyal rellotge concret es connecta amb quina branca (funció {\bf CMU\_ClockSelectSet()}\index{CMU{\_}ClockSelectSet()}); dividir un rellotge abans d'entrar a cert perifèric ({\bf CMU\_ClockDivSet()}\index{CMU{\_}ClockDivSet()}) (Llistat~\ref{clk_mng}).
+Altres funcions permeten decidir quin senyal rellotge concret es connecta amb quina branca (funció {\bf CMU\_ClockSelectSet()}\index{CMU\_ClockSelectSet()}); dividir un rellotge abans d'entrar a cert perifèric ({\bf CMU\_ClockDivSet()}\index{CMU\_ClockDivSet()}) (Llistat~\ref{clk_mng}).
 
-\index{CMU{\_}ClockSelectSet()}\index{CMU{\_}ClockDivSet()}\index{CMU{\_}ClockEnable()}
+\index{CMU\_ClockSelectSet()}\index{CMU\_ClockDivSet()}\index{CMU\_ClockEnable()}
 \begin{lstlisting}[style=customc,caption={Exemple de configuració del rellotge pel RTC},label=clk_mng]
 CMU_ClockSelectSet( cmuClock_LFA, cmuSelect_LFXO ); // El rellotge "Low Frequency Crystal Oscillator" entra al bus LFA
 CMU_ClockDivSet( cmuClock_RTC, cmuClkDiv_32768 );  // El rellotge es divideix per 32768 abans d'alimentar el RTC
@@ -132,11 +132,11 @@ Com ja s'ha mencionat breument a \fullref{se:arquitectura}, dins els {\em cores}
 Aquest {\em timer} està pensat perquè els S.O. el puguin fer servir, i com que està integrat dins el {\em core} Cortex, la portabilitat dels S.O. entre diferents fabricants serà molt senzilla (seria més complicat haver de fer un port per cada {\em timer} diferent de cada fabricant).
 
 %%ATENCIO: Trenco manualment CMU\_ClockFreqGet\\(cmuClock\_CORE) pq Latex no ho fa be
-L'exemple al repositori implementa una funció de {\bf Delay()}\index{Delay()}. El que es fa és configurar el {\em Systick} perquè generi una interrupció cada 1 mil·lisegon (Llistat~\ref{systickconfig}). Com que la funció {\bf CMU\_ClockFreqGet\\(cmuClock\_CORE)}\index{CMU{\_}ClockFreqGet()} retorna la freqüència de funcionament del rellotge del sistema, al dividir-la per 1000 i configurar el Systick amb aquest valor, generarà una interrupció cada mil·lisegon.
+L'exemple al repositori implementa una funció de {\bf Delay()}\index{Delay()}. El que es fa és configurar el {\em Systick} perquè generi una interrupció cada 1 mil·lisegon (Llistat~\ref{systickconfig}). Com que la funció {\bf CMU\_ClockFreqGet\\(cmuClock\_CORE)}\index{CMU\_ClockFreqGet()} retorna la freqüència de funcionament del rellotge del sistema, al dividir-la per 1000 i configurar el Systick amb aquest valor, generarà una interrupció cada mil·lisegon.
 
 A la ISR corresponent s'incrementa una variable global per tenir un comptatge dels mil·lisegons transcorreguts (veure Llistat~\ref{systickISR}). La variable {\bf msTicks} s'ha definit com a {\bf volatile} pel que s'explicarà a \fullref{sb:volatile}.
 
-\index{SysTick{\_}Config()}\index{CMU{\_}ClockFreqGet()}
+\index{SysTick\_Config()}\index{CMU\_ClockFreqGet()}
 \begin{lstlisting}[caption={Configuració del {\em Systick}},style=customc,label=systickconfig]
 main() {
   ...
@@ -145,7 +145,7 @@ main() {
 }
 \end{lstlisting}
 
-\index{SysTick{\_}Handler()}
+\index{SysTick\_Handler()}
 \begin{lstlisting}[caption={ISR del {\em Systick}},style=customc,label=systickISR]
 void SysTick_Handler(void)
 {
@@ -227,7 +227,7 @@ while (1) {
 }
 \end{lstlisting}
 
-El primer que es fa amb la sentència {\bf CMU\_ClockEnable()}\index{CMU{\_}ClockEnable()} és alimentar amb un rellotge al perifèric \gls{GPIO}. En la arquitectura Cortex-M de Silicon Labs cal fer això per cada perifèric que fem servir. D'aquesta manera, un perifèric que no necessitem no rep cap rellotge i el seu consum és disminueix dràsticament.
+El primer que es fa amb la sentència {\bf CMU\_ClockEnable()}\index{CMU\_ClockEnable()} és alimentar amb un rellotge al perifèric \gls{GPIO}. En la arquitectura Cortex-M de Silicon Labs cal fer això per cada perifèric que fem servir. D'aquesta manera, un perifèric que no necessitem no rep cap rellotge i el seu consum és disminueix dràsticament.
 
 Tot seguit es configuren els 3 pins que utilitzarem:
 \begin{itemize}
@@ -254,7 +254,7 @@ GPIO_PinOutSet(gpioPortE, 2);
 \end{lstlisting}
 
 Una forma molt habitual de treballar és escriure funcions amb les funcionalitats més comunes i que ens amaguin aquests detalls. Així, pel nostre exemple podríem definir les funcions del Llistat \ref{BSP_example}.
-\index{LedInit()}\index{LedOn()}\index{LedOff()}\index{GPIO{\_}PinOutSet()}\index{GPIO{\_}PinModeSet()}\index{GPIO{\_}PinOutClear()}
+\index{LedInit()}\index{LedOn()}\index{LedOff()}\index{GPIO\_PinOutSet()}\index{GPIO\_PinModeSet()}\index{GPIO\_PinOutClear()}
 \begin{lstlisting}[style=customc, label=BSP_example, caption=Exemple de BSP senzill]
 LedInit() {
   GPIO_PinModeSet(gpioPortD, 7, gpioModePushPullDrive, 0); /* LED */
@@ -347,7 +347,7 @@ Les IRQs estan enumerades i tenen prioritats, així habitualment, un valor menor
 El controlador d'interrupcions gestiona quines interrupcions rebudes arriben al processador, segons les prioritats i si la interrupció concreta està activada o no.
 
 Veurem un cas amb els GPIO, el codi està disponible \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_2}{al repositori} . En aquest cas, el que es fa primer és configurar els pins perquè generin una interrupció HW al flanc de baixada (recordem el {\em pull-up} a la PCB, Figura~\ref{fig:pullup}). Tot seguit s'activen les interrupcions corresponents.
-\index{NVIC{\_}EnableIRQ()}\index{GPIO{\_}IntConfig()}
+\index{NVIC\_EnableIRQ()}\index{GPIO\_IntConfig()}
 \begin{lstlisting}[style=customc]
  /* Set Interrupt configuration for both buttons */
 GPIO_IntConfig(gpioPortD, 8, false, true, true);
@@ -363,7 +363,7 @@ En el cas dels Cortex-M de SiliconLabs, els pins de \gls{GPIO} poden generar nom
 En el cos de l'exemple, com que els botons estan connectats al pin D8 i B11 cada un d'ells activarà una de les dues interrupcions.
 
 La \gls{ISR} per la interrupció parell la veiem al Llistat~\ref{gpio_isr}.
-\index{GPIO{\_}EVEN{\_}IRQHandler()}\index{GPIO{\_}IntClear()}\index{GPIO{\_}IntGet()}\index{GPIO{\_}PinOutClear()}
+\index{GPIO\_EVEN\_IRQHandler()}\index{GPIO\_IntClear()}\index{GPIO\_IntGet()}\index{GPIO\_PinOutClear()}
 \begin{lstlisting}[style=customc, label=gpio_isr, caption=Exemple d'ISR per GPIO]
 void GPIO_EVEN_IRQHandler(void) {
   uint32_t aux;
@@ -467,9 +467,9 @@ Tot plegat fa que sigui força complicat de configurar, i com ve sent costum, el
 Els controls que tenim habitualment per un Timer, un cop configurat, són \cite{EMLIB}:
 
 \begin{itemize}
- \item engegar i parar el Timer ({\bf TIMER\_Enable()}\index{TIMER{\_}Enable()} a EMLIB).
- \item llegir o configurar el màxim valor pel timer ({\bf TIMER\_TopGet()}\index{TIMER{\_}TopGet()} / {\bf TIMER\_TopSet()}\index{TIMER{\_}TopSet()} a EMLIB).
- \item llegir o configurar el valor pel compare ({\bf TIMER\_CompareGet()}\index{TIMER{\_}CompareGet()} / {\bf TIMER\_CompareSet()}\index{TIMER{\_}CompareSet()} a EMLIB).
+ \item engegar i parar el Timer ({\bf TIMER\_Enable()}\index{TIMER\_Enable()} a EMLIB).
+ \item llegir o configurar el màxim valor pel timer ({\bf TIMER\_TopGet()}\index{TIMER\_TopGet()} / {\bf TIMER\_TopSet()}\index{TIMER\_TopSet()} a EMLIB).
+ \item llegir o configurar el valor pel compare ({\bf TIMER\_CompareGet()}\index{TIMER\_CompareGet()} / {\bf TIMER\_CompareSet()}\index{TIMER\_CompareSet()} a EMLIB).
 \end{itemize}
 
 Els usos que li podem donar a aquest perifèric són variats, els més habituals són els següents::
@@ -493,7 +493,7 @@ El que es fa en primer lloc és configurar el Timer0 amb un seguit d'opcions. Le
 
 Un cop configurat el Timer, s'entra en el bucle infinit.
 Dins el bucle infinit, si es polsa el botó 0, es posa el comptador del Timer a 0 i s'engega el comptador (Llistat~\ref{Timer_example_1}).
-\index{TIMER{\_}CounterSet()}\index{TIMER{\_}Enable()}\index{main()}\index{GPIO{\_}PinInGet()}
+\index{TIMER\_CounterSet()}\index{TIMER\_Enable()}\index{main()}\index{GPIO\_PinInGet()}
 \begin{lstlisting}[style=customc, label=Timer_example_1, caption=Codi d'exemple d'ús d'un Timer ]
 void main(void) {
   ...
@@ -504,9 +504,9 @@ void main(void) {
 }
 \end{lstlisting}
 
-Tot seguit, es comprova si el comptador ha arribat al valor {\bf TOP\_VALUE} usant la funció {\bf TIMER\_CounterGet()}\index{TIMER{\_}CounterGet()}, si és així es fa {\em toggle} del LED (s'encén si estava apagat o el contrari), s'atura el Timer i es posa el seu comptador a 0 (Llistat~\ref{Timer_example_2}).
+Tot seguit, es comprova si el comptador ha arribat al valor {\bf TOP\_VALUE} usant la funció {\bf TIMER\_CounterGet()}\index{TIMER\_CounterGet()}, si és així es fa {\em toggle} del LED (s'encén si estava apagat o el contrari), s'atura el Timer i es posa el seu comptador a 0 (Llistat~\ref{Timer_example_2}).
 
-\index{main()}\index{TIMER{\_}CounterGet()}\index{TIMER{\_}Enable()}\index{TIMER{\_}CounterSet()}\index{GPIO{\_}PinOutToggle()}
+\index{main()}\index{TIMER\_CounterGet()}\index{TIMER\_Enable()}\index{TIMER\_CounterSet()}\index{GPIO\_PinOutToggle()}
 \begin{lstlisting}[style=customc, label=Timer_example_2, caption=Codi per comprovar si el Timer ha arribat a cert valor]
 void main(void) {
   ...
@@ -548,7 +548,7 @@ Primer de tot, cal saber per quines condicions pot generar interrupcions el nost
 Així doncs, quan estiguem a la \gls{ISR} del Timer si hem activat més d'un esdeveniments a que generi la interrupció haurem de mirar quin esdeveniments ha estat.
 
 El Timer es configura igual que a l'exemple anterior, i a més s'activen les interrupcions per aquest perifèric amb el codi que es veu a \ref{Timer_enableIRQ}.
-\index{TIMER{\_}IntEnable()}\index{NVIC{\_}EnableIRQ()}
+\index{TIMER\_IntEnable()}\index{NVIC\_EnableIRQ()}
 \begin{lstlisting}[style=customc, label=Timer_enableIRQ, caption=Codi corresponent a l'activació de les IRQs del Timer]
  /* Enable overflow interrupt */
 TIMER_IntEnable(TIMER0, TIMER_IF_OF);
@@ -557,8 +557,8 @@ TIMER_IntEnable(TIMER0, TIMER_IF_OF);
 NVIC_EnableIRQ(TIMER0_IRQn);
 \end{lstlisting}
 
-Amb això, un cop s'engegui el Timer i quan arribi el comptador a {\bf TOP} llençarà la interrupció {\bf TIMER0\_IRQn}, que executarà la {\bf ISR TIMER0\_IRQHandler()}\index{TIMER0{\_}IRQHandler()} que es veu al Llistat~\ref{Timer_IRQ} on simplement es netegen els \glspl{flag} d'interrupció i es fa {\em toggle} del \gls{LED}.
-\index{TIMER{\_}IntGet()}\index{TIMER{\_}IntClear()}
+Amb això, un cop s'engegui el Timer i quan arribi el comptador a {\bf TOP} llençarà la interrupció {\bf TIMER0\_IRQn}, que executarà la {\bf ISR TIMER0\_IRQHandler()}\index{TIMER0\_IRQHandler()} que es veu al Llistat~\ref{Timer_IRQ} on simplement es netegen els \glspl{flag} d'interrupció i es fa {\em toggle} del \gls{LED}.
+\index{TIMER\_IntGet()}\index{TIMER\_IntClear()}
 \begin{lstlisting}[style=customc, label=Timer_IRQ, caption=ISR del Timer]
 void TIMER0_IRQHandler(void) {
   uint32_t flags;
@@ -574,8 +574,8 @@ void TIMER0_IRQHandler(void) {
 
 La configuració i la posada en marxa del Timer es fa a la \gls{ISR} del botó 0, de manera similar a com ja havíem fet anteriorment a d'altres exemples: primer es netegen els {\em flags} de la \gls{IRQ}, tot seguit es posa el comptador del Timer a 0, es posa el valor màxim i per últim s'engega el Timer (Llistat~\ref{GPIO_ISR_Timer}).
 
-\index{GPIO{\_}EVEN{\_}IRQHandler()}\index{GPIO{\_}IntGet()}\index{GPIO{\_}IntClear()}
-\index{TIMER{\_}CounterSet()}\index{TIMER{\_}TopSet()}\index{TIMER{\_}Enable()}
+\index{GPIO\_EVEN\_IRQHandler()}\index{GPIO\_IntGet()}\index{GPIO\_IntClear()}
+\index{TIMER\_CounterSet()}\index{TIMER\_TopSet()}\index{TIMER\_Enable()}
 \begin{lstlisting}[style=customc, label=GPIO_ISR_Timer, caption=ISR del GPIO per l'exemple del Timer]
 void GPIO_EVEN_IRQHandler(void) {
   uint32_t flags;
@@ -617,8 +617,8 @@ Per contra, els RTCs de EFM32 són força més senzills, i és, de fet, un Timer
 
 \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/RTC}{A l'exemple per EFM32} tant sols se selecciona el rellotge de 32 kHz extern (LFXO), el divisor a 32768 per tenir un tic cada segon i es configura per a que generi una interrupció cada 2 segons (veure Llistat~\ref{RTCInit}). En aquest exemple, a la \gls{ISR} només es canvia el LED (s'apaga o encén segons el seu estat actual) (veure Llistat~\ref{RTCISR}).
 
-\index{CMU{\_}ClockSelectSet()}\index{CMU{\_}ClockDivSet()}\index{NVIC{\_}EnableIRQ()}
-\index{RTC{\_}CompareSet()}\index{RTC{\_}IntEnable()}\index{NVIC{\_}ClearPendingIRQ()}
+\index{CMU\_ClockSelectSet()}\index{CMU\_ClockDivSet()}\index{NVIC\_EnableIRQ()}
+\index{RTC\_CompareSet()}\index{RTC\_IntEnable()}\index{NVIC\_ClearPendingIRQ()}
 \begin{lstlisting}[style=customc, caption={Inicialització del RTC}, label=RTCInit]
 void main(void) {
   ...
@@ -636,7 +636,7 @@ void main(void) {
 }
 \end{lstlisting}
 
-\index{RTC{\_}IRQHandler()}\index{RTC{\_}IntClear()}\index{GPIO{\_}PinOutToggle()}
+\index{RTC\_IRQHandler()}\index{RTC\_IntClear()}\index{GPIO\_PinOutToggle()}
 \begin{lstlisting}[style=customc,caption={ISR del RTC},label=RTCISR]
 void RTC_IRQHandler(void) {
   /* Clear interrupt source */
@@ -701,7 +701,7 @@ Per generar PWM, el Timer es configura el seu registre {\bf TOP} per a que ens d
 \end{figure}
 En el codi d'exemple (Llistat \ref{Set_Timer_PWM}), el que es fa és configurar el TIMER1 en mode PWM i connectar la sortida del Timer al Pin D7 que és on està el LED connectat.
 
-\index{TIMER{\_}InitCC()}
+\index{TIMER\_InitCC()}
 \begin{lstlisting}[style=customc, label=Set_Timer_PWM, caption=Configuració del Timer per l'exemple PWM]
  /* Set Timer */
 TIMER_InitCC(TIMER1, 1, &timerCCInit);
@@ -713,7 +713,7 @@ A continuació és configuren els dos registres importants per generar PWM (Llis
 \text{Freq. de PWM} = \frac{\text{Freq Clk}}{\text{prescaler} * \text{valor TOP}} = \frac{14.000.000 \text{ Hz}}{256 * (4000 +1 )} = 13.67 \text{ Hz}
 \end{displaymath}
 
-\index{TIMER{\_}TopSet()}\index{TIMER{\_}CompareBufSet()}
+\index{TIMER\_TopSet()}\index{TIMER\_CompareBufSet()}
 \begin{lstlisting}[style=customc, label=Timer_PWM_Conf, caption=Configuració del Timer per l'exemple PWM]
 TIMER_TopSet(TIMER1, PWM_FREQ);
 TIMER_CompareBufSet(TIMER1, 1, pwm_value);
@@ -774,7 +774,7 @@ I com evitem que si tot va be el {\em watchdog} no ens reiniciï el sistema? Don
 \end{figure}
 
 La majoria de fabricants ens donen unes poques funcions per treballar amb el {\em Watchdog} (en el cas de Silicon Labs a la biblioteca EMLIB tenim el mòdul em\_wdog). Habitualment hi ha alguna funció per configurar-lo, una per engegar-lo i una per alimentar-lo. Hi ha fabricants que no permeten deshabilitar el {\em Watchdog} un cop s'ha engegat per assegurar-se que cap error de \gls{FW} provocarà que deixi de funcionar.
-\index{WDOG{\_}Feed()}
+\index{WDOG\_Feed()}
 \begin{lstlisting}[style=customc]
 WDOG_Feed();
 \end{lstlisting}
@@ -786,7 +786,7 @@ Habitualment es pot triar quina és la freqüència de funcionament del {\em Wat
 En l'\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/Watchdog}{exemple que hi ha al repositori}
 es configura el {\em Watchdog} perquè treballi amb un rellotge intern de 1 kHz i que compti fins a 4097, de manera que si ningú alimenta el {\em Watchdog} en 4 segons, aquest reiniciarà el sistema. L'exemple conté un bucle que va fent blinkar el LED de la placa i una \gls{ISR} que quan es prem el botó 0 alimenta el {\em Watchdog} (Llistat~\ref{WatchdogISR}).
 
-\index{GPIO{\_}EVEN{\_}IRQHandler()}\index{GPIO{\_}IntGet()}\index{GPIO{\_}IntClear()}\index{WDOG{\_}Feed()}
+\index{GPIO\_EVEN\_IRQHandler()}\index{GPIO\_IntGet()}\index{GPIO\_IntClear()}\index{WDOG\_Feed()}
 \begin{lstlisting}[style=customc,caption={ISR del botó que alimenta el {\em Watchdog}},label=WatchdogISR]
 void GPIO_EVEN_IRQHandler(void) {
   uint32_t aux;
@@ -871,7 +871,7 @@ D'aquesta manera, els 12 bits de resolució del ADC serviran per comparar la ten
 \end{remark}
 
 El codi, un cop inicialitzat el ADC, realitza les accions que es veuen al Llistat~\ref{ADCSimple}.
-\index{ADC{\_}Start()}\index{ADC{\_}DataSingleGet()}
+\index{ADC\_Start()}\index{ADC\_DataSingleGet()}
 \begin{lstlisting}[frame=single,caption={Codi de lectura de l'ADC},style=customc, label=ADCSimple]
 while (1) {
   ADC_Start(ADC0, adcStartSingle);
@@ -907,11 +907,11 @@ On $V_{Ref}$ és el voltatge de referència, que en aquest cas pot ser 2.5 o 1.2
 \label{sec:DAC_Example_1}
 
 Al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/DAC_1}{repositori} hi ha un exemple senzill usant el DAC per generar una tensió continua segons un valor donat.
-Primer s'inicialitzarà el \gls{DAC} i la resta de perifèrics (en aquest cas els GPIO i poc més). Es configuren els botons com sempre, amb les dues interrupcions ja conegudes ({\bf GPIO\_ODD\_IRQHandler()}\index{GPIO{\_}ODD{\_}IRQHandler()} i {\bf GPIO\_EVEN\_IRQHandler()}\index{GPIO{\_}EVEN{\_}IRQHandler()}).
+Primer s'inicialitzarà el \gls{DAC} i la resta de perifèrics (en aquest cas els GPIO i poc més). Es configuren els botons com sempre, amb les dues interrupcions ja conegudes ({\bf GPIO\_ODD\_IRQHandler()}\index{GPIO\_ODD\_IRQHandler()} i {\bf GPIO\_EVEN\_IRQHandler()}\index{GPIO\_EVEN\_IRQHandler()}).
 
 La part important de l'exemple és la inicialització del DAC, tal com es veu al Llistat~\ref{DACConfig}.
 
-\index{CMU{\_}ClockEnable()}\index{DAC{\_}PrescaleCalc()}\index{DAC{\_}Init()}\index{DAC{\_}InitChannel()}
+\index{CMU\_ClockEnable()}\index{DAC\_PrescaleCalc()}\index{DAC\_Init()}\index{DAC\_InitChannel()}
 \begin{lstlisting}[style=customc, caption=Inicialització del DAC, label=DACConfig]
 static void DACConfig(void) {
   /* Use default settings */
@@ -937,9 +937,9 @@ En aquest codi, primer es posen els valors per defecte que ens ofereix el fabric
 
 Les \gls{ISR} dels dos botons el que fan es incrementar o decrementar una variable global que serà el valor que s'enviarà al DAC per a que generi el senyal. Aquest increment o decrement es fa en passos de {\bf DAC\_STEP} unitats. D'aquesta manera pitjant els botons podrem seleccionar quin voltatge es genera a la sortida del DAC.
 
-Dins el bucle infinit de la funció {\bf main()} (Llistat~\ref{DACMain}) s'envia el valor de la variable global cap al DAC amb la funció {\bf DAC\_ChannelOutputSet()}\index{DAC{\_}ChannelOutputSet()}, es treu el valor per la consola de debug i s'espera a que un \gls{flag} indiqui que hi ha hagut un canvi en el valor de la variable global.
+Dins el bucle infinit de la funció {\bf main()} (Llistat~\ref{DACMain}) s'envia el valor de la variable global cap al DAC amb la funció {\bf DAC\_ChannelOutputSet()}\index{DAC\_ChannelOutputSet()}, es treu el valor per la consola de debug i s'espera a que un \gls{flag} indiqui que hi ha hagut un canvi en el valor de la variable global.
 
-\index{DAC{\_}ChannelOutputSet()}\index{printf()}\index{main()}
+\index{DAC\_ChannelOutputSet()}\index{printf()}\index{main()}
 \begin{lstlisting}[style=customc, caption=Bucle infinit del DAC, label=DACMain]
 void main(void) {
   while (1) {
@@ -1003,7 +1003,7 @@ El DAC es configura de la mateixa manera que a l'exemple anterior, en mode conti
 
 A la \gls{ISR} del {\em timer} es calcula el nou valor pel \gls{DAC} i s'escriu el nou valor calculat (veure Llistat~\ref{DAC_2_Example}).
 
-\index{TIMER0{\_}IRQHandler()}\index{DAC{\_}ChannelOutputSet()}
+\index{TIMER0\_IRQHandler()}\index{DAC\_ChannelOutputSet()}
 \begin{lstlisting}[style=customc, caption=Part de la ISR del Timer per generar la dada pel DAC, label=DAC_2_Example]
 void TIMER0_IRQHandler(void) {
   ...
@@ -1055,13 +1055,13 @@ L'altre aplicació pràctica del port sèrie és poder connectar el microcontrol
 \section{Fent servir una USART}
 Com que la configuració d'un port sèrie és una mica complicada, sobretot perquè segons la velocitat de funcionament del rellotge del sistema caldrà dividir i multiplicar aquest senyal fins a tenir una velocitat adequada per la velocitat seleccionada pel port sèrie, els fabricants acostumen a donar-nos biblioteques que ens ajuden.
 
-Dins la biblioteca acostumen a oferir una funció per enviar dades ({\bf USART\_Tx()}\index{USART{\_}Tx()}) i una per rebre'n ({\bf USART\_RX()}\index{USART{\_}Rx()}). Aquestes funcions són molt senzilles, i permeten enviar un sol byte o rebre'n un, o espera-se indefinidament fins que n'arribi un. Això pot ser que no sigui l'ideal per la nostra aplicació i les \gls{USART} permeten generar interrupcions segons certs esdeveniments. Normalment els més usats són el de byte rebut i el de byte enviat. D'aquesta manera, ens podem muntar una biblioteca que ens permeti rebre dades pel port sèrie fent servir exclusivament interrupcions i a la nostra aplicació agafem el que s'hagi rebut quan vagi bé.
+Dins la biblioteca acostumen a oferir una funció per enviar dades ({\bf USART\_Tx()}\index{USART\_Tx()}) i una per rebre'n ({\bf USART\_RX()}\index{USART\_Rx()}). Aquestes funcions són molt senzilles, i permeten enviar un sol byte o rebre'n un, o espera-se indefinidament fins que n'arribi un. Això pot ser que no sigui l'ideal per la nostra aplicació i les \gls{USART} permeten generar interrupcions segons certs esdeveniments. Normalment els més usats són el de byte rebut i el de byte enviat. D'aquesta manera, ens podem muntar una biblioteca que ens permeti rebre dades pel port sèrie fent servir exclusivament interrupcions i a la nostra aplicació agafem el que s'hagi rebut quan vagi bé.
 
-La manera més habitual d'implementar aquest mecanisme asíncron de enviar o rebre dades pel port sèrie és mitjançant un \gls{buffer circular}. D'aquesta manera, la \gls{ISR} de recepció ({\bf USART1\_RX\_IRQ\\Handler()}\index{USART1{\_}TX{\_}IRQHandler()}) insereix la nova dada rebuda al {\em buffer} de recepció cada cop que la criden. Només cal escriure una funció a la nostra biblioteca que extregui un caràcter del {\em buffer} cada cop que la cridin i escriure una funció que retorni el nombre de caràcters disponibles al {\em buffer} (veure Llistat \ref{UARTISRs}).
+La manera més habitual d'implementar aquest mecanisme asíncron de enviar o rebre dades pel port sèrie és mitjançant un \gls{buffer circular}. D'aquesta manera, la \gls{ISR} de recepció ({\bf USART1\_RX\_IRQ\\Handler()}\index{USART1\_TX\_IRQHandler()}) insereix la nova dada rebuda al {\em buffer} de recepció cada cop que la criden. Només cal escriure una funció a la nostra biblioteca que extregui un caràcter del {\em buffer} cada cop que la cridin i escriure una funció que retorni el nombre de caràcters disponibles al {\em buffer} (veure Llistat \ref{UARTISRs}).
 
-La ISR de transmissió ({\bf USART1\_TX\_IRQHandler()}\index{USART1{\_}TX{\_}IRQHandler()}) es crida cada cop que s'acaba d'enviar un caràcter, per tant la ISR pot enviar un caràcter del {\em buffer} circular de transmissió cada cop que la cridin (quan s'ha acabat d'enviar el caràcter anterior) i ens cal una funció que copiï les dades a enviar cap al {\em buffer} circular de transmissió i engegui el procés.
+La ISR de transmissió ({\bf USART1\_TX\_IRQHandler()}\index{USART1\_TX\_IRQHandler()}) es crida cada cop que s'acaba d'enviar un caràcter, per tant la ISR pot enviar un caràcter del {\em buffer} circular de transmissió cada cop que la cridin (quan s'ha acabat d'enviar el caràcter anterior) i ens cal una funció que copiï les dades a enviar cap al {\em buffer} circular de transmissió i engegui el procés.
 
-\index{USART{\_}IntClear()}\index{USART{\_}Send()}\index{USART{\_}Rx()}
+\index{USART\_IntClear()}\index{USART\_Send()}\index{USART\_Rx()}
 \begin{lstlisting}[style=customc,caption={ISRs de TX i RX de la UART},label=UARTISRs]
 void USART1_TX_IRQHandler(void) {
   USART_IntClear( USART1, USART_IEN_TXC);
@@ -1117,7 +1117,7 @@ En aquest cas farem servir \glspl{buffer circular} per guardar les dades rebudes
 \end{itemize}
 
 En aquest exemple es fan servir les interrupcions de la USART per controlar-la, de manera que al rebre un caràcter, la \gls{ISR} corresponent l'insereix al {\em buffer} corresponent (hi ha dos {\em buffer}, un de recepció i un d'enviament), veure Llistat~\ref{ISR_UARTRX_Avançada} i \ref{ISR_UARTTX_Avançada}.
-\index{USART1{\_}RX{\_}IRQHandler()}\index{USART{\_}Rx()}\index{USART{\_}IntClear()}
+\index{USART1\_RX\_IRQHandler()}\index{USART\_Rx()}\index{USART\_IntClear()}
 \begin{lstlisting}[style=customc,label=ISR_UARTRX_Avançada,caption=Exemple ISR avançada]
 void USART1_RX_IRQHandler(void) {
   char data;
@@ -1134,9 +1134,9 @@ D'aquesta manera, en qualsevol moment que es rebi un caràcter per la UART, la \
 
 Quan calgui, podrem cridar a la funció {\bf AvailableData()}\index{AvailableData()} per saber si hem rebut alguna cosa i processar-la si cal.
 
-Per enviar dades, cal que primer omplim el \gls{buffer circular} corresponent ({\bf TX\_SerialBuffer}) amb el que vulguem enviar i després cridar la funció {\bf USART\_Send()}\index{USART{\_}Send()}. D'aquesta manera, i gràcies a que hem configurat la USART perquè llenci una \gls{IRQ} cada cop que acabi d'enviar un caràcter, la USART enviarà un primer caràcter i es cridarà la ISR, que tornarà a cridar la funció d'enviar un caràcter fins que no en quedi cap més al {\em buffer}.
+Per enviar dades, cal que primer omplim el \gls{buffer circular} corresponent ({\bf TX\_SerialBuffer}) amb el que vulguem enviar i després cridar la funció {\bf USART\_Send()}\index{USART\_Send()}. D'aquesta manera, i gràcies a que hem configurat la USART perquè llenci una \gls{IRQ} cada cop que acabi d'enviar un caràcter, la USART enviarà un primer caràcter i es cridarà la ISR, que tornarà a cridar la funció d'enviar un caràcter fins que no en quedi cap més al {\em buffer}.
 
-\index{USART1{\_}TX{\_}IRQHandler()}\index{USART{\_}IntClear()}\index{USART\_Send()}
+\index{USART1\_TX\_IRQHandler()}\index{USART\_IntClear()}\index{USART\_Send()}
 \begin{lstlisting}[style=customc,label=ISR_UARTTX_Avançada,caption=Exemple ISR avançada]
 void USART1_TX_IRQHandler(void) {
   USART_IntClear( USART1, USART_IEN_TXC);
@@ -1209,7 +1209,7 @@ Amb això estem connectant directament els pins del microcontrolador que poden f
 Un cop tenim el Hardware preparat, cal posar-se amb el Firmware. Per fer servir el controlador Màster del nostre microcontrolador podem fer sevir les llibreries de SiliconLabs emlib. \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/I2C_1}{Aquí està el projecte sencer} per EFM32.
 
 El primer que cal fer és activar el rellotge per aquest perifèric i configurar els pins corresponents. En aquest cas, els pins 15 o 16 del connector corresponent als pins PD7 i PD6 respectivament, que són la {\em localization \#1} del I2C d'aquest microcontrolador (Llistat~\ref{i2cpins}).
-\index{CMU{\_}ClockEnable()}\index{GPIO{\_}PinModeSet()}
+\index{CMU\_ClockEnable()}\index{GPIO\_PinModeSet()}
 \begin{lstlisting}[frame=single,style=customc, label=i2cpins, caption={Initialització dels pins per l'I2C}]
 CMU_ClockEnable(cmuClock_I2C0, true);
 GPIO_PinModeSet(gpioPortD, 7, gpioModeWiredAnd, 1);
@@ -1221,7 +1221,7 @@ I2C0->ROUTE = I2C_ROUTE_SDAPEN | I2C_ROUTE_SCLPEN |
 
 A continuació cal configurar el perifèric màster, podem deixar-ho tot amb les opcions per defecte (Llistat~\ref{i2cconfig}).
 
-\index{I2C{\_}Init()}
+\index{I2C\_Init()}
 \begin{lstlisting}[frame=single,style=customc,label=i2cconfig, caption={Inicialització del perifèric I2C}]
 I2C_Init_TypeDef i2cInit = I2C_INIT_DEFAULT;
 I2C_Init(I2C0, &i2cInit);
@@ -1229,8 +1229,8 @@ I2C_Init(I2C0, &i2cInit);
 
 Un cop fet això, ja podem fer servir el controlador I2C per accedir als dispositius que hi hagin al bus.
 
-Per comoditat, s'acostuma a munta una funció per llegir registres i una funció per escriure'n. Veiem la funció {\bf I2C\_ReadRegister()}\index{I2C{\_}ReadRegister()} (Llistat~\ref{I2CReadRegister}).
-\index{I2C{\_}TransferInit()}\index{I2C{\_}Transfer()}
+Per comoditat, s'acostuma a munta una funció per llegir registres i una funció per escriure'n. Veiem la funció {\bf I2C\_ReadRegister()}\index{I2C\_ReadRegister()} (Llistat~\ref{I2CReadRegister}).
+\index{I2C\_TransferInit()}\index{I2C\_Transfer()}
 \begin{lstlisting}[style=customc,caption=Funció {\bf I2C\_ReadRegister},label=I2CReadRegister]
 static bool I2C_ReadRegister(uint8_t reg, uint8_t *val) {
   I2C_TransferReturn_TypeDef I2C_Status;
@@ -1259,11 +1259,11 @@ static bool I2C_ReadRegister(uint8_t reg, uint8_t *val) {
 
 El primer que fem és definir les variables que ens caldran. La variable més estranya que veiem aquí és la variable {\bf seq} de tipus {\bf I2C\_TransferSeq\_TypeDef}. En aquesta estructura és on es guarda tota la informació necessària per engegar una transacció per part del controlador dins el microcontrolador. Per tant, a l'estructura cal posar-hi l'adreça \gls{I2C} del dispositiu, quina mena de transacció es vol fer (lectura, escriptura, etc.), en aquest cas {\bf I2C\_FLAG\_WRITE\_READ}, que vol dir que volem llegir d'un registre; també cal omplir una {\em array} d'estructures ({\bf buf[]}) on es guarda les dades a enviar o a rebre. En aquest cas, com que només volem llegir un registre (un sol byte) al {\bf buf[0]} només hi posem l'adreça del registre a llegir i la longitud a 1 i a {\bf buf[1]} li posem un {\em buffer} per emmagatzemar el valor llegit i de longitud 1 sol byte per llegir.
 
-Un cop omplerta aquesta estructura s'engega la transacció amb la crida {\bf I2C\_TransferInit()}\index{I2C{\_}TransferInit()}, que retorna un {\bf I2C\_Status}. Després, tal com ens demana la biblioteca EMLIB, cal anar cridant la funció {\bf I2C\_Transfer()}\index{I2C{\_}Transfer()} mentre la variable {\bf I2C\_Status} valgui {\bf i2cTransferInProgress}. Això indica que la transferència pel bus s'ha acabat i cal veure com ha anat l'operació. Si tot ha anat bé la variable {\bf I2C\_Status} valdrà {\bf i2cTransferDone}. Així, el que tenim és una funció que li passem l'adreça del registre que volem llegir i ens retorna el valor que ens retorna el dispositiu.
+Un cop omplerta aquesta estructura s'engega la transacció amb la crida {\bf I2C\_TransferInit()}\index{I2C\_TransferInit()}, que retorna un {\bf I2C\_Status}. Després, tal com ens demana la biblioteca EMLIB, cal anar cridant la funció {\bf I2C\_Transfer()}\index{I2C\_Transfer()} mentre la variable {\bf I2C\_Status} valgui {\bf i2cTransferInProgress}. Això indica que la transferència pel bus s'ha acabat i cal veure com ha anat l'operació. Si tot ha anat bé la variable {\bf I2C\_Status} valdrà {\bf i2cTransferDone}. Així, el que tenim és una funció que li passem l'adreça del registre que volem llegir i ens retorna el valor que ens retorna el dispositiu.
 
 Ara tornem al nostre sensor de gestos. Quasi tots els dispositius I2C tenen un registre de tipus identificació, que ens permet validar que la comunicació es fa realment amb ell. En el cas del APDS-9960 té un registre anomenat ‘ID' a l'adreça 0x92 i que el valor que retorna al llegir-lo és 0xAB (pàgina 25 del {\em Datasheet} \cite{apds9960}). Ara toca, doncs, muntar una funció que comprovi que s'està correctament a aquest dispositiu com es veu al Llistat~\ref{testI2C}.
 
-\index{testI2C()}\index{I2C{\_}ReadRegister()}
+\index{testI2C()}\index{I2C\_ReadRegister()}
 \begin{lstlisting}[style=customc,caption=Funció {\bf testI2C()},label=testI2C]
 void testI2C(void) {
   uint8_t ret_value;
@@ -1320,7 +1320,7 @@ Normalment el dispositiu DMA es configura mitjançant descriptors, que són unes
 Posar un exemple de \gls{DMA} sovint és complicat, ja que involucra força perifèrics diferents i configuracions, així que intentarem fer algun de simple per començar. Per aquest \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/DMA_1}{primer exemple} hem optat per fer una transferència entre dues regions de memòria amb el DMA. Per això, tindrem un buffer d'origen i un de destí, en aquest cas de 256 elements de 32 bits cadascun (uint32\_t src\_buffer[BUFFER\_SIZE]).
 
 El primer que es fa és inicialitzar el DMA amb les funcions d'emlib corresponents.
-\index{DMA{\_}Init()}
+\index{DMA\_Init()}
 \begin{lstlisting}[caption={Inicialització del DMA},style=customc]
 dma_init.hprot = 0;
 dma_init.controlBlock = dmaControlBlock;
@@ -1333,7 +1333,7 @@ DMA_DESCRIPTOR_TypeDef dmaControlBlock[DMACTRL_CH_CNT * 2] SL_ATTRIBUTE_ALIGN(DM
 \end{lstlisting}
 
 A continuació configurem un canal del DMA (Llistat~\ref{DMAchannelconfig}) i li assignem una funció de \gls{callback} perquè ens notifiqui quan ha acabat la transferència (Llistat~\ref{DMAComplete}):
-\index{DMA{\_}CfgChannel()}
+\index{DMA\_CfgChannel()}
 \begin{lstlisting}[style=customc, caption={Configuració del canal DMA}, label=DMAchannelconfig]
 dma_cb.cbFunc = DmaComplete;
 dma_cb.userPtr = NULL;
@@ -1353,7 +1353,7 @@ void DmaComplete(unsigned int channel, bool primary, void *user) {
 També s'activen les interrupcions (necessàries per tenir \glspl{callback}) i es selecciona com serà la transferència (en aquest cas un 0 per indicar que serà de memòria a memòria).
 
 Per últim es configura el descriptor de la transferència (Llistat~\ref{paramDMA}).
-\index{DMA{\_}CfgDescr()}
+\index{DMA\_CfgDescr()}
 \begin{lstlisting}[style=customc, caption={Paràmetres de configuració del DMA}, label=paramDMA]
 dma_descr.arbRate = dmaArbitrate1;
 dma_descr.dstInc = dmaDataInc4;
@@ -1366,7 +1366,7 @@ DMA_CfgDescr(0, true, &dma_descr);
 En aquest cas es tria com ha de manegar les adreces (tant a la font com al destí) i quants bytes es transfereixen a cada accés. Com que estem movent un {\em array} de 32 bits de paraula, triem incrementar de 4 en 4 l'adreça i moure 4 bytes a cada accés.
 
 Per últim activem la transferència \gls{DMA} com es veu al Llistat~\ref{activateDMA}.
-\index{DMA{\_}ActivateAuto()}
+\index{DMA\_ActivateAuto()}
 \begin{lstlisting}[style=customc, caption={Activació de la transferència DMA}, label=activateDMA]
 DMA_ActivateAuto(0, true, dst_buffer, src_buffer, BUFFER_SIZE - 1);
 \end{lstlisting}
@@ -1397,9 +1397,9 @@ Una altra aplicació del \gls{DMA} és transferir dades cap o des de un perifèr
 
 Així, el que farem en aquest exemple és deixar el \gls{buffer circular} i el mateix mecanisme per rebre dades de la {\bf USART (RX)} però canviarem la manera en que enviem les dades (TX). L'exemple és \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/UART_DMA}{aquí}.
 
-El que farem és preparar el DMA per a que transfereixi dades des d'un {\em buffer} a la memòria cap al registre d'enviament de la USART (registre {\bf TXDATA} de la USART1). En aquest cas, cal configurar-lo que no incrementi l'adreça de destí, que incrementi la font byte a byte i que transfereixi bytes (els caràcters d'una UART són bytes). També cal especificar quin dispositiu fa de {\em trigger}, és a dir, quin dispositiu notifica que té una dada disponible per ser transferida (paràmetre dma\_chn.select = DMAREQ\_USART1\_TXBL). En aquest exemple no ens cal saber quan el \gls{DMA} ha acabat la transferència, així que no registrem cal \gls{callback} ni activem les interrupcions del DMA. Tot això ho hem encapsulat a la funció {\bf my\_DMA\_Init()}\index{my{\_}DMA{\_}Init()} (Llistat~\ref{DMAinit_2}).
+El que farem és preparar el DMA per a que transfereixi dades des d'un {\em buffer} a la memòria cap al registre d'enviament de la USART (registre {\bf TXDATA} de la USART1). En aquest cas, cal configurar-lo que no incrementi l'adreça de destí, que incrementi la font byte a byte i que transfereixi bytes (els caràcters d'una UART són bytes). També cal especificar quin dispositiu fa de {\em trigger}, és a dir, quin dispositiu notifica que té una dada disponible per ser transferida (paràmetre dma\_chn.select = DMAREQ\_USART1\_TXBL). En aquest exemple no ens cal saber quan el \gls{DMA} ha acabat la transferència, així que no registrem cal \gls{callback} ni activem les interrupcions del DMA. Tot això ho hem encapsulat a la funció {\bf my\_DMA\_Init()}\index{my\_DMA\_Init()} (Llistat~\ref{DMAinit_2}).
 
-\index{my{\_}DMA{\_}Init()}
+\index{my\_DMA\_Init()}
 \begin{lstlisting}[style=customc,caption={Diferències a la inicialització del DMA}, label=DMAinit_2]
 void my_DMA_Init(void) {
   ...
@@ -1414,7 +1414,7 @@ void my_DMA_Init(void) {
 
 Ens cal també una funció que engegui la transferència del DMA cap a la UART. Li hem dit {\bf sendUARTbyDMA()}\index{sendUARTbyDMA()} i rep com a paràmetres el {\em buffer} a enviar i la seva longitud (en bytes). Aquesta funció tan sols espera que el DMA no estigui ocupat i tot seguit engega la transferència (veure Llistat~\ref{lst:sendUARTbyDMA}).
 
-\index{sendUARTbyDMA()}\index{DMA{\_}ChannelEnabled()}\index{DMA{\_}ActivateBasic()}
+\index{sendUARTbyDMA()}\index{DMA\_ChannelEnabled()}\index{DMA\_ActivateBasic()}
 \begin{lstlisting}[style=customc, caption={Funció sendUARTbyDMA()}, label=lst:sendUARTbyDMA]
 void sendUARTbyDMA(void *buffer, int size) {
   /* wait for other DMA transfer to complete */
@@ -1532,13 +1532,13 @@ Habitualment en aquest mòdul s'hi posen les configuracions i inicialitzacions d
 
 En aquest cas es gestiona algun dels rellotges del sistema, el pin corresponent al LED i es configura la sortida de la consola pel {\bf printf}.
 
-D'aquesta biblioteca es fa servir la funció {\bf setupSWOForPrint()}\index{setupSWOForPrint()} i la funció {\bf BSP\_Init()}\index{BSP{\_}Init()}. Aquesta segona funció tant sols crida la primera i inicialitza el LED de la placa.
+D'aquesta biblioteca es fa servir la funció {\bf setupSWOForPrint()}\index{setupSWOForPrint()} i la funció {\bf BSP\_Init()}\index{BSP\_Init()}. Aquesta segona funció tant sols crida la primera i inicialitza el LED de la placa.
 
 \subsection{I2C\_Wrapper}
 
-Hem escrit una biblioteca senzilla per accedir al bus \gls{I2C} fent servir la llibreria emlib. D'aquesta manera encapsulem tota la funcionalitat en dues funcions senzilles de fer servir per llegir o escriure un registre d'un dispositiu I2C ({\bf I2C\_WriteRegister}\index{I2C{\_}WriteRegister()} i {\bf I2C\_ReadRegister}\index{I2C{\_}ReadRegister()}) com ja es va fer a \fullref{sub:I2C_example}.
+Hem escrit una biblioteca senzilla per accedir al bus \gls{I2C} fent servir la llibreria emlib. D'aquesta manera encapsulem tota la funcionalitat en dues funcions senzilles de fer servir per llegir o escriure un registre d'un dispositiu I2C ({\bf I2C\_WriteRegister}\index{I2C\_WriteRegister()} i {\bf I2C\_ReadRegister}\index{I2C\_ReadRegister()}) com ja es va fer a \fullref{sub:I2C_example}.
 
-\index{I2C{\_}WriteRegister()}\index{I2C{\_}TransferInit()}\index{I2C{\_}Transfer()}
+\index{I2C\_WriteRegister()}\index{I2C\_TransferInit()}\index{I2C\_Transfer()}
 \begin{lstlisting}[style=customc, caption={Part de la funció {\bf I2C\_WriteRegister}}, label=I2CWriteRegister]
 bool I2C_WriteRegister(uint8_t addr, uint8_t reg, uint8_t data) {
   ...
@@ -1554,11 +1554,11 @@ bool I2C_WriteRegister(uint8_t addr, uint8_t reg, uint8_t data) {
 
 \subsection{PWM}
 És una biblioteca molt senzilla per controlar el canal PWM que correspon al LED de la nostra placa. Només suporta aquest canal i només proporciona una funció per controlar el PWM, amb un paràmetre amb el percentatge de \gls{duty cycle} del PWM (100\% equival al LED sempre encès i 0\% correspon al LED apagat).
-La funció {\bf PWM\_Init()}\index{PWM{\_}Init()} configura el Timer1 perquè funcioni com a generador de \gls{PWM}, de manera molt similar a l'exemple \fullref{sub:PWM_example}.
+La funció {\bf PWM\_Init()}\index{PWM\_Init()} configura el Timer1 perquè funcioni com a generador de \gls{PWM}, de manera molt similar a l'exemple \fullref{sub:PWM_example}.
 
-L'altra funció de la biblioteca és {\bf PWM\_Set()}\index{PWM{\_}Set()}, que rep el percentatge del \gls{duty cycle} que ha d'estar a 1 i configura el Timer d'acord a aquest percentatge. Com que el Timer està configurat perquè compti fins a {\bf PWM\_FREQ} (que val 4096), cal passar del rang 0 -- 100 a 0 -- 4096. Un cop calculat el valor correcte, s'usa com a valor al comparador del {\em timer}.
+L'altra funció de la biblioteca és {\bf PWM\_Set()}\index{PWM\_Set()}, que rep el percentatge del \gls{duty cycle} que ha d'estar a 1 i configura el Timer d'acord a aquest percentatge. Com que el Timer està configurat perquè compti fins a {\bf PWM\_FREQ} (que val 4096), cal passar del rang 0 -- 100 a 0 -- 4096. Un cop calculat el valor correcte, s'usa com a valor al comparador del {\em timer}.
 
-\index{PWM{\_}Set()}\index{TIMER{\_}CompareBufSet()}
+\index{PWM\_Set()}\index{TIMER\_CompareBufSet()}
 \begin{lstlisting}[style=customc,caption={Funció PWM\_Set()},label=PWMSet]
 void PWM_Set(uint8_t percentage) {
   uint32_t pwm_value;
@@ -1574,7 +1574,7 @@ void PWM_Set(uint8_t percentage) {
 \subsection{APDS-9960}
 Aquesta biblioteca controla el sensor APDS-9960 via el bus \gls{I2C}. Només gestiona la funcionalitat de sensor de proximitat (que pot fer força més coses).
 
-\index{APDS{\_}9960{\_}InitProximity()}\index{I2C{\_}WriteRegister()}
+\index{APDS\_9960\_InitProximity()}\index{I2C\_WriteRegister()}
 \begin{lstlisting}[caption={Funció {\bf APDS\_9960\_InitProximity()}},style=customc,label=InitProximity]
 void APDS_9960_InitProximity() {
   // Enable Proximity detection
@@ -1589,9 +1589,9 @@ void APDS_9960_InitProximity() {
 }
 \end{lstlisting}
 
-La funció {\bf APDS\_9960\_InitProximity()}\index{APDS{\_}9960{\_}InitProximity()} (Llistat~\ref{InitProximity}) inicialitza el sensor per a què funcioni com a sensor de proximitat. Cal consultar el Datasheet per veure els registres que s'escriuen i quins valors es posen \cite{apds9960}.
+La funció {\bf APDS\_9960\_InitProximity()}\index{APDS\_9960\_InitProximity()} (Llistat~\ref{InitProximity}) inicialitza el sensor per a què funcioni com a sensor de proximitat. Cal consultar el Datasheet per veure els registres que s'escriuen i quins valors es posen \cite{apds9960}.
 
-\index{APDS{\_}9960{\_}ReadProximity()}\index{I2C{\_}ReadRegister()}
+\index{APDS\_9960\_ReadProximity()}\index{I2C\_ReadRegister()}
 \begin{lstlisting}[caption={Funció {\bf APDS\_9960\_ReadProximity()}},style=customc,label=ReadProximity]
 bool APDS_9960_ReadProximity(uint8_t *p_data) {
   uint8_t status;
@@ -1608,14 +1608,14 @@ bool APDS_9960_ReadProximity(uint8_t *p_data) {
 }
 \end{lstlisting}
 
-La funció {\bf APDS\_9960\_ReadProximity()}\index{APDS{\_}9960{\_}ReadProximity()} (Llistat~\ref{ReadProximity}) llegeix el registre d'estatus i si hi ha una dada disponible la llegeix, la retorna a travès del paràmetre per referència i el retorn de la funció valdrà {\bf True}; si no hi ha una dada disponible retorna {\bf False}.
+La funció {\bf APDS\_9960\_ReadProximity()}\index{APDS\_9960\_ReadProximity()} (Llistat~\ref{ReadProximity}) llegeix el registre d'estatus i si hi ha una dada disponible la llegeix, la retorna a travès del paràmetre per referència i el retorn de la funció valdrà {\bf True}; si no hi ha una dada disponible retorna {\bf False}.
 
 La biblioteca es basa en {\em polling} per saber si la dada a llegir és bona, comprovant el registre {\bf status} i retornant fals si no s'ha pogut llegir. Es podria millorar la biblioteca fent que el sensor llenci una interrupció cada cop que tingui una dada nova (es veurà més endavant a \fullref{sec:full_app_irq}).
 
 \section{Funció principal}
 La funció principal de l'aplicació està en el propi {\bf main()}\index{main()} i consta bàsicament d'un bucle sense fi on es va llegint el valor de proximitat del sensor (si està disponible) i s'ajusta el \gls{duty cycle} del \gls{PWM} segons aquest valor, de manera que el LED pampalluguegi més sovint quan més a prop estigui l'obstacle.
 
-\index{APDS{\_}9960{\_}ReadProximity()}\index{PWM{\_}Set()}
+\index{APDS\_9960\_ReadProximity()}\index{PWM\_Set()}
 \begin{lstlisting}[caption={Funció principal},style=customc,label=ProximityExample]
 while(pdTrue) {
   ret = APDS_9960_ReadProximity(&p_data);
@@ -1629,7 +1629,7 @@ while(pdTrue) {
 }
 \end{lstlisting}
 
-Com que hem escrit la funció {\bf APDS\_9960\_ReadProximity()}\index{APDS{\_}9960{\_}ReadProximity()} de manera que retorni true o false segons si s'ha pogut llegir o no una dada, el codi ens queda molt senzill i llegible. Si s'ha pogut llegir, es treu per la consola de {\em debug} la dada i es converteix al rang adequat el valor llegit.
+Com que hem escrit la funció {\bf APDS\_9960\_ReadProximity()}\index{APDS\_9960\_ReadProximity()} de manera que retorni true o false segons si s'ha pogut llegir o no una dada, el codi ens queda molt senzill i llegible. Si s'ha pogut llegir, es treu per la consola de {\em debug} la dada i es converteix al rang adequat el valor llegit.
 
 \begin{remark}
  Fixem-nos que la conversió de rang es fa forçant primer la multiplicació per 100 abans de la divisió per 256 per tal de no perdre precisió en la conversió. Com que treballem amb nombres enters, la divisió és entera i si ho féssim a l'inrevés obtindríem sempre valors 0, ja que <valor de 8 bits>/256 sempre dona 0 en una divisió entera i després encara que ho multipliquéssim per 100 seguiria donant 0..
@@ -1651,7 +1651,7 @@ Per això, ens calen almenys, fer els següents canvis al nostre sistema:
 Per aconseguir connectar el pin INT del sensor {\bf APDS-9960} només cal fer servir un cinquè cable Dupont entre la placa de prototipat del sensor i la nostra placa de desenvolupament. Si mirem el manual de la placa de Silicon Labs, veurem que el pin PB12 es pot fer servir com a un GPIO normal i que generi una interrupció cada cop que tinguem un flanc.
 
 Segons el {\em datasheet} \cite[3]{apds9960} del APDS-9960 el pin d'interrupció és de tipus \gls{open drain}. Això vol dir que aquest pin només pot forçar un valor '0' i li cal que el valor '1' estigui forçat per un \gls{pull-up}. En el cas de la placa que tenim, ja incorpora aquesta resistència de \gls{pull-up}, per tant, el pin de GPIO del microcontrolador no cal configurar-lo com entrada amb \gls{pull-up}.
-\index{GPIO{\_}PinModeSet()}
+\index{GPIO\_PinModeSet()}
 \begin{lstlisting}[style=customc]
 GPIO_PinModeSet(gpioPortB, 12, gpioModeInput, 1); /* IRQ from APDS_9960 */
 \end{lstlisting}
@@ -1663,7 +1663,7 @@ Ara cal que el sensor generi un senyal d'\gls{IRQ} cada cop que tingui una nova 
 % Veiem al {\em datasheet}\cite[p.20 i 21]{apds9960} que cal activar les interrupcions per proximitat (bit PIEN de l'Status Register) i posar uns valors adients als registres de {\em threshold} (adreces 0x88 i 0x89). Segons ens diu el {\em datasheet}, si el registre {\bf PDATA} està dins del nivell que marquen aquests dos registres es generarà una interrupció. Per últim, cal configurar el valor del camp {\bf PPERS} del registre {\bf Persistence} per
 Veiem al {\em datasheet} \cite[11 i 20]{apds9960} que cal activar les interrupcions per proximitat (bit {\bf PIEN} del registre {\bf Status}) i si configurem el valor del camp {\bf PPERS} del registre {\bf Persistence} al valor 0 generarà una interrupció cada cop que hi hagi una dada nova.
 
-\index{APDS{\_}9960{\_}InitProximity{\_}IRQ()}\index{I2C{\_}WriteRegister()}
+\index{APDS\_9960\_InitProximity\_IRQ()}\index{I2C\_WriteRegister()}
 \begin{lstlisting}[caption={Nova funció d'initialització del APDS{\_}9960},style=customc,label=APDS960InitProximityIRQ]
 void APDS_9960_InitProximity_IRQ() {
   //Enable Proximity detection
@@ -1686,7 +1686,7 @@ Amb aquesta configuració segons el {\em datasheet} el sensor posarà una interr
 \subsection{Habilitar la interrupció corresponent}
 L'últim pas és habilitar la interrupció corresponent al pin d'entrada que hem triat. És una operació molt similar al que ja s'ha vist a l'apartat dels GPIOs (\fullref{sub:GPIO_2}).
 
-\index{GPIO{\_}IntConfig()}\index{NVIC{\_}EnableIRQ()}
+\index{GPIO\_IntConfig()}\index{NVIC\_EnableIRQ()}
 \begin{lstlisting}[caption={Habilitar l'interrupció del pin corresponent},style=customc,label=APDS960EnableIRQ]
 GPIO_IntConfig(gpioPortD, 8, false, true, true);
 NVIC_EnableIRQ(GPIO_EVEN_IRQn);
@@ -1700,7 +1700,7 @@ Un cop tenim tot preparat, cal també modificar la nostra funció principal perq
 
 Com ja s'ha comenta anteriorment (\fullref{ch:IRQ}) posar gaire codi dins una \gls{ISR} no és aconsellable, així que per aquest exemple farem servir la segona opció proposada. Per tant, afegirem una variable de tipus {\em bool} al projecte que farem servir com a {\em flag}. Aquest {\em flag} el posarem a {\bf true} dins la \gls{ISR} i la funció principal l'esborrarà cada cop que el faci servir (Llistats~\ref{APDS960ISRFlag} i \ref{APDS960Readmain}).
 
-\index{GPIO{\_}EVEN{\_}IRQHandler()}\index{GPIO{\_}IntGet()}\index{GPIO{\_}IntClear()}
+\index{GPIO\_EVEN\_IRQHandler()}\index{GPIO\_IntGet()}\index{GPIO\_IntClear()}
 \begin{lstlisting}[caption={\gls{ISR} amb el {\em flag}},style=customc,label=APDS960ISRFlag]
 void GPIO_EVEN_IRQHandler(void) {
   /* clear flags */
@@ -1710,7 +1710,7 @@ void GPIO_EVEN_IRQHandler(void) {
   signal = true;
 }
 \end{lstlisting}
-\index{main()}\index{APDS{\_}9960{\_}ReadProximity()}
+\index{main()}\index{APDS|_9960\_ReadProximity()}
 \begin{lstlisting}[caption={Funció principal amb suport d'interrupcions},style=customc,label=APDS960Readmain]
 main() {
   ...

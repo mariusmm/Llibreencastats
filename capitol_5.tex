@@ -5,14 +5,14 @@
 \label{ch:exceptions}
 Sovint treballant amb sistemes encastats ens trobem amb errors d'origen desconegut que es poden provocar per múltiples causes. Així, per exemple, una divisió per zero, accés incorrecte a una zona de memòria o accés a la memòria fora de rang faran que el processador es reiniciï \cite[102]{DesignersGuide}\cite[318]{ARMsdg}\cite{KielHardFault}.
 
-Aquests casos poden ser molt difícils de trobar si són casos esporàdics, però l'arquitectura ARM té unes característiques que ajuden a detectar-los i trobar-los. En síntesi, el cortex-M llença una interrupció molt prioritària anomenada HardFault\_Handler()\index{HardFault{\_}Handler()} quan succeeix un problema greu del que el processador no pot recupera-se, com una divisió per zero, un accés il·legal a memòria, etc. Abans de cridar a l'excepció, la CPU guarda tot de valors claus a diferents registres, i així per exemple en el registre {\bf PC} s'hi emmagatzema l'adreça de la instrucció executada, així que, en principi, només cal anar a aquella posició de memòria per veure quin ha estat el codi que ha causat el problema. També s'emmagatzema el valor de retorn (la  instrucció següent a l'executada que ha causat l'error) al registre {\bf LR} \cite{BlogHardFalut}.
+Aquests casos poden ser molt difícils de trobar si són casos esporàdics, però l'arquitectura ARM té unes característiques que ajuden a detectar-los i trobar-los. En síntesi, el cortex-M llença una interrupció molt prioritària anomenada HardFault\_Handler()\index{HardFault\_Handler()} quan succeeix un problema greu del que el processador no pot recupera-se, com una divisió per zero, un accés il·legal a memòria, etc. Abans de cridar a l'excepció, la CPU guarda tot de valors claus a diferents registres, i així per exemple en el registre {\bf PC} s'hi emmagatzema l'adreça de la instrucció executada, així que, en principi, només cal anar a aquella posició de memòria per veure quin ha estat el codi que ha causat el problema. També s'emmagatzema el valor de retorn (la  instrucció següent a l'executada que ha causat l'error) al registre {\bf LR} \cite{BlogHardFalut}.
 
 Així doncs, es pot reescriure la ISR per obtenir les dades que ens informi sobre què ha passat per ajudar-nos a obtenir pistes de quin codi està fallant.\cite{ARMHandler}.
 
 \section{Exemple detectant errors greus}
-A l'\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/ErrorHandling}{exemple del repositori} hi ha un codi que genera diferents errors segons la funció que es cridi i una implementació de {\bf HardFault\_Handler()}\index{HardFault{\_}Handler()}. Aquesta funció està escrita en assemblador, però el que cal veure és que es crida a la funció {\bf my\_HardFault\_Handler()}\index{my{\_}HardFault{\_}Handler()} que es qui en realitat fa tota la feina i és la que cal entendre \cite{EFM32HardFault}.
+A l'\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/ErrorHandling}{exemple del repositori} hi ha un codi que genera diferents errors segons la funció que es cridi i una implementació de {\bf HardFault\_Handler()}\index{HardFault\_Handler()}. Aquesta funció està escrita en assemblador, però el que cal veure és que es crida a la funció {\bf my\_HardFault\_Handler()}\index{my\_HardFault\_Handler()} que es qui en realitat fa tota la feina i és la que cal entendre \cite{EFM32HardFault}.
 
-\index{my{\_}HardFault{\_}Handler()}
+\index{my\_HardFault\_Handler()}
 \begin{lstlisting}[style=customc,caption=Codi HardFault\_Handler,label=HardFaultHandler_1]
 void my_HardFault_Handler(uint32_t *stack) {
   printf("Error Handler\r\n");
@@ -64,7 +64,7 @@ void my_HardFault_Handler(uint32_t *stack) {
 \end{figure}
 
 
-Per últim, es crida la macro {\bf DEBUG\_BREAK}\index{DEBUG{\_}BREAK}, que està definida com una instrucció en assemblador ({\bf BKPT \#01}) que posa el {\em core} en mode {\em Debug} i atura l'execució en aquest punt. Així, si tenim un {\em debugger} connectat, veurem com l'execució s'atura en aquest punt i torna el control a la nostra eina (veure Figura~\ref{fig:HardFaultDump}).
+Per últim, es crida la macro {\bf DEBUG\_BREAK}\index{DEBUG\_BREAK}, que està definida com una instrucció en assemblador ({\bf BKPT \#01}) que posa el {\em core} en mode {\em Debug} i atura l'execució en aquest punt. Així, si tenim un {\em debugger} connectat, veurem com l'execució s'atura en aquest punt i torna el control a la nostra eina (veure Figura~\ref{fig:HardFaultDump}).
 
 
 \begin{figure}
@@ -150,7 +150,7 @@ Per tant, quan es desenvolupa una aplicació per ser de baix consum, s'acostuma 
 \subsection{Exemple de baix consum}
 \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/ADC_1_LP}{L'exemple que es veurà} farà servir l'\gls{ADC} per convertir una entrada analògica a un valor digital, com ja es a fer a l'exemple \fullref{sub:ADC_example}. En el cas de baix consum, es configura el perifèric de la mateixa forma però s'hi afegeix l'opció que generi una \gls{IRQ} quan acaba de fer una conversió. Així, el nostre codi al bucle principal engegarà la conversió, entrarà en el mode de baix consum {\bf EM1} perquè la CPU es quedi en repòs mentre l'ADC fa la seva feina i es desperti per la \gls{IRQ} de finalització; tot seguit es llegeix i es mostra la dada convertida.
 
-\index{main()}\index{ADC{\_}Start()}\index{EMU{\_}EnterEM1()}\index{ADC{\_}DataSingleGet()}
+\index{main()}\index{ADC\_Start()}\index{EMU\_EnterEM1()}\index{ADC\_DataSingleGet()}
 \begin{lstlisting}[style=customc,caption={Bucle principal amb funcions de baix consum}, label=ADC_LP]
 void main() {
   ...
@@ -184,9 +184,9 @@ Un mode que es fa servir sovint en sistemes de baix consum és el de tenir un {\
 Al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/LETIMER_LP}{projecte del repositori} hi ha un exemple d'aquest tipus. Es fa servir un {\bf LETIMER}, que és un {\em timer} de baix consum i baixa freqüència que pot funcionar mentre la resta del microcontrolador està en el mode EM2 (o EM3 segons la configuració que es faci servir) \cite[294]{EFM32TGRM}. Aquest {\bf LETIMER} es pot alimentar amb el rellotge extern de baixa freqüència a 32.768 Hz ({\bf LFXO}) o bé amb l'oscil·lador intern a 1.000 Hz ({\bf ULFRCO}) (al codi es pot triar segons es defineixi o no la macro {\bf USE\_ULFRCO}). El rellotge que s'hagi triat es pre-escala per un factor suficient per tenir un comptador prou lent, ja que cal tenir en compte que aquest comptador és de només 16 bits i, per tant, si tenim una freqüència de funcionament elevada no podrem comptar gaire temps.
 Tot seguit el {\em timer} es configura per generar una interrupció quan arribi a 0 (és un comptador decreixent) i el seu valor {\bf TOP} (al valor al que es reinicia després d'arribar a 0) es posa en funció de la freqüència de funcionament i el temps que es vol tenir el sistema en baix consum, a l'exemple del repositori es posa a 4 segons. Un resum del codi de l'exemple es veu a Llistat~\ref{LETIMER_example}.
 
-\index{LETIMER0{\_}IRQHandler()}\index{main()}\index{LETIMER{\_}IntGet()}\index{LETIMER{\_}IntClear()}
-\index{GPIO{\_}PinOutToggle()}\index{CMU{\_}ClockSelectSet()}\index{CMU{\_}ClockDivSet()}
-\index{LETIMER{\_}CompareSet()}\index{EMU{\_}EnterEM3()}
+\index{LETIMER0\_IRQHandler()}\index{main()}\index{LETIMER\_IntGet()}\index{LETIMER\_IntClear()}
+\index{GPIO\_PinOutToggle()}\index{CMU\_ClockSelectSet()}\index{CMU\_ClockDivSet()}
+\index{LETIMER\_CompareSet()}\index{EMU\_EnterEM3()}
 \begin{lstlisting}[style=customc, caption={Exemple ús de {\bf LETIMER}}, label=LETIMER_example]
 #define PRESCALER cmuClkDiv_1
 #define EFECTIVE_CLK_FREQ (1000/PRESCALER)
@@ -244,7 +244,7 @@ Cal recordar que quan el {\em core} està en algun mode de baix consum, el {\em 
 Cal pensar que tot i que aquest mètode és molt senzill d'implementar, té la limitació de que a cada {\em tick} es treu la CPU del mode de baix consum per comprovar si hi ha alguna tasca en estat {\em Ready}. Podem imaginar-nos una aplicació que llegeixi d'un sensor cada 200 ms i processant les dades, com l'aplicació d'exemple XXXXX. Si es té en compte que el {\em tick} pot ser de 1000 Hz, és fàcil d'observar que es despertarà molts cops al {\em core} perquè tant sols el planificador vegi que no hi ha cap tasca {\em Ready} i torni a adormir el processador.
 
 %% manual break a la ultima macro pq latex no ho fa be
-Aquesta característica es pot activar a FreeRTOS editant el fitxer ``FreeRTOSConfig.h'' i fixant a '0' la definició {\bf configUSE{\_}TICKLESS{\_}IDLE} i triant el valor '1' per {\bf configUSE\_SLEEP\_MODE\\\_IN\_IDLE}. En el cas de Silicon Labs, el microcontrolador es posa en el mode EM2 (veure \fullref{sec:sleepmodes}) i deixant en funcionament tant sols el RTC (veure \fullref{sub:RTC}) i les \gls{IRQ} dels GPIOs que l'usuari hagi configurat (veure \fullref{ch:IRQ}).
+Aquesta característica es pot activar a FreeRTOS editant el fitxer ``FreeRTOSConfig.h'' i fixant a '0' la definició {\bf configUSE\_TICKLESS\_IDLE} i triant el valor '1' per {\bf configUSE\_SLEEP\_MODE\\\_IN\_IDLE}. En el cas de Silicon Labs, el microcontrolador es posa en el mode EM2 (veure \fullref{sec:sleepmodes}) i deixant en funcionament tant sols el RTC (veure \fullref{sub:RTC}) i les \gls{IRQ} dels GPIOs que l'usuari hagi configurat (veure \fullref{ch:IRQ}).
 
 \subsection{FreeRTOS sense {\em tick}}
 \label{sub:tickless}
@@ -537,8 +537,55 @@ C^8 < 25^8*0,001  \rightarrow C < \sqrt[8]{25^8 * 0,001} \approx 10.54 \text{ ms
 Això ens indica que el temps de processar una dada per part el consumidor ($C$) ha de ser menor de 10.54 mil·lisegons de mitjana per assegurar els requeriments donats.
 
 
-% \section{\em Debounce}
+\section{\em Debounce}
 % %% SwitchDebouncing.pdf - SwitchDebouncingMore.pdf
+
+Un problema que ens podem trobar quan volem llegir una entrada digital, és el fenomen dels rebots: si el pin està connectat a un botó a algun altre accionador mecànic aquest pot generar rebots al senyal, que vol dir que no es genera un pols quadrat i perfecte si que no quan es genera un pols aquest vagi acompanyat per d'altres polsos més petits i espuris.
+
+Aquest efecte pot provocar que el nostre codi compti més polsos dels que realment s'haurien de comptar i tenir un sistema erroni.
+
+Per solucionar-ho, a part d'afegir certa circuiteria addicional al voltant del pin d'entrada, es pot desenvolupar codi que tingui en compte aquesta situació. Aquesta mena de codi es coneix com {\em debouncing}. Aquests algorismes normalment es basen en llegir vàries vegades el pin implicat i veure quan deixa de canviar i amb això decidir si hi hagut canvi en el valor del pin o no.
+
+Un altre forma de fer-ho, potser més senzilla és la de un cop detectat un primer flanc, deixar de llegir l'entrada fins passat un temps i un cop transcorregut el temps, es llegeix el valor de l'entrada altre cop. Això es pot fer fàcilment controlant un Timer des de la ISR d'entrada del pin.
+
+Primer cal configurar el Timer per què compti un cert temps i generi una IRQ un cop transcorregut aquest temps. Per això configurem el valor Top tal com ja vàrem fer a \fullref{sub:Timers}.
+
+En aquest exemple es configura el valor top per que estigui comptant 100 mil·lisegons fent un càlcul molt similar al de l'exemple amb Timers anterior. També es prepara la \gls{ISR} pel {\em Timer1} tal com es veu al Llistat~\ref{timer_debouncing}
+
+\index{TIMER1\_IRQHandler()}\index{TIMER\_IntGet()}\index{TIMER\_IntClear()}\index{GPIO\_PinInGet()}
+\begin{lstlisting}[style=customc, caption=ISR del timer per fer debouncing, label=timer_debouncing]
+void TIMER1_IRQHandler(void) {
+  uint32_t flags;
+
+  /* Clear flag for TIMER1 */
+  flags = TIMER_IntGet(TIMER1);
+  TIMER_IntClear(TIMER1, flags);
+
+  timer_running = false;
+
+  if (GPIO_PinInGet(gpioPortD, 8) == 1) {
+    button_counter++;
+  }
+} 
+\end{lstlisting}
+
+La variable {\em timer\_running} es defineix com una variable booleana (i volàtil) amb valor per defecte a false. A aquesta ISR es comprova el valor desitjat de l'entrada i si és el cas, s'actualitza el comptador.
+
+Per últim a la ISR del GPIO corresponent inserim el codi següent per engegar el Timer quan es detecti un flanc al senyal (un canvi al seu valor), tal com es veu al Llistat~\ref{timer_debouncing_ISR}:
+
+\index{GPIO\_EVEN\_IRQHandler()}\index{TIMER\_TopSet()}\index{TIMER\_Enable()}
+\begin{lstlisting}[style=customc, caption=Codi per engegar el timer a la ISR del GPIO, label=timer_debouncing_ISR]
+void GPIO_EVEN_IRQHandler(void) {
+  ...
+  if (!timer_running) {
+    timer_running = true;
+    TIMER_TopSet(TIMER1, DEBOUNCE_VALUE);
+    TIMER_Enable(TIMER1, true);
+  }
+...
+\end{lstlisting}
+
+D'aquesta manera tant senzilla evitarem els molests rebots i, de fet, tindrem filtrats tots els polsos que considerem massa ràpids pel nostre sistema.
 
 \section{Ús eficient de printf}
 
@@ -548,7 +595,7 @@ Una opció recomanable en cas que l'ocupació de la memòria FLASH pugui ser un 
 
 A més, totes aquestes noves funciones les usarem a través d'una \gls{macro} de C, de forma que quan passem a una compilació de {\em release} del projecte aquests {\bf printf()} desapareguin del nostre codi. 
 
-\index{printf{\_}char()}\index{printf{\_}string()}\index{printf{\_}hex8()}\index{printf{\_}int()}
+\index{printf\_char()}\index{printf\_string()}\index{printf\_hex8()}\index{printf\_int()}
 \begin{lstlisting}[style=customc,caption={Diferents implementacions de {\bf printf()}},label=printf_variable]
 
 void printf_char(char ch) {
@@ -709,7 +756,7 @@ També es pot analitzar directament el contingut de la memòria usant l'IDE Simp
 \label{sec:CMSIS-Core}
 Aquesta part de l'especificació fixa la forma de comunicar-se amb les parts més {\em core} de la CPU, com son: el mapa de memòria (\fullref{sub:memory-mapped}), el sistema d'excepcions (\fullref{ch:exceptions}), els registres de control de la CPU, el gestor d'interrupcions (\fullref{ch:IRQ}), el Systick (\fullref{sec:systick}) i les {\em caches} \cite{CMSIS-CORE}. En aquesta biblioteca s'inclouen també els fitxers d'inicialització de cada microcontrolador en concret (\fullref{sub:boot}).
 
-Així, i a tall d'exemple, les funcions que ja hem fet servir per controlar interrupcions com {\bf NVIC\_EnableIRQ()}\index{NVIC{\_}EnableIRQ()} a \fullref{ch:IRQ} no són pròpies de cap fabricant si no que són funcions definides per {\bf CMSIS-core}. També la manera en que es defineixen estructures per accedir als diferents perifèrics ve marcada per l'especificació {\bf CMSIS-Core} (veieu \fullref{devinfo}).
+Així, i a tall d'exemple, les funcions que ja hem fet servir per controlar interrupcions com {\bf NVIC\_EnableIRQ()}\index{NVIC\_EnableIRQ()} a \fullref{ch:IRQ} no són pròpies de cap fabricant si no que són funcions definides per {\bf CMSIS-core}. També la manera en que es defineixen estructures per accedir als diferents perifèrics ve marcada per l'especificació {\bf CMSIS-Core} (veieu \fullref{devinfo}).
 
 \section{CMSIS-Driver}
 % \cite{CMSIS-DRIVER}

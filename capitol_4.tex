@@ -137,9 +137,9 @@ FreeRTOS deixa el maneig de les interrupcions a mans del desenvolupador, demanan
 
 Cal tenir en compte que les interrupcions són esdeveniments totalment asíncrons i imprevisibles i que prenen el control de forma automàtica. Això fa que mentre està funcionant una \gls{ISR} el {\em kernel} del Sistema Operatiu no es pot executar i que, quan acabi d'executar la ISR, si no fem res, tornarà el control cap a la tasca que s'estava executant. Això pot provocar que una ISR alliberi un recurs o posi disponible una dada i que una tasca d'alta prioritat passi a l'estat {\em Ready} però el {\em kernel}, com que no s'executa, no pugui passar-li l'execució i se segueixi amb la taca menys prioritària que s'estava executant.
 
-Per això les funcions per accedir a recursos com semàfors o cues des d'una \gls{ISR} tenen un paràmetre extra, que informa si s'ha despertat una tasca més prioritària. Si és el cas, cal que el codi de la ISR faci un {\bf portYIELD\_FROM\_ISR()}\index{portYIELD{\_}FROM{\_}ISR()} per cridar al {\em kernel} del Sistema Operatiu (veure Llistat~\ref{ISRYield}).
+Per això les funcions per accedir a recursos com semàfors o cues des d'una \gls{ISR} tenen un paràmetre extra, que informa si s'ha despertat una tasca més prioritària. Si és el cas, cal que el codi de la ISR faci un {\bf portYIELD\_FROM\_ISR()}\index{portYIELD\_FROM\_ISR()} per cridar al {\em kernel} del Sistema Operatiu (veure Llistat~\ref{ISRYield}).
 
-\index{any{\_}IRQHandler()}\index{xSemaphoreGiveFromISR()}\index{portYIELD{\_}FROM{\_}ISR()}
+\index{any\_IRQHandler()}\index{xSemaphoreGiveFromISR()}\index{portYIELD\_FROM\_ISR()}
 \begin{lstlisting}[style=customc,caption=Codi ISR d'exemple,label=ISRYield]
 void any_IRQHandler(void) {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
@@ -266,14 +266,14 @@ static void TaskLedToggle(void *pParameter) {
 }
 \end{lstlisting}
 
-La funció {\bf main()}\index{main()} crida la funció {\bf BSP\_Init()}\index{BSP{\_}Init()} que configura els GPIOs corresponents als botons i es registra una \gls{ISR} ({\bf GPIO\_EVEN\_IRQHandler()}\index{GPIO{\_}EVEN{\_}IRQHandler()}) pel botó 0, que ‘dóna' el semàfor en quan es prem el corresponent botó a la PCB (Llistat~\ref{ISR_semaphore}).
+La funció {\bf main()}\index{main()} crida la funció {\bf BSP\_Init()}\index{BSP\_Init()} que configura els GPIOs corresponents als botons i es registra una \gls{ISR} ({\bf GPIO\_EVEN\_IRQHandler()}\index{GPIO\_EVEN\_IRQHandler()}) pel botó 0, que ‘dóna' el semàfor en quan es prem el corresponent botó a la PCB (Llistat~\ref{ISR_semaphore}).
 
 Després es crea el semàfor que compartiran la tasca i la ISR i tot seguit es crea la tasca com ja hem vist a l'exemple anterior..
 Per últim s'engega el {\em kernel} del RTOS.
 
 Cal notar que les funcions per agafar o donar un semàfor són diferents segons estiguem a una tasca o a una \gls{ISR}. En el cas de la ISR, la funció de donar al semàfor ens indica si hi ha alguna tasca que cal desbloquejar perquè l'està esperant. En cas que sigui cert, cal fer un {\em yield} des de la \gls{ISR} per a que el planificador ({\em scheduler}) del RTOS pugui actuar immediatament.
 
-\index{xSemaphoreGiveFromISR()}\index{portYIELD{\_}FROM{\_}ISR()}
+\index{xSemaphoreGiveFromISR()}\index{portYIELD\_FROM\_ISR()}
 \begin{lstlisting}[caption=ISR del botó 0,style=customc,label=ISR_semaphore]
 ISR() {
   ...
@@ -319,7 +319,7 @@ Per saber quina mida han de tenir les cues, veieu \fullref{sec:mida_cues}.
 \label{sub:cues_exemple}
 A \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Queue}{l'exemple de cues} hi ha una sola tasca que fa {\em blinkar} el \gls{LED} segons una variable. Aquesta variable s'obté de llegir (o intentar-ho) una cua. Aquesta cua (anomenada {\em queue\_buttons}) l'escriuen les dues \gls{ISR} associades als dos botons. Una envia el valor corresponent a 250 ms i l'altre ISR envia el valor que correspont a 1000 ms (Llistat~\ref{Queue_example_ISR}).
 
-\index{xQueueSendFromISR()}\index{portYIELD{\_}FROM{\_}ISR()}
+\index{xQueueSendFromISR()}\index{portYIELD\_FROM\_ISR()}
 \begin{lstlisting}[style=customc, label=Queue_example_ISR, caption=Part del codi d'una de les ISRs]
 ...
 /* Send the data to the Queue */
@@ -438,13 +438,13 @@ La prioritat de les dues tasques a l'exemple és la mateixa. Com exercici es pot
 \chapter{Exemple amb la UART i interrupcions}
 A l’\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_UART}{exemple Freertos\_UART} hi ha el mateix exemple vist a \fullref{sec:UART_example_2} però en aquest cas usant FreeRTOS. Per això hi ha uns pocs canvis:
 \begin{itemize}
- \item A les interrupcions de la USART ({\bf USART1\_TX\_IRQHandler()}\index{USART1{\_}TX{\_}IRQHandler()} i {\bf USART1\_RX\_IRQHandler()}\index{USART1{\_}RX{\_}IRQHandler()}) se les canvia la prioritat, ja que a FreeRTOS la prioritat de les interrupcions han de tenir un valor diferent a 0. Veure aquest enllaç de la documentació de FreeRTOS \cite{FreeRTOSIRQ}.
+ \item A les interrupcions de la USART ({\bf USART1\_TX\_IRQHandler()}\index{USART1\_TX\_IRQHandler()} i {\bf USART1\_RX\_IRQHandler()}\index{USART1\_RX\_IRQHandler()}) se les canvia la prioritat, ja que a FreeRTOS la prioritat de les interrupcions han de tenir un valor diferent a 0. Veure aquest enllaç de la documentació de FreeRTOS \cite{FreeRTOSIRQ}.
  \item Enlloc de fer servir el \gls{buffer circular} es fa servir una cua de FreeRTOS. Així la \gls{ISR} de recepció guarda el valor rebut a una cua i la \gls{ISR} de transmissió va buidant la mateixa cua.
- \item La funció {\bf USART\_Send()}\index{USART{\_}Send()} també fa servir la cua de transmissió per extreure els caràcters a enviar per la UART
+ \item La funció {\bf USART\_Send()}\index{USART\_Send()} també fa servir la cua de transmissió per extreure els caràcters a enviar per la UART
  \item Enlloc d’un {\em while(1)} al {\bf main()}\index{main()}, s'ha creat una tasca que prova de llegir un caràcter de la cua de recepció per fer la seva feina.
 \end{itemize}
 
-\index{USART1{\_}RX{\_}IRQHandler()}\index{USART{\_}Rx()}\index{xQueueSendFromISR()}\index{USART{\_}IntClear()}\index{portYIELD{\_}FROM{\_}ISR()}
+\index{USART1\_RX\_IRQHandler()}\index{USART\_Rx()}\index{xQueueSendFromISR()}\index{USART\_IntClear()}\index{portYIELD\_FROM\_ISR()}
  \begin{lstlisting}[style=customc,caption={ISR de RX de la UART amb FreeRTOS}]
 void USART1_RX_IRQHandler(void) {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
@@ -461,7 +461,7 @@ void USART1_RX_IRQHandler(void) {
 }
 \end{lstlisting}
 
-\index{USART1{\_}TX{\_}IRQHandler()}\index{USART{\_}IntClear()}\index{xQueueReceiveFromISR()}\index{USART{\_}Tx()}
+\index{USART1\_TX\_IRQHandler()}\index{USART\_IntClear()}\index{xQueueReceiveFromISR()}\index{USART\_Tx()}
 \begin{lstlisting}[style=customc,caption={ISR de TX de la UART amb FreeRTOS}]
 void USART1_TX_IRQHandler(void) {
   char data;
@@ -473,7 +473,7 @@ void USART1_TX_IRQHandler(void) {
 }
 \end{lstlisting}
 
-\index{USART{\_}Send()}\index{xQueueReceive()}\index{USART{\_}Tx()}
+\index{USART\_Send()}\index{xQueueReceive()}\index{USART\_Tx()}
 \begin{lstlisting}[style=customc,caption={funció UART\_Send() per FreeRTOS}]
 void USART_Send(USART_TypeDef *usart) {
   int data;
@@ -484,7 +484,7 @@ void USART_Send(USART_TypeDef *usart) {
 }
 \end{lstlisting}
 
-\index{UARTTask()}\index{xQueueReceive()}\index{xQueueSend()}\index{USART{\_}Send()}
+\index{UARTTask()}\index{xQueueReceive()}\index{xQueueSend()}\index{USART\_Send()}
 \begin{lstlisting}[style=customc,caption=Tasca principal de l'exemple]
 static void UARTTask(void *pParameter) {
   (void) pParameter;
@@ -523,7 +523,7 @@ Una de les característiques d'un \gls{RTOS} és que les diferents tasques a fer
 
 Les dues tasques s'han de poder comunicar, doncs la tasca que llegeix el valor de proximitat del sensor l'ha de poder enviar a la tasca que gestiona el \gls{PWM}. Així doncs, tenim dues tasques comunicades amb una cua (anomenada {\bf sensor\_data\_queue}). Com que el tipus de dades que hem d'enviar d'una tasca a l'altra és tant sols el valor de proximitat proporcionat pel sensor, la cua pot emmagatzemar directament aquest valor. És per això que la cua es crea amb 4 posicions de 8 bits cada una (veure Llistat~\ref{createtasks}).
 
-\index{ReadSensor{\_}task()}\index{APDS{\_}9960{\_}InitProximity()}\index{APDS{\_}9960{\_}ReadProximity()}
+\index{ReadSensor\_task()}\index{APDS\_9960\_InitProximity()}\index{APDS\_9960\_ReadProximity()}
 \index{xQueueSend()}\index{vTaskDelay()}
 \begin{lstlisting}[style=customc,caption={Tasca ReadSensor },label=readsensor_task]
 static void ReadSensor_task(void *pParameter) {
@@ -545,8 +545,8 @@ static void ReadSensor_task(void *pParameter) {
 }
 \end{lstlisting}
 
-\index{MngData{\_}task()}\index{xQueueReceive()}\index{printf()}
-\index{PWM{\_}Set()}
+\index{MngData\_task()}\index{xQueueReceive()}\index{printf()}
+\index{PWM\_Set()}
 \begin{lstlisting}[style=customc,caption={Tasca MngData},label=mgndata_task]
 static void MngData_task(void *pParameter) {
   uint8_t p_data;
@@ -588,8 +588,8 @@ Com ja hem vist anteriorment, es creen les dues tasques a la funció {\bf main()
 \label{sec:wrapperI2C}
 Com que FreeRTOS és un sistema operatiu preemptiu, cal que les funcions de les biblioteques es puguin fer servir per diverses tasques alhora (siguin re-entrants) \cite[236]{FreeRTOSBook}. Habitualment això es fa amb un {\em mutex} que protegeixi la o les seccions crítiques de cada biblioteca. En el cas de la biblioteca {\em I2C\_Wrapper} es fa amb un sol {\em mutex} que protegeix la crida a la transferència \gls{I2C} pròpiament dita (veure Llistat~\ref{I2CWriteRegisterFreeRTOS}).
 
-\index{I2C{\_}WriteRegister()}\index{xSemaphoreTake()}
-\index{I2C{\_}TransferInit()}\index{I2C{\_}Transfer()}\index{xSemaphoreGive()}
+\index{I2C\_WriteRegister()}\index{xSemaphoreTake()}
+\index{I2C\_TransferInit()}\index{I2C\_Transfer()}\index{xSemaphoreGive()}
 \begin{lstlisting}[style=customc,caption={Part de la funció I2C\_WriteRegister() adaptada a FreeRTOS}, label=I2CWriteRegisterFreeRTOS]
 bool I2C_WriteRegister() {
   ...
@@ -606,7 +606,7 @@ bool I2C_WriteRegister() {
 }
 \end{lstlisting}
 
-D'aquesta manera en el cas que dues tasques fessin servir el {\em wrapper} per accedir al bus \gls{I2C}, quan cridessin a la funció {\bf I2C\_WriteRegister()}\index{I2C{\_}WriteRegister()} o {\bf I2C\_ReadRegister()}\index{I2C{\_}ReadRegister()} aquestes funcions es protegeixen de la re-entrada amb el mutex {\em I2C\_mutex} impedint que es pogués cridar dos cops (un cop de cada tasca) a la funció {\bf I2C\_Transfer()}\index{I2C{\_}Transfer()}, que faria que les transferències \gls{I2C} no es fessin correctament.
+D'aquesta manera en el cas que dues tasques fessin servir el {\em wrapper} per accedir al bus \gls{I2C}, quan cridessin a la funció {\bf I2C\_WriteRegister()}\index{I2C\_WriteRegister()} o {\bf I2C\_ReadRegister()}\index{I2C\_ReadRegister()} aquestes funcions es protegeixen de la re-entrada amb el mutex {\em I2C\_mutex} impedint que es pogués cridar dos cops (un cop de cada tasca) a la funció {\bf I2C\_Transfer()}\index{I2C\_Transfer()}, que faria que les transferències \gls{I2C} no es fessin correctament.
 
 El {\em mutex} (anomenat {\bf I2C\_mutex}) està definit com {\em static} dins el fitxer {\bf I2C\_Wrapper.c}.
 
@@ -614,9 +614,9 @@ El {\em mutex} (anomenat {\bf I2C\_mutex}) està definit com {\em static} dins e
 static SemaphoreHandle_t I2C_mutex;
 \end{lstlisting}
 
-Això farà que aquesta variable només estigui disponible dins el mòdul i no sigui una variable global a tot el projecte. Aquest {\em mutex} s'inicialitza a la funció {\bf I2C\_initialize()}\index{I2C{\_}initialize}.
+Això farà que aquesta variable només estigui disponible dins el mòdul i no sigui una variable global a tot el projecte. Aquest {\em mutex} s'inicialitza a la funció {\bf I2C\_initialize()}\index{I2C\_initialize}.
 
-\index{I2C{\_}initialize}\index{xSemaphoreCreateMutex()}
+\index{I2C\_initialize}\index{xSemaphoreCreateMutex()}
 \begin{lstlisting}[style=customc,label=CreateI2CMutex]
 I2C_initialize() {
   ...
@@ -660,9 +660,9 @@ Quan es treballa en un entorn amb un RTOS, cal estudiar bé com fer servir el {\
 
 La solució més habitual és la de tenir una tasca dedicada a alimentar el {\em watchdog} i que rebi una mena d'OK de cada una de les tasques restants del sistema. D'aquesta forma, si una tasca deixa de funcionar, aquesta tasca dedicada ho detectarà i deixarà d'alimentar el {\em watchdog} provocant que el sistema es reiniciï (Llistat~\ref{Watchdog_RTOS}).
 
-\index{SemaphoreHandle{\_}t}\index{xSemaphoreTake()}\index{xSemaphoreGive()}
+\index{SemaphoreHandle\_t}\index{xSemaphoreTake()}\index{xSemaphoreGive()}
 \index{watchdogTouch()}\index{watchdogClear()}\index{watchdogTask()}
-\index{WDOG{\_}Feed()}\index{xSemaphoreCreateMutex()}\index{vTaskDelay()}
+\index{WDOG\_Feed()}\index{xSemaphoreCreateMutex()}\index{vTaskDelay()}
 \begin{lstlisting}[style=customc,caption={Codi d'exemple de la tasca de control del {\bf watchdog}},label=Watchdog_RTOS]
 #define WATCHDOG_TASK1 0x01
 #define WATCHDOG_TASK2 0x02
