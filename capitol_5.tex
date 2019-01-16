@@ -9,12 +9,13 @@
 % https://courses.cs.washington.edu/courses/cse466/02au/Lectures/State-models.pdf
 %% FSM, FSMD, HCFSM, Program-state machine model (PSM), Dataflow, 02auSynchronous dataflow, 
 
-Fins ara hem vist com controlar els perifèrics més habituals que poden trobar a un microcontrolador, fent ús de les biblioteques dels fabricants. També hem vist els conceptes que hi ha al darrera d'un RTOS, amb els seus canals de comunicació i sincronització entre tasques, etc.
+Fins ara hem vist com controlar els perifèrics més habituals que poden trobar a un microcontrolador, fent ús de les biblioteques dels fabricants. 
+També s'ha observat que la programació per sistemes encastats és força diferent a la d'una aplicació d'escriptori o d'una {\em app} per un telèfon mòbil. Per això cal ara dedicar uns capítols a presentar els diferents models de programació més utilitzats en la programació de sistemes encastats. Per això caldrà introduir conceptes teòrics potser nous i classificar aquestes models segons diferents aspectes per donar un seguit de criteris a l'hora de decidir quin model utilitzar per cada aplicació concreta.
 
 \chapter{Model d'interfície amb perifèrics}
 \label{ch:modelinterficie}
 
-Una primera classificació de com es planifica i s'acaba codificant la nostra aplicació és segons com es faci la interfície amb els diversos perifèrics. Aquesta classificació és independent de les següents classificacions que es faran, tal com es veurà més endavant.
+Una primera classificació de com es planifica i s'acaba codificant la nostra aplicació és segons com es faci la interfície amb els diversos perifèrics. Aquesta classificació es basa en la ja coneguda dicotomia entre el {\em polling} i el treball amb interrupcions sobre perifèrics. Aquesta classificació és independent de les següents classificacions que es faran, tal com es veurà més endavant i, de fet, es poden combinar amb les classificacions següents segons les necessitats de cada aplicació.
 
 \section{{\em Polling} d'esdeveniments}
 \label{sec:polling}
@@ -32,9 +33,9 @@ També cal tenir en compte que aquest model fa que tota l'estona el microcontrol
 
 L'altre opció és dissenyar l'aplicació de manera que els diversos perifèrics llencin interrupcions quan hagin fet les diverses tasques necessàries i el microcontrolador pugui estar {\em Idle} tot esperant per rebre les interrupcions i seguir amb l'aplicació.
 
-Normalment aquest mode de treballar fa el codi una mica més complex. (veure \fullref{gpio_isr} i \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_2}{\bf el repositori}).
+Normalment aquest mode de treballar fa el codi una mica més complex (veure \fullref{gpio_isr} i \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_2}{\bf el repositori}). En aquests casos es configuren primer tots els perifèrics necessaris per l'aplicació i a partir d'allà es té o bé un bucle infinit molt senzill processant dades o es fa tot en funcions de {\em callback} i dins les \gls{ISR} i al final del main tant sols hi ha un bucle infinit sense fer res.
 
-En aquest cas, el microcontrolador podrà estar en un mode de baix consum fins que no es generi una interrupció d'algun dels perifèrics, baixant considerablement el consum energètic de tot el sistema (vegeu \fullref{sec:lowpowerstrategies}).
+En aquest model, el microcontrolador podrà estar en un mode de baix consum fins que no es generi una interrupció d'algun dels perifèrics, baixant considerablement el consum energètic de tot el sistema (vegeu \fullref{sec:lowpowerstrategies}).
 
 % AIxò pot ser un subaparta?
 \chapter{Models de computació}
@@ -45,9 +46,9 @@ Segons com es dissenyi i codifiqui el còmput de les dades d'entrada per obtenir
 \section{Bucle de control}
 \label{sec:buclecontrol}
 
-Una característica força diferent entre un codi de programa per un sistema encastat respecte a un codi per una aplicació habitual és que en el cas dels encastats el programa no pot acabar mai. I això és perquè el codi de programa és únic ,i per tant, si acaba el codi el microcontrolador no tindrà cap altre codi a executar i acabarà per reiniciar-se el sistema (que pot ser el comportament desitjat en algun cas).
+Una característica força diferent entre un codi de programa per un sistema encastat respecte a un codi per una aplicació habitual és que en el cas dels encastats el programa no pot acabar mai. I això és perquè el codi de programa és únic, i per tant, si acaba el codi el microcontrolador no tindrà cap altre codi a executar i acabarà per reiniciar-se el sistema (que pot ser el comportament desitjat en algun cas).
 
-Dit això, el cas més senzill d'estil de programació per sistemes encastats és un senzill bucle infinit on s'executen les operacions a realitzar per l'aplicació desitjada. Abans d'aquest bucle es configuren i preparen els dispositius i variables necessàries, tal com es pot veure a diferents exemples (\href{https://github.com/mariusmm/cursembedded/blob/master/Simplicity/GPIO_1/}{GPIO\_1}, \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/Printf_SWO}{Printf\_SWO}, \href{https://github.com/mariusmm/cursembedded/blob/master/Simplicity/PWM_1/}{PWM\_1}). 
+Dit això, el cas més senzill d'estil de programació per sistemes encastats és un simple bucle infinit on s'executen les operacions a realitzar per l'aplicació desitjada. Abans d'aquest bucle es configuren i preparen els dispositius i variables necessàries, tal com es pot veure a diferents exemples (\href{https://github.com/mariusmm/cursembedded/blob/master/Simplicity/GPIO_1/}{GPIO\_1}, \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/Printf_SWO}{Printf\_SWO}, \href{https://github.com/mariusmm/cursembedded/blob/master/Simplicity/PWM_1/}{PWM\_1}). 
 
 L'exemple \fullref{gpio_example} \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_1}{\bf al repositori}) és un exemple senzill d'aquest tipus de codi.
 
@@ -76,7 +77,7 @@ Aquest model de programació és el que es fa servir en Arduino, on s'ha separat
 \section{Màquines d'estat finits}
 \label{sec:FSM}
 
-Una màquina d'estats (\gls{FSM}, de {\em Finite State Machine} en anglès) és un model de màquina que reacciona a certes entrades i calcula el valor per les sortides, segons l'estat en que estigui. També es pot veure com un seguit d'estats possibles (finit!) en el que pot estar la màquina (el nostre programa) i que va canviant segons les entrades del moment. Les sortides a cada moment depenen de l'estat on s'està i/o de les entrades (segons el tipus de màquina que s'estigui modelant: màquina de Moore o de Mealy).\cite{wiki:FSM}
+Una màquina d'estats (\gls{FSM}, de {\em Finite State Machine} en anglès) és un model de màquina que reacciona a certes entrades i calcula el valor per les sortides, segons l'estat en que estigui. També es pot veure com un seguit d'estats possibles (finit!) en el que pot estar la màquina (el nostre programa) i que va canviant segons les entrades del moment. Les sortides depenen de l'estat on s'està i/o de les entrades (segons el tipus de màquina que s'estigui modelant: màquina de Moore o de Mealy) \cite{wiki:FSM}.
 
 \begin{remark}
  Formalment un FSM es pot definir com una 6-tupla de $(S, I, O, F, H, s)$ tal que:
@@ -106,11 +107,11 @@ Així, el diagrama d'estats de la FSM que implementaria l'exemple vist a (veure 
                 (q1)  edge [bend left]    node {'0'} (S)
                         edge [loop above] node {'1'} (q1);
  \end{tikzpicture}
- \caption{FSM per l'exemple GPIO 1}
+ \caption{FSM per l'exemple GPIO\_1}
  \label{fig:FSM_GPIO1}
 \end{figure}
 
-On l'entrada ('1' o '0') es correspon amb l'entrada del pin corresponent i $On$ i $Off$ vol dir que en aquell està el LED encès o apagat. 
+On l'entrada ('1' o '0') es correspon amb l'entrada del pin corresponent, i $On$ i $Off$ vol dir que en aquell està el LED encès o apagat. 
 
 Aquesta FSM es pot codificar de la manera que es veu al Llistat~\ref{gpio_example_FSMMoore}. En aquest codi es pot veure que dins el el bucle infinit de la funció {\em main} hi ha una estructura {\em switch-case} per cobrir tots els estats. Aquests es defineixen amb un {\em enum} amb els noms desitjats i es crea una variable d'aquest tipus, que s'inicialitza amb l'estat inicial (en aquest cas l'estat {\bf On}). Després, per cada estat s'avalua l'entrada i es pren la definició de quin ha de ser el proper estat. En aquest exemple la FSM és de tipus Moore, i per això la sortida del LED està fixada per cada estat. Si es vol implementar amb una màquina de Mealy el codi hauria de ser tal com es veu al Llistat~\ref{gpio_example_FSMMealy}, on la sortida depèn de l'estat i l'entrada actual.
 
@@ -124,7 +125,7 @@ int input_value;
 /* Infinite loop, FSM*/
 while (1) {
   input_value = GPIO_PinInGet(gpioPortD, 8);
-  switch ( state ) {
+  switch (state) {
     case On:
         GPIO_PinOutSet(gpioPortD, 7);
         if (input_value == 0) {
@@ -181,10 +182,12 @@ while (1) {
 }
 \end{lstlisting}
 
-\section{Màquina d'estats finits estesa}
+Les FSM son una bona manera d'estructura la solució de l'aplicació, ja que cal dissenyar-les i pensar-les abans de començar a escriure codi. L'ús d'aquests mecanismes també ajuda a reduir el nombre de camins d'execució, cosa que simplifica el test del codi.
+
+\subsection{Màquina d'estats finits estesa}
 \label{sec:EFSM}
 
-Les màquines d'estats finits esteses (\gls{EFSM}) amplien el concepte de les FSM amb el de {\bf variables} que mantenen valors interns de manera que la funció de transició pot preguntar per valors d'aquestes variables.\cite{wiki:EFSM}
+Les màquines d'estats finits esteses (\gls{EFSM}) amplien el concepte de les FSM amb el de {\bf variables} que mantenen valors interns de manera que la funció de transició pot preguntar per valors d'aquestes variables \cite{wiki:EFSM}.
 
 \begin{remark}
  Formalment un EFSM es pot definir com una 8-tupla de $(S, I, O, D, E, U, F, s)$ tal que:
@@ -202,20 +205,302 @@ Les màquines d'estats finits esteses (\gls{EFSM}) amplien el concepte de les FS
 
 Amb aquesta mena de màquines d'estats, es poden tenir variables que, per exemple, comptin fins a un cert valor i llavors permetre un canvi d'estat, o que una variable controli un interval de temps, etc. 
 
+\subsection{Un exemple amb FSM}
+\label{sub:fsm_example}
+
+Veiem un exemple dissenyant un termòstat senzill amb la nostra placa d'avaluació. Es simularà la lectura d'un termòmetre amb el potenciòmetre que ja es va fer servir a l'exemple \fullref{sub:ADC} i es farà servir un dels LEDs per simular que s'engega l'escalfador d'aigua.
+
+Així, per implementar un termòstat senzill, cal implementar la màquina d'estats de la Figura~\ref{fig:FSM_THERMO}. En aquest diagrama d'estats no es dibuixen les transicions que mantenen l'estat, que en aquest cas seria si no es compleixen les condicions de temperatura (si la temperatura és superior a \si{21 \degreeCelsius} i està a l'estat $Off$ es manté l'estat, el mateix per l'estat $On$ si la temperatura està per sota del \si{23 \degreeCelsius}).
+
+\begin{remark}
+ Que hi hagin dos estats i les transicions entre ells sigui amb temperatures diferents (s'engega a \si{21 \degreeCelsius} i s'apaga amb \si{23 \degreeCelsius}) serveix per no tenir un termòstat engegant-se i parant-se contínuament un cop s'arriba a la temperatura indicada.
+\end{remark}
+
+El codi es troba al repositori, al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FSM_1}{\bf projecte FSM\_1}.
+
+\begin{figure}[h!]
+\centering
+ \begin{tikzpicture}[>=stealth',shorten >=1pt,auto,node distance=4cm]
+  \node[initial,state, fill=ocre!30] (S)                     {$Off$};
+  \node[state, fill=ocre!30]         (q1) [right of=S]  {$On$};
+  \path[->] (S)   
+%                         edge [loop above] node {$\square$} (S)
+                        edge [bend left]  node {$Temp<21$} (q1)
+                (q1)  edge [bend left]    node {$Temp>23$} (S)
+%                         edge [loop above] node {$\square$} (q1);
+;
+ \end{tikzpicture}
+ \caption{FSM d'un termòstat senzill}
+ \label{fig:FSM_THERMO}
+\end{figure}
+
+El codi d'aquest projecte comparteix funcions jo crides a la biblioteca \gls{ADC} d'EMLIB ja vistes a \fullref{sub:ADC_example}. S'han encapsulat dins la funció \index{ADCGetValue()}{\bf ADCGetValue()}, que fa {\em polling} de l'ADC per obtenir un valor de conversió (veure el Llistat~\ref{ADCGetValue}).
+
+\index{ADCGetValue()}\index{ADC\_Start()}\index{ADC\_DataSingleGet()}
+\begin{lstlisting}[style=customc,caption=funció ADCGetValue(),label=ADCGetValue]
+static uint32_t ADCGetValue() {
+  uint32_t ADCvalue = 0;
+
+  ADC_Start(ADC0, adcStartSingle);
+  while (ADC0->STATUS & ADC_STATUS_SINGLEACT);
+  
+  ADCvalue = ADC_DataSingleGet(ADC0);
+
+  return ADCvalue;
+}
+\end{lstlisting}
+
+\index{getTemperature()}\index{ADCGetValue()}
+\begin{lstlisting}[style=customc,caption=funció getTemperature(),label=getTemperature]
+static uint32_t getTemperature() {
+  uint32_t raw_sensor_value;
+  uint32_t temperature_value;
+
+  raw_sensor_value = ADCGetValue();
+
+  /* Fake conversion: just for the example we map 0..4095 values of the ADC to 15..35 celsius degree */
+  temperature_value = ((raw_sensor_value * 20) / 4095) + 15;
+
+  return temperature_value;
+}
+\end{lstlisting}
+
+La funció \index{getTemperature()}{\bf getTemperature()} utilitza la funció anterior per obtenir un valor de l'ADC, convertir-lo a valor de temperatura (simulada en aquest exemple) i retornar el valor calculat (veure el Llistat~\ref{getTemperature}).
+
+També existeixen unes funcions de simulació {\bf SwitchOff()} i {\bf SwitchOn()} que son les que engegarien i pararien l'escalfador d'aigua. Per les proves aquestes funcions encenen o apaguen un dels LEDs de la placa.
+
+La implementació de la FSM és molt senzilla i es veu al codi del Llistat~\ref{codi_FSM_thermosta} i al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FSM_1}{repositori}. Primerament es llegeix la temperatura (simulada) i llavors, segons quin estat estigui la màquina, es compara amb un valor o un altre per saber si cal canviar d'estat o mantenir-se en l'actual. A cada estat es crida a la funció de sortida {\bf SwitchOff()} o {\bf SwitchOn()} (la màquina és una màquina d'estats de Moore).
+
+Cal fer notar que la FSM està permanentment consultant el valor del termòmetre (simulat), ja que quan acaba una avaluació de l'estat i pren la sortida oportuna, la el codi torna a començar el bucle. Això pot ser un problema en segons quins casos, com el que el sensor a llegir tingui un nombre limita de lectures o calgui un consum del dispositiu molt baix.
+
+\begin{remark}
+ Tot i que els dos exemples que han aparegut sobre FSMs son amb només dos estats, una màquina d'estats en pot tenir un nombre arbitrari segons les necessitats de l'aplicació.
+\end{remark}
+
+
+\begin{lstlisting}[style=customc,caption=Codi de la FSM per un termòstat senzill,label=codi_FSM_thermosta]
+while (1) {
+  temperature = getTemperature();
+
+  switch (state) {
+    case Thermo_OFF:
+      if (temperature < MIN_TEMPERATURE) {
+        state = Thermo_ON;
+        printf("Temp: %ld. Changing state to Thermo_ON\r\n",
+	  temperature);
+      }
+      SwitchOff();
+      break;
+      
+    case Thermo_ON:
+      if (temperature > MAX_TEMPERATURE) {
+        state = Thermo_OFF;
+        printf("Temp: %ld. Changing state to Thermo_OFF\r\n",
+	  temperature);
+      }
+      SwitchOn();
+      break;
+    
+    default:
+      state = Thermo_OFF;
+      SwitchOff();
+  }
+} 
+\end{lstlisting}
+
+\section{Codificant FSMs}
+
+Com ja hem vist al Llistats~\ref{gpio_example_FSMMealy} i \ref{codi_FSM_thermosta}, és relativament senzill codificar una FSM en C. Tot i això, es pot trobar un model genèric per simplificar les coses. Anem a presentar-lo.
+
+Com s'ha dit anteriorment, una FSM consta de 4 operacions:
+
+\begin{itemize}
+ \item Llegir les entrades. Això provocarà o no canvis en l'estat i les sortides.
+ \item Calcular on es calculen els nous valors de les variables.
+ \item Escriure les sortides que calgui segons l'estat de la màquina d'estats.
+ \item Calcular l'estat següent segons les entrades llegides, les diverses variables i l'estat actual.
+\end{itemize}
+
+L'ordre d'aquestes operacions és indiferent mentre s'executin totes 4 a cada iteració. D'aquesta manera, podem disposar la nostra funció de {\em loop()} tal com es veu al Llistat~\ref{FSMsketch}.
+
+\index{main()}\index{setup()}\index{loop()}
+\begin{lstlisting}[style=customc,caption={Estructura bàsica d'una FSM},label=FSMsketch]
+
+void loop() {
+  read_inputs();
+  calc_values();
+  write_outputs();
+  next_estate();
+}
+
+int main(void) {
+  ...
+  setup();
+  ...
+  
+  while(1) {
+    loop();
+  }
+}
+\end{lstlisting}
+
+I l'exemple del termòstat canviaria tal com es veu al Llistat~\ref{FSMsketchTermostat} i al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FSM_2}{repositori}.
+\index{read\_inputs()}\index{calc\_values()}\index{write\_outputs()}\index{next\_estate()}
+\begin{lstlisting}[style=customc,caption={Codi de termòstat amb l'estructura bàsica d'una FSM},label=FSMsketchTermostat]
+
+void read_inputs() {
+  temperature = getTemperature();  
+}
+
+void calc_values() {
+  switch(state) {
+    case Thermo_OFF:
+      termostat_on = false;
+      break;
+    case Thermo_ON:
+      termostat_on = true;
+      break;
+  }
+}
+
+void write_outputs() {
+  if (termostat_on) {
+    SwitchOn();
+  } else {
+    SwitchOff();
+  }
+}
+
+void next_estate() {
+  switch(state) {
+    case Thermo_OFF:
+      if (temperature < MIN_TEMPERATURE) {
+        state = Thermo_ON;
+      }
+      break;
+    case Thermo_ON:
+      if (temperature > MAX_TEMPERATURE) {
+        state = Thermo_OFF;
+      }
+      break;
+  }
+}
+
+
+\end{lstlisting}
+
+Si la nostra aplicació requereix més d'una FSM, es poden intercalar les crides a cada operació de manera que es vagin executant alternant les FSMs tal com es veu a la Figura~\ref{multiple_FSM}.
+
+\index{loop()}
+\begin{lstlisting}[style=customc,caption={Funció de loop amb múltiples FSMs},label=multiple_FSM]
+ 
+void loop() {
+  read_inputs_FSM1();
+  read_inputs_FSM2();
+  ...
+  read_inputs_FSMN();
+  
+  calc_values_FSM1();
+  calc_values_FSM2();
+  ...
+  calc_values_FSMN();
+  
+  write_outputs_FSM1();
+  write_outputs_FSM2();
+  ...
+  write_outputs_FSMN();
+  
+  next_estate_FSM1();
+  next_estate_FSM2();
+  ...
+  next_estate_FSMN();
+}
+\end{lstlisting}
+
+Si s'utilitza habitualment aquest mode de programació, és possible que surti a compte muntar-se una estructura de control pròpia que manegui la crida ordenada d'aquestes funcions i sigui senzill registrar una nova FSM per ser executada concurrentment amb les demès. Un esbòs d'aquest {\em kernel} podria ser el que es veu al Llistat~\ref{FSM_kernel}.
+
+\begin{lstlisting}[style=customc,caption={Estructura bàsica d'un {\em kernel} per múltiples FSMs},label=FSM_kernel]
+#define MAX_FSM 10
+
+typedef struct {
+  void (*read_input_func)(void);
+  void (*calc_values_func)(void);
+  void (*write_outputs_func)(void);
+  void (*next_estate_func)(void);
+} FSM_t;
+
+FSM_t FSM_array[MAX_FSM];  // can manage MAX_FSM FSMs 
+
+bool register_FSM(FSM_t &fsm) {
+  const int index = 0;
+  FSM_array[index] = fsm;
+  index++;
+}
+
+void loop() {
+  int i;
+  
+  for(i = 0; i < MAX_FSM; i++) {
+    if (FSM_array[i].read_input_func) {
+      FSM_array[i].read_input_func();
+    }
+  }
+  
+  for(i = 0; i < MAX_FSM; i++) {
+    if (FSM_array[i].calc_values_func) {
+      FSM_array[i].calc_values_func();
+    }
+  }
+  ...
+}
+\end{lstlisting}
+
+Aquest {\em kernel} va executant cada una de les operacions de totes les FSM que s'hi hagin registrat prèviament. D'aquesta manera es pot tenir implementades les FSMs que solucionin la nostra aplicació d'una forma ràpida.
+
+
 \section{Flux de dades}
 \label{sec:dataflow}
 
+TBD
 
 \chapter{Tractament del temps}
 \label{ch:tractamenttemps}
 
 Tot i que el tractament del temps (deixar passar un cert temps, esperar per un esdeveniment un cert temps, etc.) es pot fer tant amb FSMs com amb un bucle de control senzill, hi ha models pensats que el tracten específicament.
 
+\section{FSMs amb temps}
+Una forma molt senzilla d'afegir temps a una FSM és afegir un temps d'espera a la funció {\em loop()}. Un cop decidit el temps de cada iteració, cal afegir aquest retard ({\em delay}) al final de cada iteració. Així, el codi de la funció {\em loop()} quedarà tal com es veu al Llistat~\ref{FSM_temps} i al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FSM_3}{repositori}.
+
+\begin{lstlisting}[style=customc,caption={FSM amb control del temps},label=FSM_temps]
+const int period = 50; // period time in miliseconds
+int start_time, end_time, iteration_time;
+
+void loop() {
+  uint32_t start_time, end_time, iteration_time;
+  
+  start_time = RTC_CounterGet(); // time value in miliseconds
+  
+  /* FSM */
+  read_inputs();
+  calc_values();
+  write_outputs();
+  next_estate();
+  /* FSM */
+  
+  end_time = RTC_CounterGet();
+  iteration_time = end_time - start_time;
+  delay(period - iteration_time);
+}
+\end{lstlisting}
+
+D'aquesta manera cada iteració s'executarà amb el període triat sempre que el temps d'execució de les seves operacions no l'excedeixi. Com es veu al codi, el temps a esperar-se de la funció {\em delay()} es calcula a cada iteració, això permet que cada iteració es faci en el període fixat independentment del temps que hagi transcorregut l'execució de les operacions anteriors. Com que sovint les operacions no transcorren en un temps determinista, inserir un simple {\em delay(period)} faria que l'execució de cada iteració es fes en un temps diferent.
+
+En aquest model, la funció {\em delay()} pot manegar opcions de baix consum, de manera que pot fer que el microcontrolador entri a un mode de baix consum mentre transcorre el temps seleccionat.
 
 \section{Tasques periòdiques}
 \label{sec:tasquesperiodiques}
 
-Un model habitual de tractar el temps d'una forma senzilla és fent ús de tasques programades. Aquestes tasques, son funcions que es criden de forma periòdica i realitzen les tasques necessàries per l'aplicació final. No hi ha més funcionalitat afegida per part del {\em kernel} bàsic: cap comunicació entre processos com semàfors o cues. Així, podem tenir un codi similar al del Llistat~\ref{tasquesperiodiquesmain}
+Un altre model força habitual de tractar el temps d'una forma senzilla és fent ús de tasques programades. Aquestes tasques son funcions que es criden de forma periòdica i realitzen les tasques necessàries per l'aplicació final. Així, podem tenir un codi similar al del Llistat~\ref{tasquesperiodiquesmain}
 
 \begin{lstlisting}[style=customc,caption={Estructura bàsica de les tasques programades},label=tasquesperiodiquesmain]
 void tasca1(void) {
@@ -231,8 +516,8 @@ void main(void) {
   ...
   
   // es registren les dues tasques, una es crida cada 5 segons, l'altra cada 15 segons
-  registra_tasca(tasca1, 5000);
-  registra_tasca(tasca2, 15000);
+  Registra_tasca(tasca1, 5000);
+  Registra_tasca(tasca2, 15000);
 
   while(1) {
     Executa_kernel();
@@ -240,8 +525,8 @@ void main(void) {
 }
 \end{lstlisting}
 
-La funció \index{registra\_tasca()}{\bf registra\_tasca()} registra la funció que se li passa per a que es cridi cada cert temps. El {\em kernel} s'encarrega de programar algun {em timer} per a que notifiqui el microcontrolador el temps corresponent i, per exemple, pugui posar en un mode de baix consum el microcontrolador mentre aquest temps no arribi.
-Com que el microcontrolador es pot despertar per diversos esdeveniments, dins el bucle infinit de la funció \index{main()}{\bf main()} es crida a la funció per a que el {\em kernel} si s'escau torni a programar el {\em timer} com calgui i torni a dormir el microcontrolador. El pseudocodi per aquesta funció seria tal com es veu al Llistat~\ref{tasquesperiodiquestimers}.
+La funció \index{Registra\_tasca()}{\bf Registra\_tasca()} registra la funció que se li passa per a que es cridi cada cert temps. El {\em kernel} s'encarrega de programar algun {em timer} per a que notifiqui el microcontrolador el temps corresponent i, per exemple, pugui posar en un mode de baix consum el microcontrolador mentre aquest temps no arribi.
+Com que el microcontrolador es pot despertar per diversos esdeveniments, dins el bucle infinit de la funció \index{main()}{\bf main()} es crida a la funció per a que el {\em kernel}, si s'escau cridi al a funció registrada, torni a programar el {\em timer} com calgui i torni a dormir el microcontrolador. El pseudocodi per aquesta funció seria tal com es veu al Llistat~\ref{tasquesperiodiquestimers}.
 
 \begin{lstlisting}[style=customc,caption={Estructura bàsica de la funció Executa\_kernel()},label=tasquesperiodiquestimers]
 void Executa_kernel(void) {
@@ -255,10 +540,61 @@ void Executa_kernel(void) {
 }
 \end{lstlisting}
 
+\subsection{Implementació}
+En el cas de treballar amb la plataforma EFM32 part d'aquestes funcionalitats les tenim implementades a la biblioteca RTCDRV i SLEEP que pertanyen a la biblioteca d'alt nivell EMDRV del fabricant \cite{EMDRV}. 
 
+La primera de les biblioteques, RTCDRV, permet gestionar {\em timers} virtuals fent servir només un {\em Timer} real, com el nom indica, es fa servir el {\em timer} RTC del microcontrolador (veure \fullref{sub:RTC}) \cite{RTCDRV}. D'aquesta manera es simplifica tenir múltiples {\em timers} i permet registrar \glspl{callback} per quan un {\em timer} arriba al seu temps programat de manera que quan un {\em timer} arriba al seu temps d'expiració es crida a la funció de {\em callback} registrada. 
+
+La segona llibreria, SLEEP, gestionar automàticament els modes de baixa energia del microcontrolador, fent que aquest entri al mode més baix possible segons els perifèrics que es tenen activats. D'aquesta manera, amb una sola crida a una funció de la biblioteca s'aconsegueix posar el microcontrolador en mode de baix consum \cite{SLEEPDRV}.
+
+D'aquesta manera, la funció {\em Registra\_tasca()} passaria a ser una crida a la funció \index{RTCDRV\_StartTimer()}{\bf RTCDRV\\\_StartTimer()} amb la funció periòdica com a {\em callback} i la resta de paràmetres com calgui ({\em rtcdrvTimerTypePeriodic}, el temps en mil·lisegons, etc.). I la funció {\em Executa\_kernel()} no hauria de fer gran cosa.
+
+Aquesta estratègia te un problema, i és que la funció de {\em callback} se la crida dins del context d'interrupció, cosa no sempre desitjable, ja que les ISR haurien de ser sempre funcions molt curtes, sense gaire funcionalitat, tal com es va explicar a \fullref{ch:IRQ}. Per solucionar això es pot canviar una mica l'estratègia i mantenir una estructura que permeti saber quina funció cal cridar i tenir una funció de {\em callback} única que mantingui aquesta informació. Llavors, a la funció {\em Executa\_kernel()} es comprova si s'ha de cridar alguna funció i llavors es crida des d'allà, fora del context d'interrupció. Això es pot veure al Llistat~\ref{kernel_efm32}.
+
+\index{RTCDRV\_AllocateTimer()}\index{RTCDRV\_StartTimer()}
+\begin{lstlisting}[style=customc,caption={Estructura bàsica de la funció Executa\_kernel()},label=kernel_efm32]
+/* Aquesta funcio es crida des d'una ISR, ha de ser curta */
+static void TimerCallback(RTCDRV_TimerID_t id, void* param) {
+  int timer;
+  
+  index = *(int*)param;
+  my_timers[index].semaphores = true;
+}
+
+void Registra_tasca(mycallback_t func, uint32_t period) {
+  static int i = 0;
+  
+  my_timers[i].callbacks = func;
+  my_timers[i].value = i;
+  
+  RTCDRV_AllocateTimer(&my_timers[i].timers_array);
+  RTCDRV_StartTimer(my_timers[i].timers_array, rtcdrvTimerTypePeriodic, period, TimerCallback, &i);
+  
+  i++;
+}
+
+static void Executa_tasca(int timeout) {
+  int i;
+  
+  for (i = 0; i < EMDRV_RTCDRV_NUM_TIMERS; i++) {
+    if (my_timers[i].semaphores == true) {
+      my_timers[i].semaphores = false;
+        if (my_timers[i].callbacks) {
+          my_timers[i].callbacks();
+        }
+     }
+  }
+}
+\end{lstlisting}
+
+Aquest model de programació és força senzill i es podria veure com un pas previ a l'ús d'un RTOS on el maneig de les tasques és mes complex i ens ofereixen mecanismes de sincronització i comunicació entre les tasques més enllà de variables compartides.
 
 \section{Multitasca}
 \label{sec:multitasca}
-Com ja hem vist a la \fullref{part:freertos}, és possible tenir multitasca en sistemes encastats. Donats l'ús de recursos que es fa i la complexitat a l'hora de programar per aquesta mena de sistemes fa que no sigui la solució idònia per tot tipus d'aplicació encastada.
+Com ja veurem a \fullref{part:freertos}, és possible tenir multitasca en sistemes encastats. Pot ser una bona forma de tenir múltiples tasques funcionant alhora sense haver de gestionar nosaltres mateixos aquesta complexitat. 
 
+Donats l'ús de recursos que es fa i la complexitat a l'hora de programar per aquesta mena de sistemes fa que no sigui la solució idònia per tot tipus d'aplicació encastada.
+A més, aquesta estratègia pot incloure també \glspl{FSM}, de manera que una o més tasques de l'aplicació estiguin implementades amb una FSM tal com s'ha comentat a les seccions anteriors.
+
+L'ús de RTOS facilita la comunicació entre tasques, 
 
