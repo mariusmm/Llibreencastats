@@ -540,14 +540,19 @@ Això ens indica que el temps de processar una dada per part el consumidor ($C$)
 \section{\em Debounce}
 % %% SwitchDebouncing.pdf - SwitchDebouncingMore.pdf
 
-Un problema que ens podem trobar quan volem llegir una entrada digital, és el fenomen dels rebots: si el pin està connectat a un botó a algun altre accionador mecànic aquest pot generar rebots al senyal, que vol dir que no es genera un pols quadrat i perfecte si que no quan es genera un pols aquest vagi acompanyat per d'altres polsos més petits i espuris.
+Un problema que ens podem trobar quan volem llegir una entrada digital, és el fenomen dels rebots: si el pin està connectat a un botó a algun altre accionador mecànic aquest pot generar rebots al senyal, que vol dir que no es genera un pols quadrat i perfecte si que no quan es genera un pols aquest vagi acompanyat per d'altres polsos més petits i espuris. Habitualment les sortides d'altres components digitals no presenta aquest fenomen i no cal fer servir aquestes tècniques.
 
 Aquest efecte pot provocar que el nostre codi compti més polsos dels que realment s'haurien de comptar i tenir un sistema erroni.
 
-Per solucionar-ho, a part d'afegir certa circuiteria addicional al voltant del pin d'entrada, es pot desenvolupar codi que tingui en compte aquesta situació. Aquesta mena de codi es coneix com {\em debouncing}. Aquests algorismes normalment es basen en llegir vàries vegades el pin implicat i veure quan deixa de canviar i amb això decidir si hi hagut canvi en el valor del pin o no.
+Per solucionar-ho, a part d'afegir certa circuiteria addicional al voltant del pin d'entrada, es pot desenvolupar codi que tingui en compte aquesta situació. Aquesta mena de codis es coneixen com {\em debouncing} i normalment es basen en llegir vàries vegades el pin implicat i veure quan deixa de canviar i amb això decidir si hi hagut canvi en el valor del pin o no.
+
+Aquests algorismes han de decidir el més ràpid possible si l'entrada ha canviat o no i per contra quan més temps estiguin avaluant l'entrada millor funcionaran i detectaran espuris ({\em glitches}). A més, quan més cops per segons s'avalua el valor d'un pin més ocupació e la CPU es tindrà per aquesta tasca.
+
+Les tècniques més habituals es basen en programar un {\em timer} o una tasca programada per que cridi una funció d'avaluació de forma periòdica (cada X mil·lisegons) i la dita funció llegeixi el valor de l'entrada i decideixi el valor real de l'entrada \cite{debounce1}\cite{debounce2}.
 
 Un altre forma de fer-ho, potser més senzilla és la de un cop detectat un primer flanc, deixar de llegir l'entrada fins passat un temps i un cop transcorregut el temps, es llegeix el valor de l'entrada altre cop. Això es pot fer fàcilment controlant un Timer des de la ISR d'entrada del pin.
 
+\subsection{Un exemple de {\em debouce}}
 Primer cal configurar el Timer per què compti un cert temps i generi una IRQ un cop transcorregut aquest temps. Per això configurem el valor Top tal com ja vàrem fer a \fullref{sub:Timers}.
 
 En aquest exemple es configura el valor top per que estigui comptant 100 mil·lisegons fent un càlcul molt similar al de l'exemple amb Timers anterior. També es prepara la \gls{ISR} pel {\em Timer1} tal com es veu al Llistat~\ref{timer_debouncing}
@@ -569,9 +574,9 @@ void TIMER1_IRQHandler(void) {
 } 
 \end{lstlisting}
 
-La variable {\em timer\_running} es defineix com una variable booleana (i volàtil) amb valor per defecte a false. A aquesta ISR es comprova el valor desitjat de l'entrada i si és el cas, s'actualitza el comptador.
+La variable {\em timer\_running} es defineix com una variable booleana (i volàtil) amb valor per defecte a false. A aquesta \gls{ISR} es comprova el valor desitjat de l'entrada i si és el cas, s'actualitza el comptador.
 
-Per últim a la ISR del GPIO corresponent inserim el codi següent per engegar el Timer quan es detecti un flanc al senyal (un canvi al seu valor), tal com es veu al Llistat~\ref{timer_debouncing_ISR}:
+Per últim a la ISR del \gls{GPIO} corresponent inserim el codi següent per engegar el {\em Timer} quan es detecti un flanc al senyal (un canvi al seu valor), tal com es veu al Llistat~\ref{timer_debouncing_ISR}:
 
 \index{GPIO\_EVEN\_IRQHandler()}\index{TIMER\_TopSet()}\index{TIMER\_Enable()}
 \begin{lstlisting}[style=customc, caption=Codi per engegar el timer a la ISR del GPIO, label=timer_debouncing_ISR]
