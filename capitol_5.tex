@@ -3,9 +3,9 @@
 
 \chapter{Gestió d'excepcions}
 \label{ch:exceptions}
-Sovint treballant amb sistemes encastats ens trobem amb errors d'origen desconegut que es poden provocar per múltiples causes. Així, per exemple, una divisió per zero, accés incorrecte a una zona de memòria o accés a la memòria fora de rang faran que el processador es reiniciï \cite[102]{DesignersGuide}\cite[318]{ARMsdg}\cite{KielHardFault}.
+Sovint treballant amb sistemes encastats ens trobem amb errors d'origen desconegut que es poden provocar per múltiples causes. Així, per exemple, una divisió per zero, un accés incorrecte a una zona de memòria o un accés a una posició de memòria fora de rang faran que el processador es reiniciï \cite[102]{DesignersGuide}\cite[318]{ARMsdg}\cite{KielHardFault}.
 
-Aquests casos poden ser molt difícils de trobar si són casos esporàdics, però l'arquitectura ARM té unes característiques que ajuden a detectar-los i trobar-los. En síntesi, el cortex-M llença una interrupció molt prioritària anomenada HardFault\_Handler()\index{HardFault\_Handler()} quan succeeix un problema greu del que el processador no pot recupera-se, com una divisió per zero, un accés il·legal a memòria, etc. Abans de cridar a l'excepció, la CPU guarda tot de valors claus a diferents registres, i així per exemple en el registre {\bf PC} s'hi emmagatzema l'adreça de la instrucció executada, així que, en principi, només cal anar a aquella posició de memòria per veure quin ha estat el codi que ha causat el problema. També s'emmagatzema el valor de retorn (la  instrucció següent a l'executada que ha causat l'error) al registre {\bf LR} \cite{BlogHardFalut}.
+Aquests casos poden ser molt difícils de trobar si són casos esporàdics, però l'arquitectura ARM té unes característiques que ajuden a detectar-los i trobar-los. En síntesi, el cortex-M llença una interrupció molt prioritària anomenada {\bf HardFault\_Handler()}\index{HardFault\_Handler()} quan succeeix un problema greu del que el processador no pot recupera-se, com una divisió per zero, un accés il·legal a memòria, etc. Abans de cridar a l'excepció, la CPU guarda tot de valors claus a diferents registres, i així per exemple en el registre {\bf PC} s'hi emmagatzema l'adreça de la instrucció executada, així que, en principi, només cal anar a aquella posició de memòria per veure quin ha estat el codi que ha causat el problema. També s'emmagatzema el valor de retorn (la  instrucció següent a l'executada que ha causat l'error) al registre {\bf LR} \cite{BlogHardFalut}.
 
 Així doncs, es pot reescriure la ISR per obtenir les dades que ens informi sobre què ha passat per ajudar-nos a obtenir pistes de quin codi està fallant.\cite{ARMHandler}.
 
@@ -83,6 +83,29 @@ També cal comentar que les diferents funcions que generen errors són les segü
  \item {\bf WrongfunctionWrongMemory()}\index{WrongfunctionWrongMemory()} causa un error per accés fora dels límits de la memòria.
  \item {\bf fp()}\index{fp()} causa un intent d'executar a la posició 0x0000\_0000 de memòria.
 \end{itemize}
+
+\chapter{{\em Shadow Registers}}
+En algunes arquitectures i en perifèrics d'alguns fabricants poden llegir que es fan servir {\em shadow registers}. S'anomenen així a registres que contenen una còpia d'un altre registre i que son els que es poden llegir per part d'altres dispositius o perifèrics. 
+
+Així per exemple, trobem {\em shadow registers} a alguns processadors de manera que quan la CPU entra a una interrupció es passa a treballar amb un banc separat de registres de propòsit general. Això es fa per evitar un sobrecost a la crida de la ISR, ja que si es tenen aquests registres s'han de guardar els valors actuals de tots els registres a la pila abans de poder executar el codi de la ISR. En canvi, si es tenen aquests registres, la CPU passa a treballar amb un banc diferent (els {\em shadow registers} durant l'execució de la ISR i no cal salvaguardar cap valor dels registres originals. Un cop se surt de la ISR la CPU torna a treballar amb el banc de registres originals. En el cas dels Cortex-M no es treballa amb aquesta mena de {\em shadow registers} i, per tant, caldrà que les ISR salvin els valors dels registres de propòsit general que sobreescriguin durant la seva execució.
+
+Una altra lloc on ens podem trobar {\em shador registers} és en alguns perifèrics que treballen valors grans repartits en diversos registres. Si aquests registres s'actualitzessin entremig d'una lectura per part del Firmware, aquest podria tenir una inconsistència a les dades. Per això, és habitual que un valor determinat s'emmagatzemi a {\em shadow registers} mentre els registres ``amagats'' s'actualitzen de forma normal. Aquests {\em shadow registers} seran els que el firmware pot llegir i s'actualitzaran tots de cop una vegada s'hagin llegit tots pel firmware. 
+
+\begin{remark}
+ A tots ens ha passat o tenim un company que ha perdut una tarda sencera intentant llegir uns registres d'aquesta mena sense seguir bé l'ordre i rebent valors dolents sense caure en el problema amb els {\em shadow registers}.
+\end{remark}
+
+Un exemple d'això últim succeeix amb els registres de data i temps del RTC dels microcontroladors d'ST (veure~\fullref{sub:RTC}). Aquest perifèric conté uns {\em shadow registers} on es copien cada 2 cicles els registres reals amb la data, el temps i els segons del RTC (Figura~\ref{fig:ShadowRegisters}). Quan es llegeix el registre amb el temps o amb els segons es bloqueja la còpia de tots els tres registres perquè la lectura dels demès no doni cap incoherència. Si no hi fossin, podria passar que es llegís el temps (per exemple les 23:59:59 del dia 1) i poc després al llegir la data ja hagués passat el segon i la data ja fos el dia 2, resultant en que enlloc de llegir les 23:59:59 del dia 1 s'hauria llegir les 23:59:59 del dia 2. En aquest cas sembla que és molt millor llegir la data correcte i que es tingui un error d'un segon a tenir un dia sencer d'error (!).
+
+Per tant, en aquest perifèric, primer cal llegir el registre amb el temps o els segons i després el registre amb la data \cite[800-805]{STM32F4RM}. Així si només es vol llegir el temps del RTC perquè no interessa la data del sistema, no es poden fer lectures consecutives del temps sense llegir també, encara que no interessi, la data del RTC. La API del fabricant en aquest cas no ho gestiona, però si que ho adverteix a la seva documentació \cite[719]{STM32UM1725}.
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.65\textwidth, keepaspectratio]{imatges/ShadowRegisters.png}
+ \caption{{\em Shadow registers} del perifèric RTC dels STM32 \cite[800]{STM32F4RM}}
+ \label{fig:ShadowRegisters}
+\end{figure}
+
 
 \chapter{Baix cosum}
 \label{ch:low-power}
