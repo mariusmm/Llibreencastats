@@ -317,7 +317,7 @@ Les cues són recursos que poden ser compartits per vàries tasques, podent-hi e
 Per saber quina mida han de tenir les cues, veieu \fullref{sec:mida_cues}.
 \subsection{Exemple amb cues}
 \label{sub:cues_exemple}
-A \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Queue}{l'exemple de cues} hi ha una sola tasca que fa {\em blinkar} el \gls{LED} segons una variable. Aquesta variable s'obté de llegir (o intentar-ho) una cua. Aquesta cua (anomenada {\em queue\_buttons}) l'escriuen les dues \gls{ISR} associades als dos botons. Una envia el valor corresponent a 250 ms i l'altre ISR envia el valor que correspont a 1000 ms (Llistat~\ref{Queue_example_ISR}).
+A \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Queue}{l'exemple de cues} hi ha una sola tasca que fa {\em blinkar} el \gls{LED} segons una variable. Aquesta variable s'obté de llegir (o intentar-ho) una cua. Aquesta cua (anomenada {\em queue\_buttons}) l'escriuen les dues \gls{ISR} associades als dos botons. Una envia el valor corresponent a 250 ms i l'altre ISR envia el valor que correspon a 1000 ms (Llistat~\ref{Queue_example_ISR}).
 
 \index{xQueueSendFromISR()}\index{portYIELD\_FROM\_ISR()}
 \begin{lstlisting}[style=customc, label=Queue_example_ISR, caption=Part del codi d'una de les ISRs]
@@ -370,6 +370,51 @@ queue_buttons = xQueueCreate(QUEUE_LENGTH, sizeof(uint32_t));
 % on new_delay està definit de tipus uint32_t.
 %
 % Això vol dir que la variable on es guarden les dades que s'envien per la cua cal que segueixi viva fins que la tasca que rep la dada pugui llegir-la. Així, cal vigilar amb variables automàtiques:
+
+\subsection{Enviant múltiples dades per una cua}
+\label{sub:dades_cua}
+
+Quan ens cal enviar diverses dades d'una tasca a una altra (o d'una ISR a una tasca, o d'una tasca a una ISR, etc.) la forma més senzilla de fer-ho és fent servir una estructura per fer un paquet.
+
+Suposem que tenim una tasca que llegeix dades d'un acceleròmetre, que treu dades de 16 bits (uint16\_t) per cada un dels eixos (X, Y, Z). Aquestes dades les volem enviar a una segona tasca que fa els càlculs pertinents per l'aplicació i, per tant, posem una cua entre les dues tasques.
+
+Per enviar el triplet de dades d'una tasca a l'altra, podríem muntar una cua on enviéssim les dades per ordre (primer X, després Y, després Z, altre cop X, després Y, etc.). Això ens podria portar problemes si la tasca que rep les dades perd una dada, ja que llavors estaríem confonent una dada per una altra.
+
+L'altra opció podria ser posar tres cues, una per cada coordenada i la tasca consumidora anar llegint de cada una. Això però, sembla que és una mica massa complexitat per un problema senzill.
+
+La millor solució consisteix a preparar una estructura de dades i que sigui aquesta estructura la que s'envia per la cua. Així, les tres dades viatgen juntes i cada una associada al seu camp corresponent.
+
+Així, podríem definir una estructura tal com es veu al llistat~\ref{queue_struct_example}.
+
+\begin{lstlisting}[style=customc, label=queue_struct_example, caption=Paquet dins d'estructura,floatplacement=h! ]
+struct queue_pkt {
+   uint16_t eixX;
+   uint16_t eixY;
+   uint16_t eixZ;
+};
+\end{lstlisting}
+
+I es crea la cua tal com es veu al Llistat~\ref{queue_struct_create_example}.
+
+\index{xQueueCreate()}
+\begin{lstlisting}[style=customc, label=queue_struct_create_example, caption=Creació de la cua amb un paquet de dades,floatplacement=h!]
+queue_handle = xQueueCreate(QUEUE_LENGTH, sizeof(struct queue_pkt));
+\end{lstlisting}
+
+
+Així, la informació que es mourà per la cua serà l'estructura i caldrà agafar cada dada de la mateixa de la forma habitual, tal com es veu al Llistat~\ref{queue_struct_read_example}.
+
+\index{xQueueReceive()}
+\begin{lstlisting}[style=customc, label=queue_struct_read_example, caption=Rebre un paquet de dades de la cua]
+...
+if (xQueueReceive(queue_buttons, &pkt, (TickType_t ) 0)) {
+  eixX = pkt.eixX;
+}
+...
+\end{lstlisting}
+
+Al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Queue_2}{repositori} l'exemple FreeRTOS\_Queue\_2 es fa servir una estructura per passar dades mitjançant una cua.
+
 
 \section{Mutex}
 \label{sec:Mutex}
