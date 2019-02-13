@@ -12,6 +12,7 @@ Aquest és un projecte viu, és a dir, seguiré ampliant i millorant el llibre, 
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![version](https://img.shields.io/badge/version-1.0-brightgreen.svg)](CHANGELOG.md)
+[![Downloads](https://img.shields.io/github/downloads/mariusmm/Llibreencastats/total.svg?label=Downloads&style=flat)](https://github.com/mariusmm/Llibreencastats/releases)
 
 
 
