@@ -831,11 +831,29 @@ Per tal d'unificar estils de codi i per evitar possibles errors, és habitual se
 Tot i que un conjunt de normes de codificació ajuda a no inserir {\em bugs}, les normes per si soles no poden garantir que no es generin {\em bugs} en un sistema complex. Cal sempre seguir les bones pràctiques de Test.% (veure \fullref{part:test}).
 \end{remark}
 
-En àmbits molt específics hi ha normes i estàndards propis, com el DO-178 per l'àmbit aeri i espacial; IEC 61508, ISO 26262 o SAE J3061 per automoció o IEC 62304 per l'industria mèdica.
+Normes generals n'hi ha moltes i alguna de les mes populars és la coneguda com ``The Power of 10: Rules for Developing Safety-Critical Code'' (``El poder del 10: regles per desenvolupar codi crític'' \cite{powerof10}. En aquest document es presenten tant sols només 10 regles per ajudar a escriure codi més segur i menys propens a errors. 
+
+En àmbits molt específics hi ha normes i estàndards propis, com el DO-178 per l'àmbit aeri i espacial; IEC 61508, ISO 26262 o SAE J3061 per automoció o IEC 62304 per l'industria mèdica. Per l'àmbit espacial el JPL ({\em Jet Propulsion Laboratory}) té publicada una norma pròpia \cite{JPLCProgramming}.
 
 També hi ha normes genèriques, que no es centren a cap àmbit concret. Les normes genèriques més habituals i conegudes són MISRA-C \cite{MISRAHomepage} i ``Embedded C Coding Standard'' \cite{BARRGuidelines}. Per espai, la \gls{ESA} fa servir el document  ``C and C++ Coding Standards'' \cite{BSSC}.
 
-Les dues es descriuen breument als apartats següents.
+Es descriuen breument als apartats següents.
+
+\section{\em The Power of 10: Rules for Developing Safety-Critical Code}
+Aquest conjunt de només 10 regles es va escriure per ajudar a l'anàlisi estàtic del codi i la revisió per desenvolupadors. Es poden resumir en:
+\begin{itemize}
+ \item Evitar construccions complexes com {\em goto} i l'ús de recursivitat.
+ \item Tots els bucles han de tenir fitada la seva longitud.
+ \item Evitar l'ús de memòria dinàmica.
+ \item Restringir la llargada d'una funció a 60 línies.
+ \item Fer servir un mínim de dos comprovacions en temps d'execució per cada funció.
+ \item Restringir la vida de les dades el més possible.
+ \item Comprovar el valor de retorn de totes les funcions que retornen un valor.
+ \item Poc ús del pre-processador.
+ \item Limitar l'ús de punters a una sola indirecció i no usar punters a funcions.
+ \item Compilar amb tots els {\em warnings} activats. Resoldre sempre tots els {\em warnings} abans de publicar el codi.
+\end{itemize}
+
 
 \section{MISRA-C}
 \label{sec:MISRA}
@@ -855,7 +873,7 @@ Així si mirem a l'addenda 1 \cite[4]{MISRAAmend} (que és de lliure distribuci�
 
 Existixen eines que automàticament comproven la conformitat d'un projecte o codi a les normes MISRA. Entre aquestes eines, algun compilador fa la comprovació en temps de compilació (ho fan els compiladors d'IAR i de TI).
 
-Per últim, cal dir que hi ha força controvèrsia amb l'idoneïtat de seguir les normes MISRA, donat les limitacions que provoca al desenvolupador i les suposades avantatges que proporciona.
+Per últim, cal dir que hi ha força controvèrsia amb d'idoneïtat de seguir les normes MISRA, donat les limitacions que provoca al desenvolupador i les suposades avantatges que proporciona.
 
 \section{\em Embedded C Coding Standard}
 Aquestes normes són de lliure accés i escrites pel Barr Group. Conté regles tant d'estil de text (número de caràcters per línia, on posar els '\{', etc.) com regles de sintaxi en C, com per exemple quan i on usar la paraula reservada {\em volatile}, etc. Segons el mateix document, aquestes regles són més laxes que les normes MISRA \cite{BARRGuidelines}.
@@ -864,6 +882,12 @@ En aquest cas, cada regla consta de l'explicació de la regla en si mateixa, el 
 
 També hi ha eines per comprovar que el codi escrit segueix aquestes normes.
 
+\section{\em JPL Institutional Coding Standard for the C Programming Language}
+Aquesta normes de codificació venen d'un laboratori del JPL per tal d'aconseguir millor seguretat i qualitat en el software que s'escriu a les sondes espacials d'aquesta institució \cite{JPLLARS}.
+
+Les normes de codificació son una ampliació de les normes MISRA per afegir-hi sistemes multi-tasca \cite{JPLCProgramming}. Es defineixen nivells d'acompliment amb les normes, anant des de LOC-1 fins a LOC-4 amb un total de 120 regles. La majoria de regles son equivalents a algunes de les normes MISRA. Els dos últims nivells d'acompliment (LOC-5 i LOC-6) consisteixen a acomplir amb totes les regles obligatòries o opcionals de les normes MISRA.
+
+Així, com a diferència de regles que es poden trobar a d'altres normes de codificació, aquestes afegeixen regles com la Regla 6, que demana que sempre es facin servir mecanismes IPC per comunicar tasques entre si, i que cap tasca ha d'accedir a dades o executar codi d'altres tasques.
 
 \chapter{DSP}
 \label{ch:DSP}
