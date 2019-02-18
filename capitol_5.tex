@@ -887,7 +887,7 @@ Aquesta normes de codificació venen d'un laboratori del JPL per tal d'aconsegui
 
 Les normes de codificació son una ampliació de les normes MISRA per afegir-hi sistemes multi-tasca \cite{JPLCProgramming}. Es defineixen nivells d'acompliment amb les normes, anant des de LOC-1 fins a LOC-4 amb un total de 120 regles. La majoria de regles son equivalents a algunes de les normes MISRA. Els dos últims nivells d'acompliment (LOC-5 i LOC-6) consisteixen a acomplir amb totes les regles obligatòries o opcionals de les normes MISRA.
 
-Així, com a diferència de regles que es poden trobar a d'altres normes de codificació, aquestes afegeixen regles com la Regla 6, que demana que sempre es facin servir mecanismes IPC per comunicar tasques entre si, i que cap tasca ha d'accedir a dades o executar codi d'altres tasques.
+Així, com a diferència de regles que es poden trobar a d'altres normes de codificació, aquestes afegeixen regles com la Regla 6, que demana que sempre es facin servir mecanismes IPC per comunicar tasques entre si, i que cap tasca ha d'accedir a dades o executar codi d'altres tasques. La Regla 7 demana que les tasques no se sincronitzin fent servir {\em delay}.
 
 \chapter{DSP}
 \label{ch:DSP}
