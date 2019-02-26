@@ -132,7 +132,7 @@ Com ja s'ha mencionat breument a \fullref{se:arquitectura}, dins els {\em cores}
 Aquest {\em timer} està pensat perquè els S.O. el puguin fer servir, i com que està integrat dins el {\em core} Cortex, la portabilitat dels S.O. entre diferents fabricants serà molt senzilla (seria més complicat haver de fer un port per cada {\em timer} diferent de cada fabricant).
 
 %%ATENCIO: Trenco manualment CMU\_ClockFreqGet\\(cmuClock\_CORE) pq Latex no ho fa be
-L'exemple al repositori implementa una funció de {\bf Delay()}\index{Delay()}. El que es fa és configurar el {\em Systick} perquè generi una interrupció cada 1 mil·lisegon (Llistat~\ref{systickconfig}). Com que la funció {\bf CMU\_ClockFreqGet\\(cmuClock\_CORE)}\index{CMU\_ClockFreqGet()} retorna la freqüència de funcionament del rellotge del sistema, al dividir-la per 1000 i configurar el Systick amb aquest valor, generarà una interrupció cada mil·lisegon.
+L'\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/Systick}{exemple al repositori} implementa una funció de {\bf Delay()}\index{Delay()}. El que es fa és configurar el {\em Systick} perquè generi una interrupció cada 1 mil·lisegon (Llistat~\ref{systickconfig}). Com que la funció {\bf CMU\_ClockFreqGet\\(cmuClock\_CORE)}\index{CMU\_ClockFreqGet()} retorna la freqüència de funcionament del rellotge del sistema, al dividir-la per 1000 i configurar el Systick amb aquest valor, generarà una interrupció cada mil·lisegon.
 
 A la ISR corresponent s'incrementa una variable global per tenir un comptatge dels mil·lisegons transcorreguts (veure Llistat~\ref{systickISR}). La variable {\bf msTicks} s'ha definit com a {\bf volatile} pel que s'explicarà a \fullref{sb:volatile}.
 
@@ -170,6 +170,7 @@ void Delay(uint32_t dlyTicks)
 
 \chapter{GPIO}
 \label{sub:GPIO_2}
+\glsreset{GPIO}
 Diem \gls{GPIO} al perifèric encarregat de la gestió de l'entrada i sortida de propòsit general. Fent servir aquest perifèric podrem configurar l'entrada o la sortida d'un pin concret del microcontrolador i posar-hi el valor desitjat ('0' o '1') o llegir quin valor hi ha posat algun altre dispositiu.
 
 De forma general, un pin en concret el podrem configurar perquè treballi com a entrada o com a sortida. Si un pin està configurat com a entrada, el valor de voltatge elèctric que tingui a l'entrada del pin, es podrà llegir per part del codi del microcontrolador. De forma inversa, un pin configurat com a sortida posarà el valor elèctric equivalent al valor que el codi escrigui.
@@ -197,7 +198,7 @@ En aquest cas, per forçar el valor '1' es fa servir una resistència connectada
 \begin{figure}
  \centering
  \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/buttons.png}
- \caption{Esquemàtic amb resistències de {\em pull-ups}}{Esquemàtic amb resistències de {\em pull-ups} (etiquetades com R101 i R102)}
+ \caption[Esquemàtic amb resistències de {\em pull-ups}]{Esquemàtic amb resistències de {\em pull-ups} (etiquetades com R101 i R102)}
  \label{fig:pullup}
 \end{figure}
 
@@ -346,7 +347,7 @@ Les IRQs estan enumerades i tenen prioritats, així habitualment, un valor menor
 
 El controlador d'interrupcions gestiona quines interrupcions rebudes arriben al processador, segons les prioritats i si la interrupció concreta està activada o no.
 
-Veurem un cas amb els GPIO, el codi està disponible \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_2}{al repositori} . En aquest cas, el que es fa primer és configurar els pins perquè generin una interrupció HW al flanc de baixada (recordem el {\em pull-up} a la PCB, Figura~\ref{fig:pullup}). Tot seguit s'activen les interrupcions corresponents.
+Veurem un cas amb els GPIO, el codi està disponible \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_2}{al repositori}. En aquest cas, el que es fa primer és configurar els pins perquè generin una interrupció HW al flanc de baixada (recordem el {\em pull-up} a la PCB, Figura~\ref{fig:pullup}). Tot seguit s'activen les interrupcions corresponents.
 \index{NVIC\_EnableIRQ()}\index{GPIO\_IntConfig()}
 \begin{lstlisting}[style=customc]
  /* Set Interrupt configuration for both buttons */
@@ -394,7 +395,7 @@ Com ja sabem, les \gls{ISR} són les funcions especials que s'executen tant bon 
 
 Tradicionalment les adreces a aquestes \glspl{ISR} (anomenats de vegades vectors d'interrupció) s'emmagatzemaven a una zona especial de la memòria del processador. Quan el processador rebia una \gls{IRQ}, com que aquestes van numerades simplement calcula l'offset de la IRQ a la taula de ISRs i executa aquella funció determinada.
 
-En els ARM Cortex amb els que treballem això es fa tal qual acabem d'explicar (link a la documentació d'ARM). En el cas dels Cortex (i la majoria de microcontroladors i processadors) la taula de vectors d'interrupcions es col·loca a la posició 0 de memòria.
+En els ARM Cortex amb els que treballem això es fa tal qual acabem d'explicar. En el cas dels Cortex (i la majoria de microcontroladors i processadors) la taula de vectors d'interrupcions es col·loca a partir de la posició 0 de memòria.
 
 El que cal, doncs, és que les nostres eines de compilació posin aquests vectors com toca a cada un dels binaris que generem. En el cas de les eines per Cortex (tant Simplicity com les eines de ST ho fan així), aprofiten un codi d'inicialització proporcionat per ARM anomenat, en el nostre cas startup\_efm32tg.S. Aquest fitxer està escrit en assemblador i, entre d'altres coses, té el codi que es veu a la Figura~\ref{fig:ISR}:
 

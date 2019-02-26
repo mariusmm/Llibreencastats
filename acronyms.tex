@@ -80,11 +80,13 @@ description={Memòria no-volàtil de gran capacitat i baix consum}
 
 \newglossaryentry{pull-up}{
 name={Pull-up},
+text={pull-up},
 description={Resistència connectada a alimentació per forçar un valor d''1' a una línia o bus}
 }
 
 \newglossaryentry{pull-down}{
 name={Pull-down},
+text={pull-down},
 description={Resistència connectada a terra per forçar un valor d''0' a una línia o bus}
 }
 
@@ -99,8 +101,10 @@ description={Comptador segons un rellotge que genera una interrupció quan arrib
 }
 
 \newglossaryentry{Watchdog}{
- name={Watchdog},
- description={Perifèric que reinicia el sistema si no s'hi accdeix periòdicament}
+ name={\em Watchdog},
+ text={\em watchdog},
+ description={Perifèric que reinicia el sistema si no s'hi accdeix periòdicament},
+ sort=Watchdog
 }
 
 \newglossaryentry{dead-lock}{
@@ -109,7 +113,8 @@ description={Situació en que dues o més tasques estan bloquejades esperant-se 
 }
 
 \newglossaryentry{memory mapped}{
-name={\em memory mapped},
+name={\em Memory mapped},
+text={\em memory mapped},
 description={Assignar una posició de memòria a un component HW per facilitar el seu accés},
 sort=memory mapped
 }
@@ -121,16 +126,19 @@ description={Pulse Width Modulation}
 
 \newglossaryentry{callback}{
 name={Callback},
+text={callback},
 description={Funció que es crida en quan acaba un procés}
 }
 
 \newglossaryentry{buffer circular}{
 name={Buffer circular},
+text={buffer circular},
 description={Estructura de dades que utilitza un sol buffer i que es pot accedir-ho de forma circular}
 }
 
 \newglossaryentry{duty cycle}{
  name={Duty cycle},
+ text={duty cycle},
  description={Cicle de treball, és la relació que existeix entre el temp que un senyal esta a '1' i el periode d'aquest senyal}
 }
 
@@ -146,35 +154,41 @@ description={Sistema Operatiu de Temps Real de codi obert i lliure}
 
 \newglossaryentry{task}{
 name={Task},
+text={task},
 description={Funció que implementa un procés de SO juntament amb l'{\em stack} corresponent}
 }
 
 \newglossaryentry{tick}{
 name={\em Tick},
+text={\em tick},
 description={Esdeveniment periòdic per a que el Sistema Operatiu prengui el controll de l'execució},
 sort=Tick
 }
 
 \newglossaryentry{stack}{
 name={\em Stack},
+text={\em stack},
 description={Regió de memòria on emmagatzemar dades pròpies d'una tasca},
 sort=Stack
 }
 
 \newglossaryentry{race condition}{
-name={\em race condition},
+name={\em Race condition},
+text={\em race condition},
 description={Error provocat per l'exeucuó simultànea de dues o més tasques},
 sort=Race condition
 }
 
 \newglossaryentry{flag}{
-name={\em flag},
+name={\em Flag},
+text={\em flag},
 description={Un {\em flag} és un bit que indica algun valor determinat d'un dispositiu o dada},
 sort=Flag
 }
 
 \newglossaryentry{open drain}{
-name={\em open drain},
+name={\em Open drain},
+text={\em Open drain},
 description={Tipus de sortida que només pot forçar un valor de '0', per tant li cal un \gls{pull-up} per funcionar correctament},
 sort=Open
 }
@@ -198,13 +212,22 @@ sort=Systick
 }
 
 \newglossaryentry{layout}{
-name={\em layout},
+name={\em Layout},
+text={\em layout},
 description={Dibuix final de com queda la PCB a dissenyar},
 sort=layout
 }
 
 \newglossaryentry{macro}{
-name={\em macro},
+name={\em Macro},
+text={\em macro},
 description={Tros de codi que té assignat un nom, de manera que cada cop que s'inserta el nom es canvia pel codi definit prèviament},
 sort=macro,
+}
+
+\newglossaryentry{wrapper}{
+name={\em Wrapper},
+text={\em wrapper},
+description={Tros de codi que embolcalla un altre per donar-li una interfície comuna},
+sort=wrapper,
 }

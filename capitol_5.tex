@@ -812,7 +812,11 @@ Aquesta biblioteca inclou totes les funcions específiques de tipus \gls{DSP} de
 \label{sec:CMSIS-RTOS}
 Aquesta biblioteca defineix un conjunt de funcions i crides per ``amagar'' el sistema operatiu que es pugui fer servir, de manera que es pugui intercanviar el \gls{RTOS} sense afectar al codi d'aplicació \cite{CMSIS-RTOS}.
 
-D'aquesta manera es tenen crides estàndard per les funcions habituals (crear tasques, semàfors, cues, etc., enviar dades a la cua, etc.) de manera que, en principi, es pugui intercanviar el RTOS sense haver de canviar res del codi d'usuari.
+D'aquesta manera es tenen crides estàndard per les funcions habituals (crear tasques, semàfors, cues, etc., enviar dades a la cua, etc.) i així es pot, en principi, intercanviar el RTOS sense haver de canviar res del codi d'usuari. Fent servir aquesta API no cal conèixer les interioritats i particularitats de cada RTOS que es vulgui fer servir, ja que quedaran amagades i pre-configurades per la biblioteca.
+
+Així tenim que ST proporciona un \gls{wrapper} de CMSIS-RTOS per FreeRTOS que s'integra fàcilment al seu IDE \cite{ST-CMSIS-RTOS}. Silicon Labs no proporciona suport per aquesta biblioteca, però es pot fer servir el \gls{wrapper} de codi obert disponible a \href{https://github.com/labapart/polymcu/tree/master/RTOS/FreeRTOS/cmsis}{GitHub}.
+
+A part, es va crear una implementació de CMSIS-RTOS anomenada CMSIS-RTOS-RTX (o també Keil RTX) per part de Keil (empresa propietat d'ARM) \cite{Keil-RTX}.
 
 \section{CMSIS-DAP}
 \label{sec:CMSIS-DAP}
@@ -820,7 +824,7 @@ Més que una biblioteca, aquesta part de CMSIS és una definició de com ha de t
 
 \section{CMSIS-NN}
 \label{sec:CMSIS-NN}
-Aquesta biblioteca està composta d'un seguit de funcions i algorismes per implementar xarxes neurals a processadors Cortex-M. \cite{CMSIS_NN_paper}\cite{CMSIS-NN} i queda fora de l'objectiu d'aquest llibre.
+Aquesta biblioteca està composta d'un seguit de funcions i algorismes per implementar xarxes neurals a processadors Cortex-M i queda fora de l'objectiu d'aquest llibre \cite{CMSIS_NN_paper}\cite{CMSIS-NN}.
 
 \chapter{Normes de codificació}
 \label{sec:GuiesProgramacio}
