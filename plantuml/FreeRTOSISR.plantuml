@@ -1,0 +1,49 @@
+' FreeRTOS activity diagram with 2 tasks when an IRQ triggers an ISR. 
+' The ISR should awake Task1 that it is waiting for a data in a Queue.
+' The ISR is a wrong code for FreeRTOS, because it lacks the
+' taskYIELD_FROM_ISR() call
+
+@startuml
+
+skinparam sequence {
+ArrowColor #009944
+ActorBorderColor #009944
+LifeLineBorderColor #009944
+LifeLineBackgroundColor #00AA55
+ParticipantBorderColor #009944
+ParticipantBackgroundColor #00AA55
+}
+
+participant Tasca1 order 1
+participant Tasca2 order 2
+participant Kernel order 3
+participant ISR order 4
+activate Tasca1
+|||
+Tasca1 -> Kernel: xQueueReceive()
+deactivate Tasca1
+activate Kernel
+
+Kernel -->> Tasca1: blocked
+Kernel -->> Tasca2: running
+deactivate Kernel
+activate Tasca2
+|||
+ISR o<--]: IRQ
+deactivate Tasca2
+activate ISR
+
+ISR-> Kernel: xQueueSendFromISR()
+deactivate ISR
+activate Kernel
+Kernel-->ISR:      pdTRUE
+deactivate Kernel
+activate ISR
+|||
+ISR --> Tasca2: Return from ISR
+destroy ISR
+activate Tasca2
+|||
+
+
+@enduml

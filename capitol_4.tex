@@ -31,7 +31,7 @@ En sistemes encastats, un SO (o RTOS) no ofereix totes les funcionalitats a les 
 
 \begin{itemize}
  \item Gestió de tasques: Creació, execució, estat de les tasques, prioritats de tasques, etc.
- \item Comunicació entre tasques: Semàfors, cues, etc.
+ \item Comunicació entre tasques: semàfors, cues, etc.
  \item Gestió de temps: Timers, {\em timeouts}, {\em delays}, etc.
 \end{itemize}
 
@@ -137,7 +137,9 @@ FreeRTOS deixa el maneig de les interrupcions a mans del desenvolupador, demanan
 
 Cal tenir en compte que les interrupcions són esdeveniments totalment asíncrons i imprevisibles i que prenen el control de forma automàtica. Això fa que mentre està funcionant una \gls{ISR} el {\em kernel} del Sistema Operatiu no es pot executar i que, quan acabi d'executar la ISR, si no fem res, tornarà el control cap a la tasca que s'estava executant. Això pot provocar que una ISR alliberi un recurs o posi disponible una dada i que una tasca d'alta prioritat passi a l'estat {\em Ready} però el {\em kernel}, com que no s'executa, no pugui passar-li l'execució i se segueixi amb la taca menys prioritària que s'estava executant.
 
-Per això les funcions per accedir a recursos com semàfors o cues des d'una \gls{ISR} tenen un paràmetre extra, que informa si s'ha despertat una tasca més prioritària. Si és el cas, cal que el codi de la ISR faci un {\bf portYIELD\_FROM\_ISR()}\index{portYIELD\_FROM\_ISR()} per cridar al {\em kernel} del Sistema Operatiu (veure Llistat~\ref{ISRYield}).
+Per això les funcions per accedir a recursos com semàfors o cues des d'una \gls{ISR} tenen un paràmetre extra, que informa si s'ha despertat una tasca més prioritària. Si és el cas, cal que el codi de la ISR faci un {\bf portYIELD\_FROM\_ISR()}\index{portYIELD\_FROM\_ISR()} per cridar al {\em kernel} del Sistema Operatiu (veure Llistat~\ref{ISRYield}.
+
+A la Figura~\ref{fig:FreeRTOSISR} hi ha un diagrama de seqüència d'un exemple amb dues tasques: la Tasca 1 és la més prioritària i es bloqueja esperant rebre una dada per una cua. Quan es bloqueja s'executa la Tasca 2. Mentre s'està executant arriba una IRQ que posa una dada a la cua de la Tasca1 i retorna. Com que el {\em kernel} no pot obté el control, es segueix executant la Tasca 2, menys prioritària. Al diagrama de la Figura~\ref{fig:FreeRTOSISRYield} succeeix el mateix que abans, però ara la \gls{ISR} crida a {\bf portYIELD\_FROM\_ISR()} en acabar i llavor es passa a executar el {\em kernel} i aquest dona l'execució a la Tasca 1. Aquest és el funcionament correcte que s'espera del sistema.
 
 \index{any\_IRQHandler()}\index{xSemaphoreGiveFromISR()}\index{portYIELD\_FROM\_ISR()}
 \begin{lstlisting}[style=customc,caption=Codi ISR d'exemple,label=ISRYield]
@@ -152,8 +154,23 @@ void any_IRQHandler(void) {
 }
 \end{lstlisting}
 
-Aquesta funció de {\em yield} retorna de la ISR i executa el {\em kernel} si la variable passada té un valor diferent a {\bf pdFALSE}.
 
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/FreeRTOSISR.png}
+ \caption{Diagrama de seqüència de dues tasques}
+ \label{fig:FreeRTOSISR}
+\end{figure}
+
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/FreeRTOSISRYield.png}
+ \caption{Diagrama de seqüència de dues tasques correcte}
+ \label{fig:FreeRTOSISRYield}
+\end{figure}
+
+Aquesta funció de {\em yield} retorna de la ISR i executa el {\em kernel} si la variable passada té un valor diferent a {\bf pdFALSE}.
 
 Sempre es diu que les \glspl{ISR} han de ser el més curtes possibles, això és pels següents motius:
 \begin{itemize}

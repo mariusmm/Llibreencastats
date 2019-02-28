@@ -1,0 +1,68 @@
+% \part{Test i Qualitat}
+% \label{part:test}
+TBD
+\chapter{Conceptes Bàsics}
+\label{ch:test_1}
+
+En el desenvolupament normal de software, en general, sempre hi ha una
+fase de test per assegurar la correcte implementació de la
+lògica. Depenen de quin sector en trobem, aquesta fase té més o menys importància en relació a esforços i dedicació. Mentre en certs sectors (medicina, automoció, espai) el tests és vital perquè hi ha en joc vides o molts diners invertits, en altres se li dedica poca o gairebé nul.la importància.
+
+Sense ànims d'entrar en conceptes molt teòrics, simplement recordar que en el món de l'enginyeria de software hi ha certa categorització en la part de test, des els anomenats test de caixa blanca o unit test: verificar que els mètodes implementats no contenen errors, test de caixa negra, integració i/o  verificació: assegurar que el codi fa el que toca.
+
+En el món dels encastats ens trobem molts cops que la fase de test es redueix a simplement 4 proves generals de funcionalitat esperada i poca cosa més, s'assumeix que el codi sol ser simple i les implicacions d'una fallada tampoc seran gaire greus.
+
+No obstant, degut a què els softwares encastats són presents a molts llocs, una bona política i praxis sempre és recomanable.
+
+Suposem que estem treballant amb uns sensors de temperatura, per regla general aquest tipus de sensors proporcionen unes lectures que cal convertir amb alguna funció de transferència si volem saber el seu valor en graus per exemple, aquestes funcions de transferència, generalment funcions polinòmiques, venen detallades en els manuals d'usuari dels sensors. En el cas més simple seria simplement un coeficient, per tan, si tenim un codi que intenta ser genèric, podríem implementar un petit mòdul com el del llistat \ref{TestTempSensor}
+
+\begin{lstlisting}[caption={Conversió sensor de temperatura},style=customc,label=TestTempSensor]
+
+static float temp_coeff = 1;
+void temp_set_coef(float c)
+{
+   temp_coeff = c;
+}
+
+float temp_convert (int count)
+{
+    return temp_coeff * count;
+}
+\end{lstlisting}
+
+Com certificaríem que no hem comès cap error, inicialment faríem algun {\em check} manual/visual per veure que les temperatures ens quadren per exemple, però per sistematitzar-ho podríem fer quelcom similar al mostrat al llistat \ref{TestTempSensor2}, on estaríem implementant un Unit Test típic.
+
+\index{main()}
+\begin{lstlisting}[caption={Test conversió sensor de temperatura},style=customc,label=TestTempSensor2]
+
+main ()
+{
+   temp_set_coef (0.3);
+
+   if (temp_convert (2) == 2*0.3)
+   {
+    printf ("Conversio Temperatura OK\n");
+   }
+   else
+   {
+   printf ("Conversio Temperatura Fail\n");
+   }
+}
+\end{lstlisting}
+
+Si implementem el codi (en PC normal) i executem, segurament ens pot sorprendre el resultat, ja que per pantalla es mostrarà \textbf{Conversió Temperatura Fail}, si revisem el codi veurem que la lògica ens indica que el test hauria de ser correcte. En aquest cas el problema es la representació de les dades, els valors decimals es guarden en memòria seguint el format del estàndard \cite{IEEE754} i en el cas de usar 32 bits en aquest format, certs valors no són completament ben representats introduint una desviació mínima, suficient per a que guardant el valor \textbf{0.3} per després multiplicar-lo per \textbf{2} no sigui exactament igual a \textbf{2*0.3}. Això ens porta a dos observacions: hem de pensar que molts cops hem de fer comprovacions amb marges de confiança i, hem d'entendre i avaluar les implicacions a llarg termini, és a dir, en l'exemple la desviació és mínima, però si es va acumulant pot acabar essent no menyspreable, acumular 2 cops per segon temperatures agafades amb l'exemple, suposa un 0.16\% de desviació per dia, 0.6\% a la setmana. Si pensem en dispositius \gls{IoT} pensats en durar mesos o anys enseguida podem veure que coses així de trivials, no codificades oportunament, poden arribar a introduir errors greus en les dades.
+
+
+%% https://www.linkedin.com/groups/71510/71510-6414628032614531072?midToken=AQGd6dzk9cCBeg&trk=eml-b2_anet_digest_weekly-group_discussions-13-grouppost~disc~0&trkEmail=eml-b2_anet_digest_weekly-group_discussions-13-grouppost~disc~0-null-c2f7k~jiycm722~n-null-communities~group~discussion&lipi=urn%3Ali%3Apage%3Aemail_b2_anet_digest_weekly%3BMmKcvYQVRnKLZUe5NsCdVw%3D%3D
+
+\chapter{Test}
+\label{ch:test_2}
+TBD
+\section{\em Test Driven Development}
+TBD
+\section{Plataformes}
+TBD
+\section{\em Mocks}
+TBD
+\section{Estandards}
+TBD
