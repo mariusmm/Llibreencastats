@@ -598,6 +598,15 @@ void GPIO_EVEN_IRQHandler(void) {
 
 Per últim, fer notar que al bucle infinit final del {\bf main()}\index{main()} no hi ha cap codi, ja que la \gls{CPU} no té res a fer mentre espera la pulsació del botó o que s'exhaureixi el temps, En el tema de baix consum (\fullref{ch:low-power}) es veurà com aprofitar aquest fet per reduir el consum del sistema amb un exemple a \fullref{sub:letimer_example}.
 
+Al diagrama de seqüència de  la Figura~\ref{fig:TImer_2seq} explica l'exemple.
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.65\textwidth, keepaspectratio]{imatges/Timer2Seq.png}
+ \caption{Diagrama de seqüència de l'exemple Timer\_2}
+ \label{fig:TImer_2seq}
+\end{figure}
+
 \chapter{RTC}
 \label{sub:RTC}
 
@@ -952,35 +961,35 @@ void main(void) {
 }
 \end{lstlisting}
 
-Si mesurem el voltatge de sortida amb un multímetre, oscil·loscopi o analitzador lògic (que tingui entrada analògica) podem veure com els valors de la variable provoquen el canvi en voltatge esperat segons la Fórmula~\ref{eq:DACFormula} tal com es veu a la Taula~\ref{tb:DACVoltages}. El pin de sortida del DAC està connectat al pin PB12, connectat al pin 13 del connector d'expansió. La Taula~\ref{tb:DACVoltages} es registren tots els valors possible de la variable {\bf DACvalue} i el voltatge mesurat amb un multímetre digital; la tercera columna presenta la diferència entre el voltatge de la fila i l'anterior, com es pot veure cada pas corresponent a poc més de 200 mV, tal com surt a la fórmula~\ref{eq:DACFormula}. A l'última fila es calcula la mitjana aritmètica de totes aquestes diferències.
+Si mesurem el voltatge de sortida amb un multímetre, oscil·loscopi o analitzador lògic (que tingui entrada analògica) podem veure com els valors de la variable provoquen el canvi en voltatge esperat segons la Fórmula~\ref{eq:DACFormula} tal com es veu a la Taula~\ref{tb:DACVoltages}. El pin de sortida del DAC està connectat al pin PB12, connectat al pin 13 del connector d'expansió. La Taula~\ref{tb:DACVoltages} es registren tots els valors possible de la variable {\bf DACvalue}, el valor teòric que hauria de generar el DAC (segona columna) i el voltatge mesurat amb un multímetre digital (tercera columna); la quarta columna presenta la diferència entre el voltatge de la fila i l'anterior, com es pot veure cada pas corresponent a poc més de 200 mV, tal com surt a la fórmula~\ref{eq:DACFormula}. A l'última fila es calcula la mitjana aritmètica de totes aquestes diferències.
 
 
 \begin{table}
 \caption{Taula resum dels valors mesurats del DAC}
 \centering
-\begin{tabular}{|c|c|c|}
+\begin{tabular}{|c|c|c|c|}
 \hline
-{\bf Variable} & {\bf Voltatge (mV)} & {\bf Pas}\\
+{\bf Variable} & {\bf Voltatge teòric (mV)} & {\bf Voltatge mesurat (mV)} & {\bf Pas}\\
 \hline
-0 & 0 & - \\
-256	& 204 & 204 \\
-512	& 410 & 206 \\
-768	& 614 & 204 \\
-1024	& 824 & 210 \\
-1280	& 1032 & 208 \\
-1536	& 1238 & 206 \\
-1792	& 1442 & 204 \\
-2048	& 1651 & 209 \\
-2304	& 1855 & 204 \\
-2560	& 2060 & 205 \\
-2816	& 2260 & 200 \\
-3072	& 2470 & 210 \\
-3328	& 2670 & 200 \\
-3584	& 2880 & 210 \\
-3840	& 3090 & 210 \\
-4096	& 3290 & 200 \\
+0 & 0 & 0 & - \\
+256	& 206 & 204 & 204 \\
+512	& 413 & 410 & 206 \\
+768	& 619 & 614 & 204 \\
+1024	& 825 & 824 & 210 \\
+1280	& 1031 & 1032 & 208 \\
+1536	& 1237 & 1238 & 206 \\
+1792	& 1444 & 1442 & 204 \\
+2048	& 1650 & 1651 & 209 \\
+2304	& 1856 &1855 & 204 \\
+2560	& 2063 & 2060 & 205 \\
+2816	& 2269 & 2260 & 200 \\
+3072	& 2475 & 2470 & 210 \\
+3328	& 2681 & 2670 & 200 \\
+3584	& 2888 & 2880 & 210 \\
+3840	& 3094 & 3090 & 210 \\
+4096	& 3300 & 3290 & 200 \\
 \hline
-\multicolumn{2}{|c|}{\bf Mitjana de Pas} & 205,5 \\
+\multicolumn{3}{|c|}{\bf Mitjana de Pas} & 205,5 \\
 %  Mitja & 205.5\\
 \hline
 \end{tabular}
