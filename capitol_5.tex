@@ -573,12 +573,13 @@ Aquests algorismes han de decidir el més ràpid possible si l'entrada ha canvia
 
 Les tècniques més habituals es basen en programar un {\em timer} o una tasca programada per que cridi una funció d'avaluació de forma periòdica (cada X mil·lisegons) i la dita funció llegeixi el valor de l'entrada i decideixi el valor real de l'entrada \cite{debounce1}\cite{debounce2}.
 
-Un altre forma de fer-ho, potser més senzilla és la de un cop detectat un primer flanc, deixar de llegir l'entrada fins passat un temps i un cop transcorregut el temps, es llegeix el valor de l'entrada altre cop. Això es pot fer fàcilment controlant un Timer des de la ISR d'entrada del pin.
+Un altre forma de fer-ho, potser més senzilla és la de un cop detectat un primer flanc, deixar de llegir l'entrada fins passat un temps i un cop transcorregut el temps, es llegeix el valor de l'entrada altre cop. Això es pot fer fàcilment controlant un Timer des de la ISR d'entrada del pin, tal com es veurà a continuació.
 
 \subsection{Un exemple de {\em debouce}}
+El codi d'aquest examples està, com sempre, al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_Debouncing}{repositori}.
 Primer cal configurar el Timer per què compti un cert temps i generi una IRQ un cop transcorregut aquest temps. Per això configurem el valor Top tal com ja vàrem fer a \fullref{sub:Timers}.
 
-En aquest exemple es configura el valor top per que estigui comptant 100 mil·lisegons fent un càlcul molt similar al de l'exemple amb Timers anterior. També es prepara la \gls{ISR} pel {\em Timer1} tal com es veu al Llistat~\ref{timer_debouncing}
+En aquest exemple es configura el valor top per que estigui comptant 100 mil·lisegons fent un càlcul molt similar al de l'exemple amb Timers anterior. També es prepara la \gls{ISR} pel {\em Timer1} tal com es veu al Llistat~\ref{timer_debouncing} (veure Figura~\ref{fig:TimerDebounce}).
 
 \index{TIMER1\_IRQHandler()}\index{TIMER\_IntGet()}\index{TIMER\_IntClear()}\index{GPIO\_PinInGet()}
 \begin{lstlisting}[style=customc, caption=ISR del timer per fer debouncing, label=timer_debouncing]
@@ -596,6 +597,14 @@ void TIMER1_IRQHandler(void) {
   }
 } 
 \end{lstlisting}
+
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/DebouceSeq.png}
+ \caption{Diagrama de seqüència de l'exemple de {\em debounce}}
+ \label{fig:TimerDebounce}
+\end{figure}
 
 La variable {\em timer\_running} es defineix com una variable booleana (i volàtil) amb valor per defecte a false. A aquesta \gls{ISR} es comprova el valor desitjat de l'entrada i si és el cas, s'actualitza el comptador.
 

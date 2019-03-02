@@ -1,0 +1,25 @@
+' Debounce example activity diagram 
+
+@startuml
+
+skinparam sequence {
+ArrowColor #009944
+ActorBorderColor #009944
+LifeLineBorderColor #009944
+LifeLineBackgroundColor #00AA55
+ParticipantBorderColor #009944
+ParticipantBackgroundColor #00AA55
+}
+
+actor Usuari order 1
+participant GPIO_ISR order 2
+participant Timer order 3
+participant Timer_ISR order 4
+|||
+Usuari -> GPIO_ISR: Botó
+GPIO_ISR  -->> Timer: Start
+Timer -->> Timer: counting
+... 100 mil·lisegons...
+Timer -->> Timer_ISR: Timer overflow
+
+@enduml
