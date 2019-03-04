@@ -1,0 +1,36 @@
+' FreeRTOS Semaphore example
+
+@startuml
+
+skinparam sequence {
+ArrowColor #009944
+ActorBorderColor #009944
+LifeLineBorderColor #009944
+LifeLineBackgroundColor #00AA55
+ParticipantBorderColor #009944
+ParticipantBackgroundColor #00AA55
+EntityBorderColor #009944
+EntityBackgroundColor #00AA55
+}
+
+participant Tasca1 order 1
+entity Semaphore order 2 
+participant GPIO_ISR order 3
+activate Tasca1
+|||
+Tasca1 -> Semaphore: xSemaphoreTake()
+deactivate Tasca1
+
+|||
+GPIO_ISR o<--]: IRQ
+activate GPIO_ISR
+
+GPIO_ISR-> Semaphore: xSemaphoreGiveFromISR()
+Semaphore --> GPIO_ISR
+Semaphore --> Tasca1
+destroy GPIO_ISR
+activate Tasca1
+
+
+
+@enduml

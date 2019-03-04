@@ -269,7 +269,7 @@ A FreeRTOS tenim diferents tipus de semàfors:
 
 \subsection{Exemple amb semàfors}
 \label{sub:semafors_exemple}
-A \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Semaphore}{l'exemple} hi ha una tasca que es queda esperant a agafar un semàfor i quan l'aconsegueix fa un {\em toggle} del LED (Veure Llistat~\ref{semaphore_task_example}).
+A \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Semaphore}{l'exemple} hi ha una tasca que es queda esperant a agafar un semàfor i quan l'aconsegueix fa un {\em toggle} del LED (veure Llistat~\ref{semaphore_task_example} i el diagrama de seqüència~\ref{fig:SeqDiagramSemaphore}).
 
 \index{TaskLedToggle()}\index{xSemaphoreTake()}\index{LedToggle()}
 \begin{lstlisting}[style=customc,caption=Tasca amb semàfor d'exemple,label=semaphore_task_example]
@@ -282,6 +282,15 @@ static void TaskLedToggle(void *pParameter) {
   }
 }
 \end{lstlisting}
+
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/SemaphoreFreeRTOS.png}
+ \caption{Diagrama de seqüència de l'exemple amb semàfors}.
+ \label{fig:SeqDiagramSemaphore}
+\end{figure}
+
 
 La funció {\bf main()}\index{main()} crida la funció {\bf BSP\_Init()}\index{BSP\_Init()} que configura els GPIOs corresponents als botons i es registra una \gls{ISR} ({\bf GPIO\_EVEN\_IRQHandler()}\index{GPIO\_EVEN\_IRQHandler()}) pel botó 0, que ‘dóna' el semàfor en quan es prem el corresponent botó a la PCB (Llistat~\ref{ISR_semaphore}).
 
@@ -334,7 +343,7 @@ Les cues són recursos que poden ser compartits per vàries tasques, podent-hi e
 Per saber quina mida han de tenir les cues, veieu \fullref{sec:mida_cues}.
 \subsection{Exemple amb cues}
 \label{sub:cues_exemple}
-A \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Queue}{l'exemple de cues} hi ha una sola tasca que fa {\em blinkar} el \gls{LED} segons una variable. Aquesta variable s'obté de llegir (o intentar-ho) una cua. Aquesta cua (anomenada {\em queue\_buttons}) l'escriuen les dues \gls{ISR} associades als dos botons. Una envia el valor corresponent a 250 ms i l'altre ISR envia el valor que correspon a 1000 ms (Llistat~\ref{Queue_example_ISR}).
+A \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Queue}{l'exemple de cues} hi ha una sola tasca que fa {\em blinkar} el \gls{LED} segons una variable. Aquesta variable s'obté de llegir (o intentar-ho) una cua. Aquesta cua (anomenada {\em queue\_buttons}) l'escriuen les dues \gls{ISR} associades als dos botons. Una envia el valor corresponent a 250 ms i l'altre ISR envia el valor que correspon a 1000 ms (Llistat~\ref{Queue_example_ISR} i diagrama de seqüència~\ref{fig:SeqDiagramQueue}).
 
 \index{xQueueSendFromISR()}\index{portYIELD\_FROM\_ISR()}
 \begin{lstlisting}[style=customc, label=Queue_example_ISR, caption=Part del codi d'una de les ISRs]
@@ -348,6 +357,13 @@ portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 ...
 \end{lstlisting}
 
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/QueueFreeRTOS.png}
+ \caption{Diagrama de seqüència de l'exemple de {\em debounce}}
+ \label{fig:SeqDiagramQueue}
+\end{figure}
 
 En aquest cas, la tasca fa servir la funció {\bf xQueueReceive()}\index{xQueueReceive()} amb un valor de 0 a l'últim paràmetre, que és el temps en {\em ticks} que ha d'esperar-se a rebre un valor en el cas que la cua estigui buida (veure Llistat~\ref{queue_example_main}).
 

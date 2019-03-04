@@ -1,0 +1,41 @@
+' FreeRTOS Queue example
+
+@startuml
+
+skinparam sequence {
+ArrowColor #009944
+ActorBorderColor #009944
+LifeLineBorderColor #009944
+LifeLineBackgroundColor #00AA55
+ParticipantBorderColor #009944
+ParticipantBackgroundColor #00AA55
+EntityBorderColor #009944
+EntityBackgroundColor #00AA55
+}
+
+participant Tasca1 order 1
+entity Queue order 2 
+participant GPIO_ODD_ISR order 3
+participant GPIO_EVEN_ISR order 4
+activate Tasca1
+|||
+Tasca1 -> Queue: xQueueReceive()
+deactivate Tasca1
+
+|||
+GPIO_ODD_ISR o<--]: IRQ_ODD
+activate GPIO_ODD_ISR
+
+GPIO_ODD_ISR -> Queue: xQueueSendFromISR()
+Queue --> GPIO_ODD_ISR
+Queue --> Tasca1
+destroy GPIO_ODD_ISR
+activate Tasca1
+
+GPIO_EVEN_ISR o<--]: IRQ_EVEN
+activate GPIO_EVEN_ISR
+GPIO_EVEN_ISR -> Queue: xQueueSendFromISR()
+Queue --> GPIO_EVEN_ISR
+destroy GPIO_EVEN_ISR
+
+@enduml
