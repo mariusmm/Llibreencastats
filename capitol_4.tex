@@ -237,6 +237,57 @@ La funció {\bf vTaskStartScheduler()\index{vTaskStartScheduler()}}, que en cond
 
 
 
+\chapter{Controlant el temps a les tasques}
+Habitualment les tasques dins d'un sistema amb un Sistema Operatiu s'executen periòdicament, de manera que la tasca fa la seva feina i després demana suspendre's per un temps determinat. Les tasques, doncs poden cridar a la funció {\bf vTaskDelay()} per demanar al {\em kernel} que la suspengui un determinat temps passat com a paràmetre. Per exemple, al codi \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Blink}{FreeRTOS\_Blink} la tasca principal te l'estructura del Llistat~\ref{FreeRTOS_BlinkTask}. En aquest cas senzill, la tasca anirà canviant el LED d'encès a apagat cada 500 mil·lisegons
+
+\index{TaskLedToggle()}\index{LedToggle()}\index{vTaskDelay()}\index{pdMS\_TO\_TICKS()}
+\begin{lstlisting}[style=customc, label=FreeRTOS_BlinkTask, caption=Tasca de l'exemple FreeRTOS\_BlinkTask]
+static void TaskLedToggle(void *pParameter) {
+  for (;;) {
+    LedToggle();
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
+}
+\end{lstlisting}
+
+Però què passaria si el temps d'execució de la tasca fos variable? Si tenim un codi més complicat que segons les condicions tardi més o menys temps, es tindrà que la tasca tarda un cert temps variable a executar-se i després es suspèn durant 500 mil·lisegons. Això farà que la seva periodicitat variï a cada execució de la tasca, cosa que pot ser inacceptable segons els casos.
+
+Per això FreeRTOS proporciona la funció \index{vTaskDelayUntil()}{\bf vTaskDelayUntil()} que te en compte el tems utilitzat per la tasca abans de suspendre-la, de manera que es torni a cridar exactament en el període de temps desitjat.
+
+\section{Un exemple amb vTaskDelayUntil}
+
+A l'exemple \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Delay}{FreeRTOS\_Delay} es fa servir la funció \index{vTaskDelayUntil()}{\bf vTaskDelayUntil()} dins una tasca que cada cop que s'executa un cicle te un temps diferent d'execució. Això és fa amb una crida a \index{vTaskDelay()}{\bf vTaskDelay()} amb un delay d'un valor aleatori entre 0 i 300 mil·lisegons. 
+Després d'aquesta execució es crida la funció {\bf vTaskDelayUntil()} per suspendre de manera que la seva periodicitat sigui sempre de 500 mil·lisegons (veure Llistat~\ref{FreeRTOS_Delay}). 
+
+
+\begin{lstlisting}[style=customc, label=FreeRTOS_Delay, caption=Tasca de l'exemple FreeRTOS\_Delay]
+static void TaskLedToggle(void *pParameter) {
+  ...
+  for (;;) {
+    LedToggle();
+    printf("%lu", xTaskGetTickCount());
+
+    /* Random delay from o to 300 ms. */
+    random_time = rand() % 300;
+    printf("\t %lu\r\n", random_time);
+    delay_time = pdMS_TO_TICKS(random_time);
+    vTaskDelay(delay_time);
+
+    /* We want the task exactly every 500 milliseconds independently
+    * from the (different) execution time */
+    vTaskDelayUntil(&previous_tick_time, pdMS_TO_TICKS(500));
+  }
+}
+\end{lstlisting}
+
+Per comprova el correcte funcionament es treu per la consola de {\em debug} el {\em tick} que s'està executant i el temps aleatori que es gasta per la tasca (veure Figura~\ref{fig:TaskDelayConsole}). Es pot veure com, a la primera columna, el tick on s'executa la tasca és sempre múltiple de 64 i que el temps que està executant-se la tasca va variant (segona columna).
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.65\textwidth, keepaspectratio]{imatges/TaskDelayUntilConsole.png}
+ \caption{Consola amb la sortida de l'exemple FreeRTOS\_Delay}
+ \label{fig:TaskDelayConsole}
+\end{figure}
 
 %%%%%%%% AMPLIAR
 
