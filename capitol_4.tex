@@ -254,7 +254,7 @@ Però què passaria si el temps d'execució de la tasca fos variable? Si tenim u
 
 Per això FreeRTOS proporciona la funció \index{vTaskDelayUntil()}{\bf vTaskDelayUntil()} que te en compte el tems utilitzat per la tasca abans de suspendre-la, de manera que es torni a cridar exactament en el període de temps desitjat.
 
-\section{Un exemple amb vTaskDelayUntil}
+\section{Un exemple amb vTaskDelayUntil()}
 
 A l'exemple \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Delay}{FreeRTOS\_Delay} es fa servir la funció \index{vTaskDelayUntil()}{\bf vTaskDelayUntil()} dins una tasca que cada cop que s'executa un cicle te un temps diferent d'execució. Això és fa amb una crida a \index{vTaskDelay()}{\bf vTaskDelay()} amb un delay d'un valor aleatori entre 0 i 300 mil·lisegons. 
 Després d'aquesta execució es crida la funció {\bf vTaskDelayUntil()} per suspendre de manera que la seva periodicitat sigui sempre de 500 mil·lisegons (veure Llistat~\ref{FreeRTOS_Delay}). 
@@ -287,6 +287,17 @@ Per comprova el correcte funcionament es treu per la consola de {\em debug} el {
  \includegraphics[width=0.65\textwidth, keepaspectratio]{imatges/TaskDelayUntilConsole.png}
  \caption{Consola amb la sortida de l'exemple FreeRTOS\_Delay}
  \label{fig:TaskDelayConsole}
+\end{figure}
+
+\subsection{Comprovació amb l'oscil·loscopi}
+Es pot aprofitar que l'exemple  fa {\em toggle} del LED que també està connectat a un pin del connector d'expansió de la placa de desenvolupament (al pin 15 del {\em Expansion header}).
+A més, s'ha reduït el temps del període a 100 mil·lisegons i un {\em delay} aleatori d'entre 0 i 75 mil·lisegons. Així es pot comprovar amb l'oscil·loscopi que el senyal generat és prou bo i estable (veure Figura~\ref{fig:DelayUntil}).
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.65\textwidth, keepaspectratio]{imatges/DelayUntil.png}
+ \caption{Captura de l'oscil·loscopi de l'exemple vTaskDelayUntil()}
+ \label{fig:DelayUntil}
 \end{figure}
 
 %%%%%%%% AMPLIAR
