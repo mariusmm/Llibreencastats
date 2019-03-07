@@ -104,7 +104,8 @@
 
 \usepackage{nameref}
 
-
+\usepackage[section]{placeins} 
+\usepackage{siunitx}
 
 \makeglossaries
 \loadglsentries{acronyms}
@@ -167,6 +168,12 @@
 \captionsetup[figure]{labelfont={color=ocre,bf}}
 \captionsetup[lstlisting]{labelfont={color=ocre,bf}}
 \captionsetup[table]{labelfont={color=ocre,bf}}
+
+%----------------------------------------------------------------------------------------
+% Per dibuixar FSMs
+%----------------------------------------------------------------------------------------
+\usepackage{tikz}
+\usetikzlibrary{arrows,automata}
 
 %----------------------------------------------------------------------------------------
 % Només fem index de part i chapter, no sections ni subsections ni res
@@ -243,7 +250,7 @@
 
     \vspace{4\baselineskip}
     \vspace{4\baselineskip}
-    Vull agrair a Borja Martínez, Lluís Gesa, Cristina Cano, Francisco Vázquez, Pere Tuset, Xose Pérez, Jordi Binefa i Xavier Fitó pels comentaris i correccions fetes al text. Com de costum tots els errors que encara hi hagi al text i al codi son cosa meva i no pas seva.
+    Vull agrair a Borja Martínez, Lluís Gesa, Cristina Cano, Francisco Vázquez, Pere Tuset, Xose Pérez, Jordi Binefa, Xavier Fitó i Lluís Ribas pels comentaris i correccions fetes al text. Com de costum tots els errors que encara hi hagi al text i al codi son cosa meva i no pas seva.
     
     \vspace{\baselineskip}
     Màrius
@@ -300,11 +307,18 @@
 \include{capitol_4}
 
 %----------------------------------------------------------------------------------------
-% 5a Part: Temes avançats
+% 5a Part: Models de programació
+%----------------------------------------------------------------------------------------s
+\part{Models de programació}
+\label{part:modelsprogramacio}
+\include{capitol_5}
+
+%----------------------------------------------------------------------------------------
+% 6a Part: Temes avançats
 %----------------------------------------------------------------------------------------s
 \part{Temes avançats}
 \label{part:avançats}
-\include{capitol_5}
+\include{capitol_6}
 
 %----------------------------------------------------------------------------------------
 % 6a Part: Test
