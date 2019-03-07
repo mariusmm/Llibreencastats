@@ -38,4 +38,4 @@ El llibre està escrit en LaTeX i depèn de força paquets (veure llista). Al ma
 ### Llista de paquets LaTeX
 Els paquets que es fan servir en el codi LaTeX son els següents:
 
-`listings`, `textcomp`, `parskip`, `colortbl`, `courier`, `nameref`, `graphicx`, `tikz`, `babel`, `enumitem`, `booktabs`, `xcolor`, `avant`, `mathptmx`, `microtype`, `inputenc`, `fontenc`, `biblatex`, `calc`, `makeidx`, `titletoc`, `fancyhdr`,  `amsmath`, `amsfonts`, `amssymb`, `amsthm`, `hyperref`, `bookmark`
+`listings`, `textcomp`, `parskip`, `colortbl`, `courier`, `nameref`, `graphicx`, `tikz`, `babel`, `enumitem`, `booktabs`, `xcolor`, `avant`, `mathptmx`, `microtype`, `inputenc`, `fontenc`, `biblatex`, `calc`, `makeidx`, `titletoc`, `fancyhdr`,  `amsmath`, `amsfonts`, `amssymb`, `amsthm`, `hyperref`, `bookmark`, `siunitx`, `placeins`
