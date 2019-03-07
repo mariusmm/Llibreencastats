@@ -256,7 +256,7 @@ Per això FreeRTOS proporciona la funció \index{vTaskDelayUntil()}{\bf vTaskDel
 
 \section{Un exemple amb vTaskDelayUntil()}
 
-A l'exemple \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Delay}{FreeRTOS\_Delay} es fa servir la funció \index{vTaskDelayUntil()}{\bf vTaskDelayUntil()} dins una tasca que cada cop que s'executa un cicle te un temps diferent d'execució. Això és fa amb una crida a \index{vTaskDelay()}{\bf vTaskDelay()} amb un delay d'un valor aleatori entre 0 i 300 mil·lisegons. 
+A l'exemple \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Delay}{FreeRTOS\_Delay} es fa servir la funció \index{vTaskDelayUntil()}{\bf vTaskDelayUntil()} dins una tasca que cada cop que s'executa un cicle te un temps diferent d'execució. Això és fa amb una crida a \index{vTaskDelay()}{\bf vTaskDelay()} amb un retard aleatori amb valors entre 0 i 300 mil·lisegons. 
 Després d'aquesta execució es crida la funció {\bf vTaskDelayUntil()} per suspendre de manera que la seva periodicitat sigui sempre de 500 mil·lisegons (veure Llistat~\ref{FreeRTOS_Delay}). 
 
 
@@ -280,7 +280,7 @@ static void TaskLedToggle(void *pParameter) {
 }
 \end{lstlisting}
 
-Per comprova el correcte funcionament es treu per la consola de {\em debug} el {\em tick} que s'està executant i el temps aleatori que es gasta per la tasca (veure Figura~\ref{fig:TaskDelayConsole}). Es pot veure com, a la primera columna, el tick on s'executa la tasca és sempre múltiple de 64 i que el temps que està executant-se la tasca va variant (segona columna).
+Per comprova el correcte funcionament es treu per la consola de {\em debug} el {\em tick} en que s'està executant i el temps aleatori que es gasta per la tasca (veure Figura~\ref{fig:TaskDelayConsole}). Es pot veure com, a la primera columna, el tick on s'executa la tasca és sempre múltiple de 64 i que el temps que està executant-se la tasca va variant (segona columna).
 
 \begin{figure}
  \centering
@@ -290,7 +290,7 @@ Per comprova el correcte funcionament es treu per la consola de {\em debug} el {
 \end{figure}
 
 \subsection{Comprovació amb l'oscil·loscopi}
-Es pot aprofitar que l'exemple  fa {\em toggle} del LED que també està connectat a un pin del connector d'expansió de la placa de desenvolupament (al pin 15 del {\em Expansion header}).
+Es pot aprofitar que l'exemple fa {\em toggle} del LED el GPIO també està connectat a un pin del connector d'expansió de la placa de desenvolupament (al pin 15 del {\em Expansion header}).
 A més, s'ha reduït el temps del període a 100 mil·lisegons i un {\em delay} aleatori d'entre 0 i 75 mil·lisegons. Així es pot comprovar amb l'oscil·loscopi que el senyal generat és prou bo i estable (veure Figura~\ref{fig:DelayUntil}).
 
 \begin{figure}
@@ -423,7 +423,7 @@ portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 \begin{figure}
  \centering
  \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/QueueFreeRTOS.png}
- \caption{Diagrama de seqüència de l'exemple de {\em debounce}}
+ \caption{Diagrama de seqüència de l'exemple de cues}
  \label{fig:SeqDiagramQueue}
 \end{figure}
 
@@ -477,7 +477,7 @@ Per enviar el triplet de dades d'una tasca a l'altra, podríem muntar una cua on
 
 L'altra opció podria ser posar tres cues, una per cada coordenada i la tasca consumidora anar llegint de cada una. Això però, sembla que és una mica massa complexitat per un problema senzill.
 
-La millor solució consisteix a preparar una estructura de dades i que sigui aquesta estructura la que s'envia per la cua. Així, les tres dades viatgen juntes i cada una associada al seu camp corresponent.
+La millor solució consisteix a preparar una estructura de dades i que sigui aquesta estructura la que s'envia per la cua. Així, les tres dades viatgen juntes i cada una associada al seu camp corresponent. La definició de l'estructura haurà de ser comú a totes les tasques i cues que la facin servir; en un projecte gran caldrà definir-la en un {\em header} comú per la resta de mòduls del projecte.
 
 Així, podríem definir una estructura tal com es veu al llistat~\ref{queue_struct_example}.
 
@@ -508,7 +508,7 @@ if (xQueueReceive(queue_buttons, &pkt, (TickType_t ) 0)) {
 ...
 \end{lstlisting}
 
-Al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Queue_2}{repositori} l'exemple FreeRTOS\_Queue\_2 es fa servir una estructura per passar dades mitjançant una cua.
+Al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Queue_2}{repositori} l'exemple FreeRTOS\_Queue\_2 es fa servir una estructura per passar dades mitjançant una cua. 
 
 
 \section{Mutex}
@@ -654,7 +654,7 @@ Per la resta, l'aplicació té el mateix funcionament que l'exemple sense RTOS. 
 Per resumir i posar un exemple de tot el vist sobre \gls{FreeRTOS}, agafarem l'aplicació d'exemple feta a \fullref{ch:aplicaciosenzilla} i es transformarà en una aplicació amb FreeRTOS. Per començar es treballarà amb la versió amb {\em polling} de l'aplicació original.
 
 \section{Tasques}
-Una de les característiques d'un \gls{RTOS} és que les diferents tasques a fer per l'aplicació es divideixen en tasques. En aquest cas, sembla senzill pensar que es pot dividir la feina a fer en dos parts: (i) Llegir la dada del sensor i (ii) canviar el \gls{duty cycle} del \gls{PWM} segons el valor llegit. En resum, les tasques seran:
+Una de les característiques d'un \gls{RTOS} és que les diferents tasques a fer per l'aplicació es divideixen en tasques. En aquest cas, sembla senzill pensar que es pot dividir la feina a fer en dos parts: (i) llegir la dada del sensor i (ii) canviar el \gls{duty cycle} del \gls{PWM} segons el valor llegit. En resum, les tasques seran:
 
 \begin{itemize}
  \item {\bf ReadSensor\_task}: aquesta tasca llegeix periòdicament el valor de proximitat del sensor i envia aquesta dada cap a l'altra tasca. Això ho fa cada mig segon i fa {\em polling} del registre d'{\em estatus} del sensor (veure llistat~\ref{readsensor_task}).
@@ -722,7 +722,7 @@ main() {
   ...
 \end{lstlisting}
 
-Com ja hem vist anteriorment, es creen les dues tasques a la funció {\bf main()}\index{main()}
+Com ja hem vist anteriorment, es creen les dues tasques dins de la funció {\bf main()}\index{main()} (Llistat~\ref{createtasks}).
 
 \section{Modificant el {\em wrapper} d'I2C}
 \label{sec:wrapperI2C}
@@ -748,13 +748,13 @@ bool I2C_WriteRegister() {
 
 D'aquesta manera en el cas que dues tasques fessin servir el {\em wrapper} per accedir al bus \gls{I2C}, quan cridessin a la funció {\bf I2C\_WriteRegister()}\index{I2C\_WriteRegister()} o {\bf I2C\_ReadRegister()}\index{I2C\_ReadRegister()} aquestes funcions es protegeixen de la re-entrada amb el mutex {\em I2C\_mutex} impedint que es pogués cridar dos cops (un cop de cada tasca) a la funció {\bf I2C\_Transfer()}\index{I2C\_Transfer()}, que faria que les transferències \gls{I2C} no es fessin correctament.
 
-El {\em mutex} (anomenat {\bf I2C\_mutex}) està definit com {\em static} dins el fitxer {\bf I2C\_Wrapper.c}.
+El {\em mutex} (anomenat {\bf I2C\_mutex}) està definit com {\em static} dins el fitxer {\bf I2C\_Wrapper.c}. Això farà que aquesta variable només estigui disponible dins el mòdul i no sigui una variable global a tot el projecte. Aquest {\em mutex} s'inicialitza a la funció {\bf I2C\_initialize()}\index{I2C\_initialize}.
 
 \begin{lstlisting}[style=customc,label=I2CMutex]
 static SemaphoreHandle_t I2C_mutex;
 \end{lstlisting}
 
-Això farà que aquesta variable només estigui disponible dins el mòdul i no sigui una variable global a tot el projecte. Aquest {\em mutex} s'inicialitza a la funció {\bf I2C\_initialize()}\index{I2C\_initialize}.
+
 
 \index{I2C\_initialize}\index{xSemaphoreCreateMutex()}
 \begin{lstlisting}[style=customc,label=CreateI2CMutex]
@@ -808,7 +808,7 @@ La solució més habitual és la de tenir una tasca dedicada a alimentar el {\em
 #define WATCHDOG_TASK2 0x02
 #define WATCHDOG_TASK3 0x04
 #define WATCHDOG_TASK4 0x08
-#define WATCHDOG_FULL 0x0F
+#define WATCHDOG_FULL  0x0F
 
 static uint8_t watchdog_list;
 SemaphoreHandle_t watchdog_mutex;
@@ -844,6 +844,6 @@ void watchdogTask(void *parameter) {
 
 El codi que es veu al Llistat~\ref{Watchdog_RTOS} proporciona la funció {\bf watchdogTouch()}\index{watchdogTouch()} que és la que haurà de cridar les diferents tasques del sistema, cadascuna amb un paràmetre {\bf WATCHDOG\_TASK<N>} diferent i únic.
 
-Com es pot veure a l'exemple, la variable local a la biblioteca {\em watchdog\_list} emmagatzema l'estat de totes les tasques i s'hi accedeix a la funció {\bf watchdogTouch()} que protegeix l'accés amb un {\em mutex}. La tasca {\bf watchdogTask()}\index{watchdogTask()} avalua aquesta variable d'estat i si tot ha anat correctament (totes les tasques han cridat la seva funció almenys un cop), alimenta el {\em watchdog} En cas contrari, la tasca no l'alimenta i acabarà per reiniciar el sistema.
+Com es pot veure a l'exemple, la variable local a la biblioteca {\em watchdog\_list} emmagatzema l'estat de totes les tasques i s'hi accedeix a la funció {\bf watchdogTouch()} que protegeix l'accés amb un {\em mutex}. La tasca {\bf watchdogTask()}\index{watchdogTask()} avalua aquesta variable d'estat i si tot ha anat correctament (totes les tasques han cridat la seva funció almenys un cop), alimenta el {\em watchdog}. En cas contrari, la tasca no l'alimenta i acabarà per reiniciar el sistema.
 
 A l'exemple aquesta tasca s'executa un cop cada segon, i el {\em watchdog} s'ha de configurar d'acord a aquest temps (un temps de {\em watchdog} de 2 segons seria l'adequat). La resta de tasques haurien de cridar la funció {\bf watchdogTouch()} amb un període de temps prou curt (per exemple cada 500 mil·lisegons) per tal de que tot el sistema s'executi correctament.

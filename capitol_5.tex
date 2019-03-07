@@ -35,7 +35,7 @@ void my_HardFault_Handler(uint32_t *stack) {
 }
 \end{lstlisting}
 
-A la primera part (veure Llistat~\ref{HardFaultHandler_1}) de la \gls{ISR} es treu per la consola de debug la causa de l'excepció ({\em bus fault}, {\em memory access}, {\em divide by zero}, etc.).
+A la primera part (veure Llistat~\ref{HardFaultHandler_1}) de la \gls{ISR} es treu per la consola de {\em debug} la causa de l'excepció ({\em bus fault}, {\em memory access}, {\em divide by zero}, etc.).
 
 Tot seguit es treu per la mateixa consola els valors dels registres que hi ha a l'\gls{stack} per tenir dades que ens permetin localitzar l'error (Llistat~\ref{HardFaultHandler_2}).
 
@@ -196,7 +196,7 @@ Si usem l'analitzador lògic per mesurar els temps, veiem la imatge de la Figura
 \begin{figure}
  \centering
  \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/ADC_LP1_Measurement.png}
- \caption{Captura de les mesures temps de l'analitzador lògic}
+ \caption{Captura de les mesures de temps amb l'analitzador lògic}
  \label{fig:adc_logic}
 \end{figure}
 
