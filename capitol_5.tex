@@ -552,7 +552,7 @@ D'aquesta manera, la funció {\em Registra\_tasca()} passaria a ser una crida a 
 Aquesta estratègia te un problema, i és que la funció de {\em callback} se la crida dins del context d'interrupció, cosa no sempre desitjable, ja que les ISR haurien de ser sempre funcions molt curtes, sense gaire funcionalitat, tal com es va explicar a \fullref{ch:IRQ}. Per solucionar això es pot canviar una mica l'estratègia i mantenir una estructura que permeti saber quina funció cal cridar i tenir una funció de {\em callback} única que mantingui aquesta informació. Llavors, a la funció {\em Executa\_kernel()} es comprova si s'ha de cridar alguna funció i llavors es crida des d'allà, fora del context d'interrupció. Això es pot veure al Llistat~\ref{kernel_efm32}.
 
 \index{RTCDRV\_AllocateTimer()}\index{RTCDRV\_StartTimer()}
-\begin{lstlisting}[style=customc,caption={Estructura bàsica de la funció Executa\_kernel()},label=kernel_efm32]
+\begin{lstlisting}[style=customc,caption={Estructura bàsica de la funció Executa\_tasca()},label=kernel_efm32]
 /* Aquesta funcio es crida des d'una ISR, ha de ser curta */
 static void TimerCallback(RTCDRV_TimerID_t id, void* param) {
   int timer;

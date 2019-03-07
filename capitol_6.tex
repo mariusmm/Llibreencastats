@@ -39,7 +39,7 @@ A la primera part (veure Llistat~\ref{HardFaultHandler_1}) de la \gls{ISR} es tr
 
 Tot seguit es treu per la mateixa consola els valors dels registres que hi ha a l'\gls{stack} per tenir dades que ens permetin localitzar l'error (Llistat~\ref{HardFaultHandler_2}).
 
-\begin{lstlisting}[style=customc,caption=Codi HardFault\_Handler,label=HardFaultHandler_2]
+\begin{lstlisting}[style=customc,caption=Codi HardFault\_Handler (continuació),label=HardFaultHandler_2]
 void my_HardFault_Handler(uint32_t *stack) {
   ...
   printf("sp = 0x%08lX\r\n",  (uint32_t) stack);
@@ -761,7 +761,7 @@ Primer es treuen per la consola les mides de totes dues estructures, que encaixe
 
 Cal destacar com s'accedeix byte a byte a l'estructura. Es defineix un apuntador a byte ({\em uint8\_t} *) i es fa apuntar a l'adreça d'inici de l'estructura que es vol analitzar. Tot seguit es va imprimint byte a byte el contingut de la memòria on està emmagatzemada l'estructura.
 
-\begin{lstlisting}[style=customc,caption={Estructura d'exemple empaquetada},label=struct_example]
+\begin{lstlisting}[style=customc,caption={Mostrant una estructura {\em byte} a {\em byte}},label=struct_example]
 ...
   uint8_t *buffer;
 
