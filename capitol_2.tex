@@ -148,7 +148,7 @@ Al codi del Llistat~\ref{memorymappedCode} es defineixen les 3 adreces de memòr
 Enlloc d'accedir a cada registre per separat, com hem fet a l'exemple, es pot definir una estructura que es correspongui amb cada un dels registres d’un perifèric en concret i que aquesta apunti a l'adreça base del perifèric. Així, per accedir a un registre en concret només caldrà accedir al camp de l'estructura definida.
 
 Un exemple d'això el tenim a fitxer efm32g\_devinfo.h, que defineix
-una estructura d'aquest estil, com es veu al llistat~\ref {devinfo}.
+una estructura d'aquest estil, com es veu al Llistat~\ref {devinfo}.
 
 \begin{lstlisting}[label=devinfo,caption={Exemple de definició d'estructura per accedir a memòria},style=customc]
 typedef struct
@@ -174,14 +174,14 @@ typedef struct
 } DEVINFO_TypeDef; /** @} */
 \end{lstlisting}
 
-Que es correspon amb els registres de la regió DI a la que hem accedit abans. Aquesta estructura es fa servir al fitxer efm32tg840f32.h definint la referència mostrada al llistat~\ref {devinfodec}.
+Que es correspon amb els registres de la regió DI a la que hem accedit abans. Aquesta estructura es fa servir al fitxer efm32tg840f32.h definint la referència mostrada al Llistat~\ref {devinfodec}.
 
 \begin{lstlisting}[label=devinfodec,caption={Declaració d'una variable d'accés a la memòria estructurada},style=customc]
 #define DEVINFO ((DEVINFO_TypeDef *) DEVINFO_BASE) /**< DEVINFO base ptr */
 \end{lstlisting}
 
 De manera que es pot accedir als mateixos registres com s'indica al
-llistat~\ref {devinfouse}. Que és una forma bastant més còmoda de treballar.
+Llistat~\ref {devinfouse}. Que és una forma bastant més còmoda de treballar.
 
 \begin{lstlisting}[label=devinfouse,caption={Ús de l'estructura d'accés},style=customc]
 aux = DEVINFO->MSIZE;
