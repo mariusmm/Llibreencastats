@@ -65,12 +65,14 @@ Per descarregar el fitxer binari a la ROM, cal un dispositiu extern al microcont
 
 A més, aquest programador sol afegir característiques de {\em debug}, de manera que podem controlar l'execució del microcontrolador, inspeccionar el valor de variables o posicions de memòria, accedir a la consola de {\em debug}, etc.
 
+En el cas de la nostra placa de prototipat, aquest programador i {\em debugger} està integrat a la pròpia PCB, de manera que no ens cal res més que la PCB i un cable USB per programar i {\em debugger} el microcontrolador sense cap altre dispositiu auxiliar.
+
 \subsection{{\em Toolchain}}
 Com per tot processador, cal un seguit d'eines que ajudin a traduir el nostre codi (normalment C o C++) en instruccions màquina que la CPU pugui processar. Aquestes eines son el compilador i el {\em linker}. El compilador fa aquesta traducció pròpiament dita i genera fitxers objecte i el {\em linker} recull tot de fitxers objecte per crear un sol fitxer executable o biblioteca.
 
 En el cas dels microcontroladors, hem d'acabar obtenint un fitxer executable que serà el que el microcontrolador començarà a executar quan s'engegui. Aquest fitxer haurà de tenir tot el conjunt de biblioteques i funcions necessàries per la correcta execució de l'aplicació, ja que en aquest context no tenim cap mena de sistema operatiu que ens proporcioni cap ajuda ni biblioteques.
 
-També és habitual disposar d'algun \gls{IDE} que ens agrupa totes les eines en un entorn amigable i senzill (veure~Figura~\ref{fig:IDE}.)
+També és habitual disposar d'algun \gls{IDE} que ens agrupa totes les eines en un entorn amigable i senzill (veure~Figura~\ref{fig:IDE}).
 
 \begin{figure}
  \centering
@@ -79,5 +81,5 @@ També és habitual disposar d'algun \gls{IDE} que ens agrupa totes les eines en
  \label{fig:IDE}
 \end{figure}
 
-L'\gls{IDE} de Simplicity fa servir com a compilador el compilador per ARM de GNU \cite{ARMGNU}. Aquest compilador és de codi obert i lliure i és àmpliament utilitzant per la majoria de fabricants a les seves eines.
+L'\gls{IDE} de Simplicity fa servir com a compilador el compilador per ARM de GNU \cite{ARMGNU}. Aquest compilador és de codi obert i lliure i és àmpliament utilitzant per la majoria de fabricants a les seves eines. Aquest es un compilador creuat, és a dir, es pot executar en un processador diferent del processador pel que està compilant el codi.
 
