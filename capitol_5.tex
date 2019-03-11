@@ -10,7 +10,7 @@
 %% FSM, FSMD, HCFSM, Program-state machine model (PSM), Dataflow, 02auSynchronous dataflow, 
 
 Fins ara hem vist com controlar els perifèrics més habituals que poden trobar a un microcontrolador, fent ús de les biblioteques dels fabricants. 
-També s'ha observat que la programació per sistemes encastats és força diferent a la d'una aplicació d'escriptori o d'una {\em app} per un telèfon mòbil. Per això cal ara dedicar uns capítols a presentar els diferents models de programació més utilitzats en la programació de sistemes encastats. Per això caldrà introduir conceptes teòrics potser nous i classificar aquestes models segons diferents aspectes per donar un seguit de criteris a l'hora de decidir quin model utilitzar per cada aplicació concreta.
+També s'ha observat que la programació per sistemes encastats és força diferent a la d'una aplicació d'escriptori o d'una {\em app} per un telèfon mòbil. Per això cal ara dedicar uns capítols a presentar els diferents models de programació més utilitzats en la programació de sistemes encastats. També caldrà introduir conceptes teòrics potser nous i classificar aquestes models segons diferents aspectes per donar un seguit de criteris a l'hora de decidir quin model utilitzar per cada aplicació concreta.
 
 \chapter{Model d'interfície amb perifèrics}
 \label{ch:modelinterficie}
@@ -52,9 +52,9 @@ Dit això, el cas més senzill d'estil de programació per sistemes encastats é
 
 L'exemple \fullref{gpio_example} \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_1}{\bf al repositori}) és un exemple senzill d'aquest tipus de codi.
 
-Quan l'aplicació es complica i comença a tenir més camins de decisió i condicions, s'acostuma a canviar el model cap a màquines d'estat finits, com es veurà al següent apartat
+Quan l'aplicació es complica i comença a tenir més camins de decisió i condicions, s'acostuma a canviar el model cap a màquines d'estat finits, com es veurà al següent apartat.
 
-Aquest model de programació és el que es fa servir en Arduino, on s'ha separat en dues funcions, una per configurar els perifèrics i demès (funció {\bf setup()} i la funció principal que es va cridant un cop i un altre (funció {\bf loop()}. La funció {\bf main()} del sistema Arduino bàsicament executa el que es veu al llistat~\ref{arduinomain} (es pot veure a \$ARDUINO/hardware/arduino/avr/cores/arduino/main.cpp).
+Aquest model de programació és el que es fa servir en Arduino, on s'ha separat en dues funcions, una per configurar els perifèrics i demès (funció {\bf setup()} i la funció principal que es va cridant un cop i un altre (funció {\bf loop()}. La funció {\bf main()} del sistema Arduino bàsicament executa el que es veu al llistat~\ref{arduinomain} (es pot veure a \$ARDUINO\$/hardware/arduino/avr/cores/arduino/main.cpp).
 
 \begin{lstlisting}[style=customc, label=arduinomain, caption=funció main() d'Arduino]
  int main(void)
@@ -234,7 +234,7 @@ El codi es troba al repositori, al \href{https://github.com/mariusmm/cursembedde
  \label{fig:FSM_THERMO}
 \end{figure}
 
-El codi d'aquest projecte comparteix funcions jo crides a la biblioteca \gls{ADC} d'EMLIB ja vistes a \fullref{sub:ADC_example}. S'han encapsulat dins la funció \index{ADCGetValue()}{\bf ADCGetValue()}, que fa {\em polling} de l'ADC per obtenir un valor de conversió (veure el Llistat~\ref{ADCGetValue}).
+El codi d'aquest projecte comparteix funcions o crides a la biblioteca \gls{ADC} d'EMLIB ja vistes a \fullref{sub:ADC_example}. S'han encapsulat dins la funció \index{ADCGetValue()}{\bf ADCGetValue()}, que fa {\em polling} de l'ADC per obtenir un valor de conversió (veure el Llistat~\ref{ADCGetValue}).
 
 \index{ADCGetValue()}\index{ADC\_Start()}\index{ADC\_DataSingleGet()}
 \begin{lstlisting}[style=customc,caption=funció ADCGetValue(),label=ADCGetValue]
@@ -271,7 +271,7 @@ També existeixen unes funcions de simulació {\bf SwitchOff()} i {\bf SwitchOn(
 
 La implementació de la FSM és molt senzilla i es veu al codi del Llistat~\ref{codi_FSM_thermosta} i al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FSM_1}{repositori}. Primerament es llegeix la temperatura (simulada) i llavors, segons quin estat estigui la màquina, es compara amb un valor o un altre per saber si cal canviar d'estat o mantenir-se en l'actual. A cada estat es crida a la funció de sortida {\bf SwitchOff()} o {\bf SwitchOn()} (la màquina és una màquina d'estats de Moore).
 
-Cal fer notar que la FSM està permanentment consultant el valor del termòmetre (simulat), ja que quan acaba una avaluació de l'estat i pren la sortida oportuna, la el codi torna a començar el bucle. Això pot ser un problema en segons quins casos, com el que el sensor a llegir tingui un nombre limita de lectures o calgui un consum del dispositiu molt baix.
+Cal fer notar que la FSM està permanentment consultant el valor del termòmetre (simulat), ja que quan acaba una avaluació de l'estat i pren la sortida oportuna, el codi torna a començar el bucle. Això pot ser un problema en segons quins casos, com el que el sensor a llegir tingui un nombre limita de lectures o calgui un consum del dispositiu molt baix.
 
 \begin{remark}
  Tot i que els dos exemples que han aparegut sobre FSMs son amb només dos estats, una màquina d'estats en pot tenir un nombre arbitrari segons les necessitats de l'aplicació.
@@ -316,7 +316,7 @@ Com s'ha dit anteriorment, una FSM consta de 4 operacions:
 
 \begin{itemize}
  \item Llegir les entrades. Això provocarà o no canvis en l'estat i les sortides.
- \item Calcular on es calculen els nous valors de les variables.
+ \item Calcular els nous valors de les variables.
  \item Escriure les sortides que calgui segons l'estat de la màquina d'estats.
  \item Calcular l'estat següent segons les entrades llegides, les diverses variables i l'estat actual.
 \end{itemize}
@@ -344,7 +344,7 @@ int main(void) {
 }
 \end{lstlisting}
 
-I l'exemple del termòstat canviaria tal com es veu al Llistat~\ref{FSMsketchTermostat} i al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FSM_2}{repositori}.
+Si adaptem l'exemple del termòstat a aquest mètode de codificació, quedaria tal com es veu al Llistat~\ref{FSMsketchTermostat} i al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FSM_2}{repositori}.
 \index{read\_inputs()}\index{calc\_values()}\index{write\_outputs()}\index{next\_estate()}
 \begin{lstlisting}[style=customc,caption={Codi de termòstat amb l'estructura bàsica d'una FSM},label=FSMsketchTermostat]
 
