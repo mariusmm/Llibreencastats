@@ -1508,12 +1508,71 @@ Un cas especial per accedir a la \gls{FLASH} és el dels {\em bootloaders}. Un {
 
 El més habitual en {\em bootloaders} per sistemes encastats és que puguin rebre una nova imatge de l'executable de l'aplicació a través d'un dels ports sèrie del sistema \footnote{També hi ha {\em bootloaders} que poden rebre la imatge per USB, via ràdio, per un port Ethernet, llegir-la d'una tarja SD, etc.}. Per realitzar aquest tasca, el {\em bootloader} ha de poder accedir i escriure a tota la memòria FLASH del microcontrolador \cite{AN0003}.
 
+
+\chapter{Mòduls criptogràfics}
+Molts dels microcontroladors actuals incorporen perifèrics per accelerar els càlculs de xifratge i desxifrage de dades. La majoria suporten directament el xifratge i desxifratge dels mètodes més habituals (AES, DES, 3DES, etc.) i proporcionen acceleració a d'altres mètodes més inusuals. A més, acostumen anar acompanyats de biblioteques que ajudes a un ús senzill d'aquests processos que, en ocasions, son força complexos.
+
+Pel cas de la família EFM32 es te un mòdul criptogràfic compatible amb AES en les versions més antigues dels microcontroladors i un mòdul millorat anomenat {\bf CRYPTO} a les famílies més modernes \cite[453]{EFM32TGRM}. Pel microcontroladors d'ST hi ha un perifèric anomenat processador criptogràfic ({\em Cryptographic processor}) i el {\em Hash processor} per realitzar tasques relacionades amb el xifratge de dades \cite[720]{STM32F4RM}.
+
+En el cas de SiliconLabs i el microcontrolador que tenim a la nostra placa de prototipat (Tiny Gecko), el mòdul AES suporta, com el seu propi nom indica, el mètode de xifratge AES, en les versions de clau de 128, 192 i 256 bits i treballant en blocs de 128 bits de dades. Xifrar un missatge de 128 bits li porta 54 cicles de rellotge en el cas d'una clau de 128 bits i de 75 cicles amb la clau de 256 bits. És per tant, una implementació força ràpida i eficient de l'algorisme i, no cal dir-ho, millor i més robusta que la que puguem fer nosaltres amb codi.
+
+La versió del mòdul per microcontroladors més moders, anomenada CRYPTO, accelera també funcions de hash (SHA-1, SHA-224 i SHA-256). parts de xifratge el·líptic (ECC) i porta acompanyant una biblioteca SW que suporta d'altres algorismes (DES, 3DES, MD5, RC4) accelerats en part pel mòdul HW.
+
+L'ús d'aquesta mena de mòduls acostuma a ser força senzill, ja que només cal configurar la clau de xifratge i el mètode a usar i a partir d'aquí emplenar el buffer i donar l'ordre de xifrar (o desxifrar). Un cop acabat el xifratge, es pot llegir el buffer amb les dades xifrades i fer-les servir com calgui.
+
+\section{Xifrant dades amb AES-128}
+
+Al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/AES_1}{repositori hi ha un exemple} que xifra una cadena de text amb AES-128 i el mètode conegut com ECB (Electronic Codebook), el mètode més senzill de xifratge. Primer cal generar una clau de xifratge i un text a xifrar (Llistat~\ref{cryptokey}).
+\begin{lstlisting}[style=customc,caption=Clau i text a xifrar,label=cryptokey]
+uint8_t myKey[16] = {0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32};
+char my_message[] = "This is a plain message to be encrypted with the AES module.";
+uint8_t my_buffer[64];
+\end{lstlisting}
+
+Donat que la biblioteca emlib suporta el perifèric, només cal una crida a la funció especifica per obtenir el xifrat del buffer, tal com es veu al Llistat~\ref{aes_ecb128}.
+
+\index{AES\_ECB128()}
+\begin{lstlisting}[style=customc,caption=Operació de xifratge,label=aes_ecb128]
+ AES_ECB128(my_buffer, (uint8_t*) my_message, my_message_len, myKey, true);
+\end{lstlisting}
+
+Un cop retorna la funció, a {\em my\_buffer} ja hi tindrem el missatge xifrat. A l'exemple, agafem aquest buffer xifrat i el desxifrem per comprovar que, efectivament, el procés ha estat correcte:
+
+\index{AES\_DecryptKey128()}\index{AES\_ECB128()}
+\begin{lstlisting}[style=customc,caption=Operació de xifratge,label=aes_ecb128]
+/* Generate decrypt key from original key */
+AES_DecryptKey128(decryptionKey, myKey);
+
+/* Decrypt message */
+AES_ECB128((uint8_t) my_buffer_decrypt, my_buffer, my_message_len, decryptionKey, false);
+\end{lstlisting}
+
+Aquí cal fer notar que primer hem de generar la clau de desxifratge a partir de la clau de xifratge. Aquest procés també es fa via HW amb el perifèric AES.
+
+A la consola es van treien els valors que es van obtenint a cada pas, tal com es veu a la Figura~\ref{fig:aes_console}.
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.95\textwidth, keepaspectratio]{imatges/AESWebCheckConsole.png}
+ \caption{Consola de l'exemple AES\_1}
+ \label{fig:aes_console}
+\end{figure}
+
+El resultat també el podem comprovar a una eina externa per corroborar que el procés és vàlid i compatible amb algun altre SW de xifratge/desxifratge AES-128. Podem fer servir la web {\em aes online domain tools} per comprovar-ho (\href{http://aes.online-domain-tools.com/}{link}, veure Figura~\ref{fig:aes_web}).
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/AESWebCheck.png}
+ \caption{Web per desxifrar el text xifrat de l'exemple AES\_1}
+ \label{fig:aes_web}
+\end{figure}
+
 \chapter{Altres perifèrics}
 \label{ch:otherperipherals}
 Fins ara s'han introduït els perifèrics més habituals i que es poden trobar a als microcontroladors actuals. Tot i això, hi ha altres perifèrics més específics d'algun àmbit d'aplicació que no s'han presentat. En podem enumerar uns quants sense poder ser exhaustius:
 
 \begin{itemize}
- \item Mòduls {\em crypto} que permeten operacions de tipus criptogràfic per realitzar càlculs de claus criptogràfiques. Sovint aquesta mena de mòduls suporten directament el xifratge o desxifratge en estàndards com AES, DES, triple-DES, etc. \cite[720]{STM32F4RM}\cite[772]{STM32F4RM}\cite[453]{EFM32TGRM}.
+%  \item Mòduls {\em crypto} que permeten operacions de tipus criptogràfic per realitzar càlculs de claus criptogràfiques. Sovint aquesta mena de mòduls suporten directament el xifratge o desxifratge en estàndards com AES, DES, triple-DES, etc. \cite[720]{STM32F4RM}\cite[772]{STM32F4RM}\cite[453]{EFM32TGRM}.
  \item \gls{DMA} avançats, que permeten fer transferències complexes, no tant sols d'un {\em buffer} d'una sola dimensió (com els {\em arrays}) si no de dues dimensions per moure imatges o matrius de 2 dimensions \cite[339]{STM32F4RM}.
  \item {\em Drivers} \gls{LCD} que poden controlar directament pantalles \cite[480]{STM32F4RM}\cite[490]{EFM32TGRM}. Segons el model i el fabricant aquest mòdul podrà controlar diferents tipus de pantalla (LCD o TFT), amb color o blanc i negre, diferents resolucions i profunditat de color, etc.
  \item Mòdul controlador de USB que permet connectar i controlar el microcontrolador al bus USB \cite[965]{STM32F4RM}\cite[1446]{EFM32GG11RM}.
@@ -1525,6 +1584,251 @@ Fins ara s'han introduït els perifèrics més habituals i que es poden trobar a
 Treballar amb aquests perifèrics, tot i que no ho veurem en aquest llibre, és força similar a la resta de perifèrics que hem vist: estan mapats a memòria i tenen un conjunt de registres que permet controlar el perifèric a través de llegir i escriure aquests registres. Els fabricants proporcionen llibreries per facilitar-ne l'ús com amb la resta de perifèrics que hem vist.
 
 Els perifèrics més complexos (per exemple USB o Ethernet) acostumen a portar associats una llibreria proporcionada pel fabricant o per tercers per poder controlar el perifèric i simplificar-ne l'ús. Així, per exemple, és habitual fer servir la llibreria LwIP per tenir funcionalitat de xarxa ({\em sockets}, TCP, UDP, IP, etc.) \cite{lwip}\cite{wiki:lwip} i que els fabricants proporcionin documentació o codi per enllaçar aquesta llibreria amb el seu perifèric.
+
+
+\section{\em Peripheral Reflex System}
+
+Un perifèric que proporciona el fabricant Silicon Labs per la seva línia EFM32 és el {\em Peripheral Reflex System} (\gls{PRS}). Aquest sistema és una mena de xarxa que permet a diferents perifèrics comunicar-se entre si sense involucrar la CPU, de manera que uns envien senyals que d'altres recullen per engegar alguna tasca \cite[135]{EFM32TGRM}. 
+
+D'aquesta manera, és possible que un Timer enviï un senyal a la UART perquè inici una transmissió, o un GPIO engegui un Timer i permeti comptar quant de temps ha estat pitjat un botó. Tot això es fa sense que la CPU intervingui per a res, estalviant energia i simplificant el codi. Els senyals que es generen i es reben estan dins de canals, de manera que poden funcionar diferents canals simultàniament i connectar-hi diferents perifèrics sense que s'interfereixin. Aquest perifèric només es troba als dispositius de Silicon Labs i, fins al moment, cap altre fabricant inclou res de similar en els seus microcontroladors \cite{AN0025}.
+
+\subsection{Un exemple amb PRS senzill}
+En aquest exemple d'ús del \gls{PRS} el farem servir per comptar el temps que es polsa un dels botons de la placa de prototipat. Per fer-ho, configurarem el port GPIO per a que generi un senyal PRS per nivell i aquest alimenti a un dels canals del Timer 0. Quan es detecti el flanc de baixada del GPIO (es pitja el botó), el Timer començarà a comptar i quan es detecti el flanc de pujada (es deixa anar el botó) el Timer s'aturarà i llençarà una interrupció de tipus {\em Input Capture}. Al final, el que tindrem al registre {\em Capture} 0 del Timer serà el nombre de {\em ticks} que ha estat pitjat el botó 0.
+
+La configuració del Timer és la que es veu al Llistat~\ref{PRSTimer}. Al codi es veu que es tria el canal 2 del PRS per activar l'{\em input capture} i es configura el Timer per a que s'engegui quan es rebi un flanc de baixada i s'aturi amb el flanc de pujada. També es pre-escala el rellotge per 1024, deixant-lo en $14.000.000 / 1024 = 13.617,875 Hz$.
+
+\index{TIMER\_InitCC()}\index{TIMER\_Init()}\index{TIMER\_IntEnable()}\index{NVIC\_EnableIRQ()}
+\begin{lstlisting}[style=customc,caption=Configuració del Timer i l'{\em input capture},label=PRSTimer]
+static void TimerConfig(void) {
+  TIMER_InitCC_TypeDef timerCCInit = {
+    .eventCtrl = timerEventFalling,
+    .edge = timerEdgeFalling,
+    .prsSel = timerPRSSELCh2,
+    .cufoa = timerOutputActionNone,
+    .cofoa = timerOutputActionNone,
+    .cmoa = timerOutputActionNone,
+    .mode = timerCCModeCapture,
+    .filter = false,
+    .prsInput = true,
+    .coist = false,
+    .outInvert = false
+  };
+
+  TIMER_InitCC(TIMER0, 0, &timerCCInit);
+
+  TIMER_Init_TypeDef timerInit = {
+    .enable = false,
+    .debugRun = false,
+    .prescale = timerPrescale1024,
+    .clkSel = timerClkSelHFPerClk,
+    .fallAction = timerInputActionReloadStart,
+    .riseAction = timerInputActionStop,
+    .mode = timerModeUp,
+    .dmaClrAct = false,
+    .quadModeX4 = false,
+    .oneShot = false,
+    .sync = false
+  };
+
+  TIMER_Init(TIMER0, &timerInit);
+  TIMER_IntEnable(TIMER0, TIMER_IF_CC0);
+  NVIC_EnableIRQ(TIMER0_IRQn);
+}
+\end{lstlisting}
+
+La configuració del pin és més senzilla, tal com es veu al Llistat~\ref{PRSGPIO}. Simplement es configura que els GPIO generaran senyals PRS i es configura el canal número 2 per que rebi el valor del pin 8.
+
+\index{GPIO\_PinModeSet()}\index{GPIO\_IntConfig()}\index{GPIO\_InputSenseSet()}\index{PRS\_SourceSignalSet()}
+\begin{lstlisting}[style=customc,caption=Configuració del GPIO per generar un senyal PRS,label=PRSGPIO]
+ static void GPIOConfig(void) {
+  GPIO_PinModeSet(gpioPortD, 7, gpioModePushPullDrive, 0); /* LED */
+  GPIO_PinModeSet(gpioPortD, 8, gpioModeInput, 0); 		 /* Boto 0 */
+  GPIO_PinModeSet(gpioPortB, 11, gpioModeInput, 0); 		 /* Boto 1 */
+
+  /* Set Interrupt configuration for both buttons */
+  GPIO_IntConfig(gpioPortD,  8, false, true, true);
+  GPIO_IntConfig(gpioPortB, 11, false, true, true);
+
+  GPIO_InputSenseSet(GPIO_INSENSE_PRS, _GPIO_INSENSE_RESETVALUE);
+
+  PRS_SourceSignalSet(2, PRS_CH_CTRL_SOURCESEL_GPIOH, PRS_CH_CTRL_SIGSEL_GPIOPIN8, prsEdgeOff);
+}
+\end{lstlisting}
+
+Per últim, el Timer està configurat per generar una \gls{IRQ} en quan capturi el valor del comptador el CC1. Per tant, cal escriure la \gls{ISR} corresponent i tractar les dades com toca. En aquest cas només es treu per la consola el valor llegit en ticks del Timer. A la funció {\bf main()} tant sols hi ha la configuració dels perifèrics, ja que un cop configurats, la CPU no cal que faci res fins que no es crida la ISR; és per això que dins el bucle principal es posa la CPU en el mode EM1 de baix consum amb la crida a la funció {\bf EMU\_EnterEM1()}\index{EMU\_EnterEM1()}.
+
+\index{TIMER0\_IRQHandler()}\index{TIMER\_IntGet()}\index{TIMER\_IntClear()}\index{TIMER\_CaptureGet()}
+\begin{lstlisting}[style=customc,caption=ISR del Timer,label=PRSISR]
+void TIMER0_IRQHandler(void) {
+  volatile uint32_t time_value = 0;
+
+  uint32_t aux;
+  aux = TIMER_IntGet(TIMER0);
+
+  TIMER_IntClear(TIMER0, aux);
+
+  time_value = TIMER_CaptureGet(TIMER0, 0);
+  printf("time button 0: %lu\r\n", time_value); // 13672 ticks / second
+} 
+\end{lstlisting}
+
+
+
+\subsection{Exemple amb PRS, DMA, DAC i ADC}
+
+Anem a veure un exemple força complex, on intervindran el DMA, l'ADC, el DAC i un parell de Timers. El que farà l'exemple serà enregistrar els valors durant 2 segons d'una entrada analògica per replicar-la després per una sortida també analògica. Per això, es configurarà l'ADC per que faci les lectures i es vagin guardant a un buffer fent servir el DMA i després es faci l'operació a la inversa cap el DAC.
+
+Per marcar el ritme de captura de l'ADC i de conversió del DAC es farà servir un senyal PRS proporcionat per Timers. D'aquesta manera, es configurarà un {\em Timer} per a que generi un senyal PRS cada cop que fa {\em overflow} i aquest senyal engegui el procés de conversió de l'ADC i un altre Timer per generar un senyal similar pel DAC.
+
+A l'exemple es configurarà l'ADC perquè prengui mostres del canal 6 amb referencia de tota l'escala, tot seguit es configura perquè el seu {\em trigger} sigui el canal 0 del PRS (veure Llistat~\ref{DMAADCPRS}).
+
+\index{ADC\_InitSingle()}
+\begin{lstlisting}[style=customc,caption=Configuració de l'ADC perquè funcioni amb el PRS ,label=DMAADCPRS]
+static void ADCConfig(void) {
+  ...
+  singleInit.reference = adcRefVDD;
+  singleInit.input = adcSingleInpCh6;
+  
+  /* Use PRS channel 0 */
+  singleInit.prsEnable = true;
+  singleInit.prsSel = adcPRSSELCh0;
+  ADC_InitSingle(ADC0, &singleInit);
+  ...
+}
+\end{lstlisting}
+
+A continuació es configura el canal PRS perquè sigui el Timer 0 qui generi el senyal i es configurà també el Timer 0 perquè generi un pols a la freqüència desitjada (Llistat~\ref{DMAADCTIMER}).
+
+\index{TIMER\_Init()}\index{TIMER\_TopBufSet()}\index{PRS\_SourceSignalSet()}
+\begin{lstlisting}[style=customc,caption=Configuració del Timer0 perquè funcioni amb el PRS ,label=DMAADCTIMER]
+static void ADCConfig(void) {
+  ...
+  PRS_SourceSignalSet(0, PRS_CH_CTRL_SOURCESEL_TIMER0, PRS_CH_CTRL_SIGSEL_TIMER0OF, prsEdgeOff);
+
+  TIMER_Init_TypeDef timerInit = TIMER_INIT_DEFAULT;
+  timerInit.enable = false;
+  TIMER_Init(TIMER0, &timerInit);
+  TIMER_TopBufSet(TIMER0, CMU_ClockFreqGet(cmuClock_TIMER0)/SAMPLING_FREQ);
+}
+\end{lstlisting}
+
+Amb això tindrem que quan s'engegui el Timer 0, aquest anirà generant senyals pel PRS que faran que l'ADC faci una conversió de senyal. Ara cal configurar el DMA perquè reculli aquesta dada i l'emmagatzemi on pertoca. Això es farà de forma molt similar a l'exemple anterior, configurant el canal de manera que la font del senyal serà l'ADC (paràmetre DMAREQ\_ADC0\_SINGLE)  i que l'origen de dades no s'ha de canviar i el destí s'ha d'incrementar de 2 en 2 (ja que llegirem dades de l'ADC de tipus uint16\_t que son de 2 bytes) (Llistat~\ref{DMAADCDMA}).
+
+\index{DMA\_CfgChannel()}\index{DMA\_CfgDescr()}
+\begin{lstlisting}[style=customc,caption=Configuració del DMA per obtenir dades de l'ADC, label=DMAADCDMA]
+static void DMAConfig(void) {
+  ...
+  /* configure DMA for ADC reads */
+  dma_cb_adc.cbFunc = dmaTransferCompleteADC;
+  dma_cb_adc.userPtr = NULL;
+
+  chnlCfg.highPri = false;
+  chnlCfg.enableInt = true;
+  chnlCfg.select = DMAREQ_ADC0_SINGLE;
+  chnlCfg.cb = &dma_cb_adc;
+  DMA_CfgChannel(DMA_CHANNEL_ADC, &chnlCfg);
+
+  descrCfg.srcInc = dmaDataIncNone;
+  descrCfg.dstInc = dmaDataInc2;
+  descrCfg.size = dmaDataSize2;
+  descrCfg.arbRate = dmaArbitrate1;
+  descrCfg.hprot = 0;
+  DMA_CfgDescr(DMA_CHANNEL_ADC, true, &descrCfg);
+  ...
+}
+\end{lstlisting}
+
+Per últim, per engegar aquest procés ho farem a través del botó 0 de la placa i per tant hem de posar el codi que engega el Timer 0 i que activa el DMA a la ISR corresponent (Llistat~\ref{DMAADCISR}).
+
+\index{DMA\_ActivateBasic()}\index{TIMER\_CounterSet()}\index{TIMER\_Enable()}
+\begin{lstlisting}[style=customc,caption=Configuració del DMA per obtenir dades de l'ADC, label=DMAADCISR]
+void GPIO_EVEN_IRQHandler(void) {
+  uint32_t aux;
+
+  /* clear flags */
+  aux = GPIO_IntGet();
+  GPIO_IntClear(aux);
+
+  LedOn();
+
+  /* Activate DMA transfer */
+  DMA_ActivateBasic(DMA_CHANNEL_ADC, true, false, (void*)DMAbufferADC, (void*)&(ADC0->SINGLEDATA), SAMPLES-1);
+
+  /* Activate TIMER 0 */
+  TIMER_CounterSet(TIMER0, 0);
+  TIMER_Enable(TIMER0, true);
+}
+\end{lstlisting}
+
+Un procés molt similar és el que cal fer per realitzar l'operació inversa, és a dir, fer que el DMA transfereixi les dades obtingudes cap al DAC perquè aquest generi el senyal analògic corresponent. Primer es configura el DAC indicant que cal que faci una conversió cada cop que rebi un senyal del canal PRS número 3 (Llistat~\ref{DMADAC}).
+
+\index{DAC\_InitChannel()}
+\begin{lstlisting}[style=customc,caption=Configuració del DAC perquè funcioni amb el PRS, label=DMADAC]
+static void DACConfig(void) {
+  ...
+  /* Use PRS channel 3 */
+  initChannel.prsEnable = true;
+  initChannel.prsSel = dacPRSSELCh3;
+  DAC_InitChannel(DAC0, &initChannel, 1); 
+  ...
+}
+\end{lstlisting}
+A continuació es configura el canal número 3 del PRS perquè obtingui el senyal del Timer 1 (Llistat~\ref{DMADACPRS}). I per últim es configura el DMA perquè el seu {\em trigger} sigui el canal 1 del DAC (Llistat~\ref{DMADACDMA}).
+
+\index{TIMER\_Init()}\index{TIMER\_TopBufSet()}\index{PRS\_SourceSignalSet()}
+\begin{lstlisting}[style=customc,caption=Configuració del PRS i el Timer, label=DMADACPRS]
+static void DACConfig(void) {
+  ...
+  /* Configure PRS channel 3 trigger to be TIMER1*/
+  PRS_SourceSignalSet(3, PRS_CH_CTRL_SOURCESEL_TIMER1, PRS_CH_CTRL_SIGSEL_TIMER1OF, prsEdgeOff);
+
+  TIMER_Init_TypeDef timerInit = TIMER_INIT_DEFAULT;
+  timerInit.enable = false;
+  TIMER_Init(TIMER1, &timerInit);
+  TIMER_TopBufSet(TIMER1, CMU_ClockFreqGet(cmuClock_TIMER1)/SAMPLING_FREQ);
+}
+\end{lstlisting}
+
+\index{DMA\_CfgChannel()}\index{DMA\_CfgDescr()}
+\begin{lstlisting}[style=customc,caption=Configuració del PRS i el Timer, label=DMADACDMA]
+static void DMAConfig(void) {
+  ...
+  chnlCfg.highPri = false;
+  chnlCfg.enableInt = true;
+  chnlCfg.select = DMAREQ_DAC0_CH1;
+  chnlCfg.cb = &dma_cb_dac;
+  DMA_CfgChannel(DMA_CHANNEL_DAC, &chnlCfg);
+
+  descrCfg.srcInc = dmaDataInc2;
+  descrCfg.dstInc = dmaDataIncNone;
+  descrCfg.size = dmaDataSize2;
+  descrCfg.arbRate = dmaArbitrate1;
+  descrCfg.hprot = 0;
+  DMA_CfgDescr(DMA_CHANNEL_DAC, true, &descrCfg);
+}
+\end{lstlisting}
+
+
+La ISR del botó 1, haurà d'engegar el DMA i el Timer 1 per engegar el procés de generar el senyal prèviament mostrejat (Llistat~\ref{DMADACISR}).
+
+\index{DMA\_ActivateBasic()}\index{TIMER\_CounterSet()}\index{TIMER\_Enable()}
+\begin{lstlisting}[style=customc,caption=ISR del botó 1, label=DMADACISR]
+void GPIO_ODD_IRQHandler(void) {
+  uint32_t aux;
+
+  /* clear flags */
+  aux = GPIO_IntGet();
+  GPIO_IntClear(aux);
+
+  /* Activate DMA transfer */
+  DMA_ActivateBasic(DMA_CHANNEL_DAC, true, false, (void*) &(DAC0->CH1DATA), (void*)DMAbufferADC, SAMPLES-1);
+
+  /* Activate TIMER 1 */
+  TIMER_CounterSet(TIMER1, 0);
+  TIMER_Enable(TIMER1, true);
+}
+\end{lstlisting}
+
 
 \chapter{Una aplicació completa}
 \label{ch:aplicaciosenzilla}
