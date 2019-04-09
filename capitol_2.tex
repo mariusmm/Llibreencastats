@@ -7,9 +7,9 @@ Un sistema encastat és, bàsicament, un seguit de components hardware i softwar
 
 Els components hardware es poden dividir en tres grans blocs:
 \begin{itemize}
-\item Procés de dades: dispositiu amb la capacitat de gestionar dades, entrada sortida, etc. Pot ser un microcontrolador, un \gls{DSP}, una \gls{FPGA}, un \gls{ASIC} o un sistema hibrid que incorpori varis dels anteriors dins el mateix hardware.
- \item Sensors o introducció de dades. Qualsevol dispositiu que rep estímuls del mon físic i els converteix en dades, ja siguin digitals o analògiques (termòmetre, pantalla tàctil, acceleròmetre, etc.).
- \item Actuadors o presentació de dades. Qualsevol dispositiu que rep una dada o sèrie de dades i ho converteix en una acció física (motor, pantalla, relé, etc.).
+\item procés de dades: dispositiu amb la capacitat de gestionar dades, entrada sortida, etc. Pot ser un microcontrolador, un \gls{DSP}, una \gls{FPGA}, un \gls{ASIC} o un sistema hibrid que incorpori varis dels anteriors dins el mateix hardware.
+ \item sensors o introducció de dades. Qualsevol dispositiu que rep estímuls del mon físic i els converteix en dades, ja siguin digitals o analògiques (termòmetre, pantalla tàctil, acceleròmetre, etc.).
+ \item actuadors o presentació de dades. Qualsevol dispositiu que rep una dada o sèrie de dades i ho converteix en una acció física (motor, pantalla, relé, etc.).
 \end{itemize}
 
 
@@ -116,7 +116,7 @@ Per exemple, en el Cortex-M3 de la nostra placa, el mapa de memòria és el seg�
 \item etc.
 \end{itemize}
 
-Dins de la primera zona hi trobem la zona DI ({\em Device Information}) de l’adreça 0x0FE0\_8000 fins a 0x0FE0\_8400. Aquesta zona guarda certs valors únics per a cada dispositiu. En aquest espai, els registres MEM\_INFO\_FLASH, MEM\_INFO\_RAM i PART\_FAMILY els podem llegir fàcilment \cite[24]{EFM32GRM} (Figura~\ref{fig:EFM32_DI}):
+Dins de la primera zona hi trobem la zona DI ({\em Device Information}) de l'adreça 0x0FE0\_8000 fins a 0x0FE0\_8400. Aquesta zona guarda certs valors únics per a cada dispositiu. En aquest espai, els registres MEM\_INFO\_FLASH, MEM\_INFO\_RAM i PART\_FAMILY els podem llegir fàcilment \cite[24]{EFM32GRM} (Figura~\ref{fig:EFM32_DI}):
 
 \begin{figure}
  \centering
@@ -143,12 +143,11 @@ int main(void) {
 }
 \end{lstlisting}
 
-Al codi del Llistat~\ref{memorymappedCode} es defineixen les 3 adreces de memòria per ser accedides fent servir un punter. Així, llegint el valor de les definicions FLASH\_INFO, RAM\_INFO o PART\_INFO s’accedeix a la posició de memòria definida de forma directa. Per fer una escriptura es faria igual, però en l'exemple no es pot escriure a cap d'aquests registres. Debugant el codi línia a línia veurem que la variable aux pren el valor corresponent a cada un dels registres mapats.
+Al codi del Llistat~\ref{memorymappedCode} es defineixen les 3 adreces de memòria per ser accedides fent servir un punter. Així, llegint el valor de les definicions FLASH\_INFO, RAM\_INFO o PART\_INFO s'accedeix a la posició de memòria definida de forma directa. Per fer una escriptura es faria igual, però en l'exemple no es pot escriure a cap d'aquests registres. Debugant el codi línia a línia veurem que la variable aux pren el valor corresponent a cada un dels registres mapats.
 
-Enlloc d'accedir a cada registre per separat, com hem fet a l'exemple, es pot definir una estructura que es correspongui amb cada un dels registres d’un perifèric en concret i que aquesta apunti a l'adreça base del perifèric. Així, per accedir a un registre en concret només caldrà accedir al camp de l'estructura definida.
+Enlloc d'accedir a cada registre per separat, com hem fet a l'exemple, es pot definir una estructura que es correspongui amb cada un dels registres d'un perifèric en concret i que aquesta apunti a l'adreça base del perifèric. Així, per accedir a un registre en concret només caldrà accedir al camp de l'estructura definida.
 
-Un exemple d'això el tenim a fitxer efm32g\_devinfo.h, que defineix
-una estructura d'aquest estil, com es veu al Llistat~\ref {devinfo}.
+Un exemple d'això el tenim a fitxer efm32g\_devinfo.h, que defineix una estructura d'aquest estil, com es veu al Llistat~\ref {devinfo}.
 
 \begin{lstlisting}[label=devinfo,caption={Exemple de definició d'estructura per accedir a memòria},style=customc]
 typedef struct
@@ -180,8 +179,7 @@ Que es correspon amb els registres de la regió DI a la que hem accedit abans. A
 #define DEVINFO ((DEVINFO_TypeDef *) DEVINFO_BASE) /**< DEVINFO base ptr */
 \end{lstlisting}
 
-De manera que es pot accedir als mateixos registres com s'indica al
-Llistat~\ref {devinfouse}. Que és una forma bastant més còmoda de treballar.
+De manera que es pot accedir als mateixos registres com s'indica al Llistat~\ref {devinfouse}. Que és una forma bastant més còmoda de treballar.
 
 \begin{lstlisting}[label=devinfouse,caption={Ús de l'estructura d'accés},style=customc]
 aux = DEVINFO->MSIZE;
@@ -189,8 +187,6 @@ aux = DEVINFO->PART;
 \end{lstlisting}
 
 Per sort, la majoria de fabricants proporcionen llibreries de baix nivell que ens estalvien tant conèixer tots els detalls de cada un dels perifèrics com d'haver de manegar els registres un a un: pel cas de SiliconLabs aquestes llibreries s'agrupen sota la EMLIB \cite{EMLIB}; en el cas de l'empresa ST ens proporciona la biblioteca {\em STM32 Standard Peripheral Libraries} \cite{STM32Lib} o la més moderna {\em  STM32Cube hardware abstraction layer (HAL)} \cite{STM32CubeHAL}.
-
-% \fbox{El codi d'aquest exemples està al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/MemoryMap}{repositori del curs}}
 
 El codi d'aquests exemples està al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/MemoryMap}{repositori del curs}
 
@@ -227,7 +223,7 @@ A la posició de memòria 0x0000\_0000 el que hi ha és el vector d'interrupció
 
 \section{Rapidesa d'un microcontrolador}
 \label{sub:speedtest}
-Molts cops no ens fem a la idea de com de ràpid és la CPU d’un microcontrolador. Estem acostumats a llegir i escoltar freqüències de funcionament dels microprocessadors d’escriptori o de servidor, que actualment són de Gigahertz i els nostres pobres microcontroladors van, en el millor dels casos, a uns quants pocs Megahertz. Això ens pot fer pensar que els nostres microcontroladors són lents i que no poden fer gaire coses.
+Molts cops no ens fem a la idea de com de ràpid és la CPU d’un microcontrolador. Estem acostumats a llegir i escoltar freqüències de funcionament dels microprocessadors d'escriptori o de servidor, que actualment són de Gigahertz i els nostres pobres microcontroladors van, en el millor dels casos, a uns quants pocs Megahertz. Això ens pot fer pensar que els nostres microcontroladors són lents i que no poden fer gaire coses.
 
 Podem comprovar-ho empíricament.
 
@@ -256,7 +252,7 @@ Pitjant el botó molt ràpidament el comptador arriba a 8.000 i 9.000. Així que
 \label{sub:speedtest_example}
 El \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/SpeedTest_2}{segon exemple} és una mica més complicat. Per tal de mesurar el temps que es pitja el botó, farem servir un {\em Timer}, que ja ho veurem més endavant (veure \fullref{sub:Timers}). El que es fa a l'exemple és mesurar acuradament el temps que està el botó pitjat i calcular el nombre d'operacions que s'ha fet en aquell temps.
 
-Com podem veure a la Taula~\ref{tb:SpeedTest} el nombre d’operacions per segon es manté constant independentment del temps que estiguem pitjant el botó i és un número força alt, 134.000 sumes per segon!!!
+Com podem veure a la Taula~\ref{tb:SpeedTest} el nombre d'operacions per segon es manté constant independentment del temps que estiguem pitjant el botó i és un número força alt, 134.000 sumes per segon!!!
 
 \begin{table}[t!]
 \caption{Mesures de temps i sumes per segon}

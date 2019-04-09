@@ -473,7 +473,6 @@ Una forma molt senzilla d'afegir temps a una FSM és afegir un temps d'espera a 
 
 \begin{lstlisting}[style=customc,caption={FSM amb control del temps},label=FSM_temps]
 const int period = 50; // period time in miliseconds
-int start_time, end_time, iteration_time;
 
 void loop() {
   uint32_t start_time, end_time, iteration_time;
@@ -534,7 +533,7 @@ void Executa_kernel(void) {
   Posar processador en mode de baix consum
   /* Aqui el processador esta suspes esperant algun esdeveniment o que es dispari un timer */
 
-  Averiguar quina tasca toca executar-se
+  Esbrinar quina tasca toca executar-se
   Executar tasca 
   (Opcional) Cridar a una funcio generica de l'usuari
 }
