@@ -52,7 +52,7 @@ En aquest llibre i curs ens centrarem exclusivament a parlar del Cortex-M i les 
 Aquesta arquitectura proposada per ARM és una arquitectura tipus RISC de 32 bits amb suport de {\em cache}, punt flotant i dissenyada per ser de baix consum. Tot i que hi ha diferents versions d'aquesta arquitectura, mantenen un conjunt d'instruccions comuns. Aquí llistem els més habituals \cite[7]{EmbeddedBook}:
 
 \begin{itemize}
- \item {\bf Cortex-M0+}: És la versió més bàsica d'aquesta arquitectura, orientat a dispositius molt barats i senzills. Conté un {\em pipeline} de 2 etapes i no té cap mena de {\em cache}. És la versió més senzilla que es pot trobar als catàlegs dels fabricants \cite{CortexM0}.
+ \item {\bf Cortex-M0+}: És la versió més bàsica d'aquesta arquitectura, orientat a dispositius molt barats i senzills i de molt baix consum. Conté un {\em pipeline} de 2 etapes i no té cap mena de {\em cache}. És la versió més senzilla que es pot trobar als catàlegs dels fabricants \cite{CortexM0}.
  \item {\bf Cortex-M3}: Versió de millors prestacions, amb un {\em pipeline} més llarg (3 etapes) i predicció de salts, suport HW d'operacions amb punt fix, sistema de debug avançat i, opcionalment, protecció de memòria \cite{CortexM3}.
  \item {\bf Cortex-M4}: Versió que afegeix capacitats de punt flotant en HW a un Cortex-M3 \cite{CortexM4}.
  \item {\bf Cortex-M7}: Versió d'alt rendiment amb un {\em pipeline} de 6 etapes superescalar, predicció de salts i aritmètica de punt flotant de fins a 64 bits \cite{CortexM7}.
@@ -88,7 +88,7 @@ CoreMark/MHz & 2.42 & 3.32 & 3.40 & 5.04\\
 
 \section{Arquitectura}
 \label{se:arquitectura}
-L'arquitectura dels processadors Cortex-M varia segons la família que estudiem. La família Corte-M0+ té una arquitectura Von Newmann i la resta de famílies tenen arquitectura Harvard mixta, on tot i que la CPU té busos separats per accedir a l'espai de dades o a l'espai de codi, estan tots dos connectats a uns sola matriu (Figura~\ref{fig:M3MemoryMap}) \cite[794]{GuideCortexM3M4}.
+L'arquitectura dels processadors Cortex-M varia segons la família que estudiem. La família Corte-M0+ té una arquitectura Von Newmann i la resta de famílies tenen arquitectura Harvard mixta, on tot i que la CPU té busos separats per accedir a l'espai de dades o a l'espai de codi, estan tots dos connectats a una sola matriu (Figura~\ref{fig:M3MemoryMap}) \cite[794]{GuideCortexM3M4}.
 
 A part de la CPU pròpiament dita, el que se'n diu {\em core} en els microcontroladors ARM inclou també un controlador d'interrupcions (veure~\fullref{ch:IRQ}), un {\em timer} simple (\fullref{sec:systick}) i un mòdul opcional de protecció de memòria (MPU) \cite[230]{GuideCortexM3M4}. Al ser dispositius comuns a tots els {\em Cores}, l'accés a ells és molt similar entre diferents fabricants (veure \fullref{sec:CMSIS-Core}).
 
