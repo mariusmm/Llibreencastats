@@ -1,7 +1,7 @@
 # Curs de programació de sistemes encastats: El llibre
 
 
-Aquest és el repositori del llibre "Curs de programació de sistemes encastats".  El pdf el podeu descarregar [aquí (PDF)](https://github.com/mariusmm/Llibreencastats/releases/download/1.0.5/LlibreEncastats.pdf).
+Aquest és el repositori del llibre "Curs de programació de sistemes encastats".  El pdf el podeu descarregar [aquí (PDF)](https://github.com/mariusmm/Llibreencastats/releases/download/1.0.6/LlibreEncastats.pdf).
 
 El blog corresponent el podeu trobar [aquí](https://sistemesencastats.wordpress.com).
 El repositori amb el codi dels exemples [està aquí](https://github.com/mariusmm/cursembedded).
