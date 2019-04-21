@@ -37,6 +37,15 @@ En sistemes encastats, un SO (o RTOS) no ofereix totes les funcionalitats a les 
 
 Les tasques són les unitats bàsiques de funcionament i és on s'implementen les funcionalitats del sistema.
 
+\section{Temps Real}
+Com ja s'ha dit, FreeRTOS és un Sistema Operatiu de Temps Real, que vol dir que totes les seves operacions tenen un temps d'execució fitat de manera que permet construir aplicacions de Temps Real.Aquest temps fita ve donat perquè tot les funcions del Sistema Operatiu son deterministes, això és, es pot saber {\em a priori} quin temps tardaran a executar-se i, en principi, no han de dependre de factors externs. Així, per exemple, desbloquejar una tasca que està depenent d'un semàfor sempre tardarà el mateix temps per una plataforma donada, fer un {\em context switch} entre tasques el mateix, encara que hi hagi dues o cinquanta tasques preparades, etc.
+
+Això és especialment important quant la nostra aplicació ha de reaccionar ràpidament a algun esdeveniment extern, ja que podrem mesurar i/o calcular la fita màxima de la operació crítica i podrem confiar en que el sistema sempre estarà fitat per aquest valor siguin les condicions que siguin.
+
+Quan es parla de temps real, usualment se'n fa una classificació en dos tipus: {\em soft real-time}  i {\em hard real-time}. S'entén per {\em soft real-time} aquella aplicació en que existeix alguna restricció de temps en algun moment, però aquesta restricció es pot incomplir sense que l'aplicació falli. Un exemple podria ser una aplicació  on cal mostrar vídeo per una pantalla; aquesta aplicació tindrà una fita tal que permeti mostra rel vídeo de forma prou suau, però si mai es per un {\em frame} l'aplicació no falla, si no que l'usuari veurà un artefacte estany a la pantalla. En canvi, un sistema que es defineixi com {\em hard real-time} no pot incomplir en cap moment aquesta restricció  temporal. Un exemple típic és l'{\em airbag} d'un cotxe, que cal que es dispari en el moment adequat i que, en canvi, pot provocar danys si es dispara més tard.
+
+Cal fer notar que precisament per la condició de cricitat i de determinisme, hem d'escriure les funcions d'\gls{ISR} el més curt possibles ja que, a la majoria de les plataformes, quan s'està executant una ISR estan desactivades les \glspl{IRQ} i el RTOS està ``venut'', en el sentit que no pot interrompre ni controlar el temps que es gasta en la ISR.
+
 \section{Tasques}
 
 Una tasca és el que es coneix com a procés en els Sistemes Operatius de propòsit general. Per tant, una tasca serà l'estructura mínima de codi en que es divideix una aplicació. Aquestes tasques seran les que el planificador o {\em scheduler} del Sistema Operatiu anirà executant i retirant d'execució segons certes condicions que veurem a continuació.
@@ -321,6 +330,8 @@ Un semàfor és un dels mecanismes de comunicació entre tasques mes habituals d
 Habitualment es fan servir per sincronitzar almenys dues tasques que comparteixen el semàfor o per protegir una secció crítica.
 
 \subsection{Semàfors a FreeRTOS}
+\label{sub:semaphores}
+
 A FreeRTOS tenim diferents tipus de semàfors:
 
 \begin{itemize}
@@ -574,6 +585,198 @@ L'ús de Mútex és necessari per controlar l'accés a qualsevol secció crític
 \begin{exercise}
 La prioritat de les dues tasques a l'exemple és la mateixa. Com exercici es pot provar de canviar les prioritats i treure els Mutex, a veure què passa i intentar entendre el perquè.
 \end{exercise}
+
+
+\section{\em Event Groups}
+A més dels mecanismes ja explicats, i que son els més típics en la comunicació i sincronització entre tasques, FreeRTOS ens proporciona un mecanisme que permet bloquejar o desbloquejar una o vàries tasques segons succeeixi un o varis esdeveniments \cite[266]{FreeRTOSBook}. Aquest mecanisme es diu {\em Event Groups} i permet que una o vàries tasques defineixen a quins esdeveniments son sensibles  i el {\em kernel} gestiona tot el necessari. Aquest mecanisme permet:
+\begin{itemize}
+ \item Que una tasca o més tasques estiguin bloquejades esperant diversos esdeveniments
+ \item Que un esdeveniment desbloquegi vàries tasques de forma simultània.
+\end{itemize}
+
+% Aquest mecanisme es podria simular amb diversos semàfors binaris (veure \fullref{sub:semaphores}) però augmentaria la complexitat i la possibilitat d'introduir errors.
+
+Aquest mecanisme es basa en declarar {\em flags} per cada esdeveniment per tot seguit definir un grup de {\em flags} anomenat {\em Event Groups}. Aquests {\em flags} individuals s'emmagatzemen com un sol bit, de manera que només poden tenir el valor 0 o 1, on el 0 vol dir que l'esdeveniment no ha succeït i l'1 que l'esdeveniment si que ha succeït. Tots aquests bits es guardaran en una variable de 8 o 24 bits depenent com estigui definida la constant {\bf configUSE\_16\_BIT\_TICKS} al fitxer {\em FreeRTOSConfig.h} (si la constant val 1 el grup conté només 8 bits, si val 0 (valor per defecte) el grup conté 24 bits). 
+
+Les tasques que han d'estar pendents d'aquest grup notifiquen al {\em kernel} de quins esdeveniments particulars volen dependre (bits individuals de la paraula), si s'ha de complir tots o només un (operació ``AND'' o ``OR''), si s'han de netejar els {\em flags} que han desbloquejat la tasca i el temps que es pot esperar a que això succeeixi ({\em timeout}).
+
+Així, i de forma general, tindrem que qui manegui els esdeveniments  (típicament ISRs, però poden ser altres tasques) posaran els {\em flags} individuals a '1' quan aquests succeeixin mentre que una o més tasques estaran bloquejades esperant que una sèrie de bits del grup s'activin (només un o tots depenent de la configuració particular).
+
+\subsection{Exemple de {\em event groups}}
+
+El codi d'aquest exemple es troba \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_EventGroups}{al repositori} i conté una sola tasca esperant per que es compleixin dos esdeveniments, que serà la pulsació dels dos botons de la placa de prototipat. Per tant, l'exemple farà {\em toggle} del LED quan s'hagin pres els dos botons (no cal que sigui simultàniament).
+
+\index{xEventGroupWaitBits()}
+\begin{lstlisting}[style=customc,caption=Tasca esperant per un grup d'esdeveniments,label=EventGroupsTask]
+#define FIRST_BUTTON_BIT (1 << 0)
+#define SECOND_BUTTON_BIT (1 << 1)
+
+static void TaskLedToggle(void *pParameter) {
+  (void) pParameter;
+
+  while (true) {
+    xEventGroupWaitBits(event_group, (FIRST_BUTTON_BIT | SECOND_BUTTON_BIT), pdTRUE, pdTRUE, portMAX_DELAY);
+    LedToggle();
+  }
+}
+\end{lstlisting}
+
+Al Llistat~\ref{EventGroupsTask} es presenta la tasca, que simplement es queda bloquejada esperant pels dos bits del grup prèviament definits. Els dos paràmetres següents (tots dos {\bf pdTRUE}) indiquen que cal  netejar els esdeveniments i cal esperar a tots els esdeveniments s'hagin activat. Per últim, també es configura un {\em timeout} infinit perquè la tasca es quedi bloquejada per sempre esperant als dos esdeveniments.
+
+El codi de la ISR (veure Llistat~\ref{EventGroupsISR})  conté el codi ja conegut per netejar els flags del mòdul GPIO i tot seguit es notifica l'esdeveniment corresponent al grup amb la funció {\em xEventGroupSetBitsFromISR}. En aquest cas els paràmetres son: el grup a notificar, el bit del grup a notificar i l'últim paràmetre serveix per rebre la informació de si cal notificar al {\em kernel} que una tasca s'ha desbloquejat.
+
+\index{xEventGroupSetBitsFromISR()}\index{portYIELD\_FROM\_ISR()}
+\begin{lstlisting}[style=customc,caption=ISR notificant un esdeveniment a un grup,label=EventGroupsISR]
+void GPIO_ODD_IRQHandler(void) {
+  uint32_t aux;
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+  /* clear flags */
+  aux = GPIO_IntGet();
+  GPIO_IntClear(aux);
+
+  xEventGroupSetBitsFromISR(event_group, SECOND_BUTTON_BIT, &xHigherPriorityTaskWoken);
+
+  /* Awake a task ? */
+  portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+\end{lstlisting}
+
+Si a la tasca es canviés la crida per la del Llistat~\ref{EventGroupsTaskB} llavors la tasca es desbloquejarà qua passi qualsevol dels dos esdeveniments (es farà una ``OR'' entre els tots els bits del grup enlloc d'una ``AND'').
+\begin{lstlisting}[style=customc,caption=Tasca esperant un grup d'esdeveniments  (OR),label=EventGroupsTaskB]
+static void TaskLedToggle(void *pParameter) {
+  (void) pParameter;
+
+  while (true) {
+    xEventGroupWaitBits(event_group, (FIRST_BUTTON_BIT | SECOND_BUTTON_BIT), pdTRUE, pdFALSE, portMAX_DELAY);
+    LedToggle();
+  }
+}
+\end{lstlisting}
+
+\subsection{Sobre el determinisme dels grups d'esdeveniments}
+La implementació d'aquests {\em Event Groups} a FreeRTOS es fan mitjançant una tasca auxiliar del mòdul de Timers software ja que la resolució d'un grup d'esdeveniments no és determinista (ja que no es pot saber per avançat quantes tasques o quants esdeveniments estan involucrats a cada moment). La tasca auxiliar es crea automàticament el primer cop que es crea un grup d'esdeveniments amb la prioritat per defecte d'aquest tasca. 
+
+A més, la comunicació entre les funcions de l'API ({\em xEventGroupSetBitsFromISR()}, etc.) i la tasca auxiliar es fa mitjançant una cua, de manera que no és possible el determinisme de tot el mecanisme pel cas general. 
+
+Per tot això, cal ser curós en quins casos fer servir aquest mecanisme, per senzill que pugui semblar i depenent de la criticitat de l'aplicació i del cas particular.
+
+
+\section{Notificacions a tasques}
+Les notificacions a tasques (en anglès {\em Direct to Task Notifications}) son  un mecanisme propi de FreeRTOS similar a les cues, semàfors i mútex però més simple i, en alguns casos, més eficient (aquest mecanisme pot ser fins a un 45\% més ràpid que un mecanisme basat en un semàfor binari). 
+
+Si bé els mecanismes introduïts fins ara eren objectes que existien entre les tasques que comunicaven, les notificacions es fan de forma directe entre \gls{ISR} i tasques o entre dues tasques sense cap objecte addicional. Això te l'avantatge que s'estalvia memòria, ja que no cal mantenir tanta informació i que el mecanisme és més ràpid, però comporta certes limitacions:
+\begin{itemize}
+ \item  No es pot enviar una notificació cap a una \gls{ISR}, tot i que si que es pot a l'inversa.
+ \item  Només es pot notificar a una sola tasca, ja que es notifica directament la tasca, no cap mecanisme intermig.
+ \item No es pot emmagatzemar dades, ja que el mecanisme de notificació pot manegar una i només una dada.
+\end{itemize}
+
+Les funcions de notificació a tasques necessiten conèixer el {\em handler} de la tasca a enviar, cosa que s'acostuma a fer mitjançant variables globals.
+
+A la Taula~\ref{tb:task_notifications} es resumeixen les crides a les notificacions i a quins mecanismes poden substituir \footnote{També hi ha les funcions per ISRs vTaskNotifyGiveFromISR() i xTaskNotifyFromISR()}.
+
+\index{xTaskNotifyGive()}\index{ulTaskNotifyTake()()}\index{xTaskNotify()}\index{xTaskNotifyWait()}
+\index{vTaskNotifyGiveFromISR()}\index{xTaskNotifyFromISR()}
+\begin{table}
+\caption{Crides de notificacions de tasques i els mecanismes equivalents }
+\centering
+\begin{tabular}{|c|c|}
+\hline
+ Semàfor binari & xTaskNotifyGive()  /  ulTaskNotifyTake() \\
+\hline
+ Semàfor comptador & xTaskNotifyGive() /  ulTaskNotifyTake() \\
+\hline
+Grup d'esdeveniments & xTaskNotify() /  xTaskNotifyWait()\\
+\hline
+Cua (d'un sol element) & xTaskNotify() /  xTaskNotifyWait()\\
+\hline
+\end{tabular}
+\label{tb:task_notifications}
+\end{table}
+
+\subsection{Exemple de notificació directa a tasques}
+\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_TaskNotify}{Al repositori} hi ha l'exemple més senzill on es notifica una tasca que es suspèn esperant un esdeveniment. Aquest esdeveniment ve donat per la pulsació d'un dels botons i la notificació per part de la \gls{ISR}.
+
+\index{ulTaskNotifyTake()}
+\begin{lstlisting}[style=customc,caption={Tasca que espera la notificació}, label=DirectNotificationTask]
+static void TaskLedToggle(void *pParameter) {
+  (void) pParameter;
+
+  while (true) {
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    TriggerToggle();
+    LedToggle();
+  }
+}
+\end{lstlisting}
+
+El Llistat~\ref{DirectNotificationTask} mostra la tasca, que simplement espera agafar la notificació amb la funció {\bf ulTaskNotifyTake()} per tot seguit fer {\em toggle} del LED. Els paràmetres de la crida fan que es netegi el flag un cop s'ha rebut i s'esperi indefinidament.
+
+Cada una de les ISR tant sols notifica la tasca amb la crida corresponent, tal com es veu al Llistat~\ref{DirectNotificationISR}. En aquest cas s'ha de fer servir la variable {\em taskhandle} que emmagatzema el {\em handle} a la tasca que està esperant la notificació. Aquesta variable és global a tot el codi i està definida al principi del fitxer main.c.
+
+\index{vTaskNotifyGiveFromISR()}
+\begin{lstlisting}[style=customc,caption={Tasca que espera la notificació}, label=DirectNotificationISR]
+void GPIO_ODD_IRQHandler(void) {
+  uint32_t aux;
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+  /* clear flags */
+  aux = GPIO_IntGet();
+  GPIO_IntClear(aux);
+
+  vTaskNotifyGiveFromISR(taskhandle, &xHigherPriorityTaskWoken);
+  
+  /* Awake a task ? */
+  portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+\end{lstlisting}
+
+\section{Comparant temps de resposta}
+En aquesta secció valorarem els temps de resposta mesurats en els tres mecanismes de comunicació entre esdeveniments i tasques, que son els semàfors, els grups d'esdeveniments i les notificacions directes.
+
+A la Taula~\ref{tb:IRQtoTaskTime} es resumeixen aquestes mesures i a les Figures~\ref{fig:IRQtoTaskTime_Semaphhore},\ref{fig:IRQtoTaskTime_Direct} i \ref{fig:IRQtoTaskTime_Group} es veuen les mesures fetes amb l'oscil·loscopi. Com es pot comprovar, el mecanisme més senzill i ràpid és el de la notificació directa, el semàfor afegeix una mica més de complexitat i per tant de temps de resposta i, per últim, el mecanisme més complex del grup d'esdeveniments és el mecanisme més lent amb diferència.
+
+Cal fer notar també que la resposta és de l'ordre de microsegons, que està per sota del temps de{\em  tick}, cosa que significa que la tasca que s'estigui executant en el moment d'ocorre l'esdeveniment s'interromp i es passa a executar la tasca que està esperant el mecanisme associat a l'esdeveniment.
+
+\begin{table}
+\caption{Crides de notificacions de tasques i els mecanismes equivalents }
+\centering
+\begin{tabular}{|c|c|}
+\hline
+ Mecanisme & Temps (microsegons) \\
+\hline
+ Semàfor binary & 93,6 \\
+\hline
+Notificació directa & 79,2  \\
+\hline
+Grup d'esdeveniments & 306 \\
+\hline
+\end{tabular}
+\label{tb:IRQtoTaskTime}
+\end{table}
+
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/IRQtoSemaphore.png}
+ \caption{Temps de resposta usant semàfors}
+ \label{fig:IRQtoTaskTime_Semaphhore}
+\end{figure}
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/IRQtoDirectTask.png}
+ \caption{Temps de resposta usant notificació a tasca}
+ \label{fig:IRQtoTaskTime_Direct}
+\end{figure}
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/IRQtoEventGroup.png}
+ \caption{Temps de resposta usant groups de notificació}
+ \label{fig:IRQtoTaskTime_Group}
+\end{figure}
 
 \chapter{Exemple amb la UART i interrupcions}
 A l’\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_UART}{exemple Freertos\_UART} hi ha el mateix exemple vist a \fullref{sec:UART_example_2} però en aquest cas usant FreeRTOS. Per això hi ha uns pocs canvis:
