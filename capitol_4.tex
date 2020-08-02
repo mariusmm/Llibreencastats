@@ -1100,3 +1100,162 @@ El codi que es veu al Llistat~\ref{Watchdog_RTOS} proporciona la funció {\bf wa
 Com es pot veure a l'exemple, la variable local a la biblioteca {\em watchdog\_list} emmagatzema l'estat de totes les tasques i s'hi accedeix a la funció {\bf watchdogTouch()} que protegeix l'accés amb un {\em mutex}. La tasca {\bf watchdogTask()}\index{watchdogTask()} avalua aquesta variable d'estat i si tot ha anat correctament (totes les tasques han cridat la seva funció almenys un cop), alimenta el {\em watchdog}. En cas contrari, la tasca no l'alimenta i acabarà per reiniciar el sistema.
 
 A l'exemple aquesta tasca s'executa un cop cada segon, i el {\em watchdog} s'ha de configurar d'acord a aquest temps (un temps de {\em watchdog} de 2 segons seria l'adequat). La resta de tasques haurien de cridar la funció {\bf watchdogTouch()} amb un període de temps prou curt (per exemple cada 500 mil·lisegons) per tal de que tot el sistema s'executi correctament.
+
+\chapter{{\em Drivers} en multi-tasca}
+Quan fem servir un dispositiu (I2C, SPI, etc.) en un entorn multi-tasca com és 
+FreeRTOS podem tenir el problema de dos o més tasques accedint simultàniament a 
+un mateix recurs (el mòdul hardware del microcontrolador). És per això que cal 
+escriure els drivers per accedir a dispositius d'una manera especial quan 
+treballem en entorns multi-tasca.
+
+Ens podem imaginar què passaria si dues tasques intentessin accedir al bus I2C 
+alhora? Què passaria quan una estigues llegint pel bus i, pel que fos, quedés 
+suspesa i la següent tasca a executar-se comences una transferència d'escriptura 
+pel mateix bus? Segurament es corromprien totes dues transferències o s'estarien 
+fent transferències errònies al sistema.
+
+El que volem evitar és que dues o més tasques facin ús alhora del recurs 
+compartit. Per tant, caldrà establir un control d'accés de manera que fins que 
+una tasca no ha acabat de fer servir el recurs l'altra tasca s'ha d'estar 
+esperant. Ja hem vist una aproximació  senzilla a \fullref{sec:wrapperI2C}, 
+però ara anem a mirar-nos-ho amb més deteniment.
+
+Hi ha diferents maneres de fer això, aquí farem servir la més senzilla 
+i estesa, que és escriure un wrapper (embolcall) que protegeixi les funcions del 
+driver i que seran les que farem servir a les nostres tasques. Aquest wrapper 
+contindrà totes les funcions necessàries i les protegirà amb un mutex (veieu 
+Fent servir Mutex en aquest mateix curs). Aquest mutex ens servirà per controlar 
+l'accés a les parts compartides, que seran les pròpies crides al driver del més 
+baix nivell.
+
+Veiem-ho amb un exemple fent un {\em wrapper} al driver d'I2C de Silicon Labs que 
+tenim a una aplicació completa (codi al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_App_1}{github}). En el cas que tinguéssim 
+un sistema on hi hagués més d'un dispositiu Slave connectat el bus, que hi 
+accedeixen dues tasques diferents, podriem trobar-nos amb el problema que 
+comentàvem d'accés múltiple. Per tant, ens cal protegir els accessos amb el 
+mutex tal com hem comentat.
+
+El primer que caldrà és definir una funció d'inicialització del wrapper I2C, que 
+podria quedar com es veu al Llistat~\ref{I2CWrapperMutexInit}.
+\index{wrapper\_I2C\_Init()}
+\begin{lstlisting}[style=customc, label=I2CWrapperMutexInit, caption=Inicialització del {\em wrapper} I2C amb Mutex]
+/****************************/
+/*   Fitxer I2C_Wrapper.h   */
+/****************************/
+typedef struct I2C_Handle_t* I2C_WrapperHandler_t;
+
+I2C_WrapperHandler_t I2C_initialize(void);
+bool I2C_WriteRegister(I2C_WrapperHandler_t handlr, uint8_t addr, uint8_t reg, uint8_t data);
+bool I2C_ReadRegister(I2C_WrapperHandler_t handlr, uint8_t addr, uint8_t reg, uint8_t *val);
+
+/****************************/
+/*   Fitxer I2C_Wrapper.c   */
+/****************************/
+struct I2C_Handle_t {
+   SemaphoreHandle_t mutex;
+};
+
+static struct I2C_Handle_t i2c_hdnl = {0};
+
+I2C_WrapperHandler_t wrapper_I2C_Init() {
+
+  if (i2c_hdnl.mutex == NULL) {
+    i2c_hdnl.mutex = xSemaphoreCreateMutex();
+  
+    I2C_Init (...);
+  }
+
+  return &i2c_hdnl;
+} 
+\end{lstlisting}
+
+La funció tant sols crea un mutex i inicialitza el driver de la biblioteca  
+emlib d'I2C del fabricant. El mutex el retorna com un tipus handler de l'I2C 
+(I2C\_WrapperHandler\_t) i serà el primer paràmetre que caldrà passar a la resta 
+de crides a les funcions del wrapper.
+
+Així, podem modificar les dues funcions per accedir al bus I2C i que provin 
+d'accedir al mutex, les modificacions podrien quedar tal com es veu al 
+Llistat~\ref{I2CWrapperMutexFuncs}.
+
+\index{wrapper\_I2C\_ReadReg()}
+\index{wrapper\_I2C\_WriteReg()}
+\begin{lstlisting}[style=customc, label=I2CWrapperMutexFuncs, caption=Modificacions a les funcions {\em wrapper} I2C amb Mutex]
+bool wrapper_I2C_ReadReg(I2C_WrapperHandler_t handlr, uint8_t address, uint8_t reg, uint8_t *data) {
+
+  xSemaphoreTake (handlr->mutex, portMAX_DELAY);
+  ...
+  I2C_Transfer( ... );
+  ...
+  xSemaphoreGive (handlr->mutex);
+
+}
+
+bool wrapper_I2C_WriteReg(I2C_WrapperHandler_t handlr, uint8_t address, uint8_t reg, uint8_t data) {
+  xSemaphoreTake (handlr->mutex, portMAX_DELAY);
+  ...
+  I2C_Transfer ( ... );
+  ...
+  xSemaphoreGive (handlr->mutex);
+} 
+\end{lstlisting}
+
+Així, amb aquests canvis el que tenim ara és que una funció d'accés al bus I2C 
+no es col·lissonarà amb una altra, ja que abans d'intentar accedir-hi haurà 
+d'agafar el mutex. Si no ho aconsegueix, la funció es queda esperant-lo un temps 
+infinit (es bloqueja la funció i la tasca que l'hagi cridada). Quan estarà 
+disponible el mutex? Doncs quan una altra funció d'una altra tasca acabi el seu 
+accés i alliberi el bus.
+
+Cal veure també que el tipus del handler (I2C\_WrapperHandler\_t) és l'únic tipus 
+que és públic del mòdul i així amaguem l'implementació de l'estructura del 
+handler. En aquest cas el handler és una estructura amb només un mutex, però si 
+més endavant cal afegir-hi més informació no farà que canviï el tipus del 
+handler que fan servir els diferents mòduls. 
+
+Aquesta és una bona pràctica per amagar l'implementació de la definició i 
+deixant independent una de l'altra i donant-los la llibertat de canviar 
+l'estructura sense haver de canviar res del codi que fa servir la biblioteca.
+
+També cal veure que el handler és, de fet, un apuntador a una estructura. Això 
+també és una pràctica comuna, ja que és molt més ràpid i eficient passar com a 
+paràmetre un apuntador (que no deixa de ser un tipus de 32 bits) que no pas 
+passar tota l'estructura sencera (que poden ser força camps i molt costosa de 
+passar, copiar, etc.).
+
+Un exemple de canvi a l'estructura del handler podria ser afegir el timeout que 
+volem per provar d'accedir al mutex associat, de manera que a la funció 
+\index{I2C\_initialize()}I2C\_initialize() se li passés el timeout desitjat i es guardes a l'estructura 
+handler. Els canvis serien els que es veuen al Llistat~\ref{I2CWrapperMutexNew}.
+
+\begin{lstlisting}[style=customc, label=I2CWrapperMutexNew, caption=Afegint més dades a l 'estructura del {\em wrapper} I2C amb mutex]
+struct I2C_Handle_t {
+   SemaphoreHandle_t mutex;
+   TickType_t timeout;
+};
+
+I2C_WrapperHandler_t I2C_initialize(TickType_t timeout) {
+  ...
+  i2c_hdnl.mutex = xSemaphoreCreateMutex();
+  i2c_hdnl.timeout = timeout;
+  ...
+}
+
+bool I2C_WriteRegister(I2C_WrapperHandler_t handlr, uint8_t addr, uint8_t reg, uint8_t data) {
+  ...
+  xSemaphoreTake(handlr->mutex, handlr->timeout);
+  ...
+}
+... 
+\end{lstlisting}
+
+Aquesta canvis només implicarien afegir el paràmetre de timeout a la crida 
+d'inicialització de l'I2C i cap altre canvi per part dels mòduls que facin 
+servir aquesta biblioteca.
+
+Un altre canvi que es podria afegir és en el cas que tinguem més d'un perifèric 
+del mateix tipus (és a dir, 3 SPIs, o 2 I2C, o...) caldria llavors passar quin 
+dels perifèrics volem inicialitzar i fer servir. Per tant, una opció seria 
+passar com a paràmetre a la funció I2C\_initialize() quin dels perifèrics I2C es 
+vol inicialitzar. El handler que tornés hauria de ser diferent en funció del 
+perifèric a treballar i quin és s'hauria de guardar a l'estructura oculta.
