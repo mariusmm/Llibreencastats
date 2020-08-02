@@ -1248,3 +1248,105 @@ Com que actualment les biblioteques que ofereixen són compatibles entre diferen
 \end{figure}
 
 
+\chapter{Inicialització del sistema i del llenguatge C}
+\label{ch:initialization}
+És la funció main() realment la primera funció que s’executa quan comença l’execució? 
+Qui implementa les funcions malloc()/free()? 
+Ara toca aprendre sobre els interiors del runtime de C i com s’inicialitza tot el sistema
+
+Abans no comenci l’execució del nostre programa s’executen tot de funcions 
+per preparar tant el microcontrolador com l’entorn d’execució de C.
+
+Comencem per l’inici: quan el microcontrolador surt de l’estat de reset, 
+el que fa és anar a executar el ResetHandler\index{ResetHandler} que està a l’adreça per defecte 
+del Program Counter (registre pc).
+
+Aquesta funció la trobem definida al fitxer startup\_gcc\_efm32tg.s al directori
+CMSIS del projecte i aquest handler tant sols crida la funció SystemInit()\index{SystemInit()}, tal 
+com es veu a la Figura~\ref{fig:resethandlercortex}.
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.50\textwidth, keepaspectratio]{imatges/resethandlercortex.png}
+ \caption{Reset Handler per Cortex-M}
+ \label{fig:resethandlercortex}
+\end{figure}
+
+
+Podem dir-li al debugger que s’aturi en aquesta funció canviant-li la 
+configuració i dient-li que s’aturi a la funció que vulguem, en aquest cas hi 
+podem escriure Reset\_Handler\index{Reset\_Handler}. Per defecte veurem que està configurat per 
+que s’aturi a la funció main() (Figura~\ref{fig:debugstopat}).
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/debugstopat.png}
+ \caption{Configuració del {\it Debugger}}
+ \label{fig:debugstopat}
+\end{figure}
+
+Aquesta funció està definida pel fabricant i la trobem al fitxer system\_efm32tg.c
+al mateix directori. En el cas dels Cortex-M el que fa és modificar el registre 
+VTOR de la CPU per a que apunti a la taula de vectors d’interrupció definits 
+al fitxer startup\_gcc\_efm32tg.s.
+
+A continuació segueix executant-se el Reset Handler, i el primer que fa és 
+copiar la secció {\bf .data} a la RAM (Figura~\ref{fig:copy_data_efm32}). Això què vol dir? Doncs que les variables 
+que s’han inicialitzat amb algun valor inicial al nostre codi s’han 
+emmagatzemat al fitxer binari a continuació del codi (secció {\bf .text}). 
+Abans de començar a funcionar el codi, cal copiar aquestes variables a la 
+memòria RAM, que és la secció {\bf .data}. Així, quan aquesta part de la 
+inicialització acaba, tenim les variables a la memòria RAM amb els seus 
+valors inicials.
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/copy_data_efm32.png}
+ \caption{Còpia de la secció .bss a la memòria RAM}
+ \label{fig:copy_data_efm32}
+\end{figure}
+
+Un acabada aquesta còpia, es crida a la funció \_start()\index{\_start()} de la biblioteca que 
+estiguem fent servir. En el cas de EFM32 la biblioteca és la Nano C library. 
+Aquesta biblioteca implementa les llibreries estàndard de C (stdlib, string, 
+memory, etc.) i li cal una inicialització que es troba al fitxer crt0.S (situada 
+a newlib/libc/sys/arm/crt0.S).
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/crt0_setstack-1.png}
+ \caption{Inicialització del registre d'stack (Stack Pointer)}
+ \label{fig:crt0_setstack-1}
+\end{figure}
+
+El que es fa aquí és inicialitzar el punter de l’stack a l’adreça que s’indiqui al 
+fitxer del linker i posar a zero tota la memòria de la secció {\bf .bbs} 
+(Figures~\ref{fig:crt0_setstack-1} i \ref{fig:crt0_bssinit}).
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/crt0_bssinit.png}
+ \caption{Inicialització de la secció .bss}
+ \label{fig:crt0_bssinit}
+\end{figure}
+
+
+A continuació es crida la funció \_\_libc\_init\_array()\index{\_\_libc\_init\_array()} 
+(situada a newlib/libc/misc/init.c) que va cridant funcions d’inicialització 
+de la pròpia biblioteca (i constructors estàtics si treballem en C++).
+
+Finalment, la funció \_start()\index{\_start()} crida a la funció main() del nostre programa i ja 
+comença a executar-se el nostre codi (Figura~\ref{fig:crt0_callmain}).
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/crt0_callmain.png}
+ \caption{Crida a la funció \_init() i funció main()}
+ \label{fig:crt0_callmain}
+\end{figure}
+
+Com es pot veure, no és trivial engegar un microcontrolador i tenir l’entorn del 
+llenguatge C preparat, però per sort tenim aquestes biblioteques i els fitxers
+que ens donen els fabricants per fer-ho sense que ens n’haguem de preocupar.
+
+
