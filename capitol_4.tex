@@ -662,6 +662,56 @@ A més, la comunicació entre les funcions de l'API ({\em xEventGroupSetBitsFrom
 Per tot això, cal ser curós en quins casos fer servir aquest mecanisme, per senzill que pugui semblar i depenent de la criticitat de l'aplicació i del cas particular.
 
 
+\section{Conjunt de cues {\em Queue Sets}}
+Hi ha casos on una tasca pot voler rebre dades de cues diferents on, potser, per cada cua es reben dades de tipus diferents. FreeRTOS ens proporciona un mecanisme per poder rebre de vàries cues d'una forma senzilla.
+
+El mecanisme és el {\em Queue set} (conjunt de cues) que permet agrupar tot de cues i semàfors i després consultar per part d'una tasca si hi ha alguna dada disponible a alguna de les cues o semàfor.
+
+El que cal fer és crear un conjunt, afegir-hi els mecanismes de sincronització que es vulguin incloure i ja només cal consultar la disponibilitat a través del conjunt enlloc de cada mecanisme per separat.
+
+Anem a veure-ho en un exemple, que com sempre \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_QueueSets}{està al repositori}.  A l'exemple es modifica l'\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/FreeRTOS_Queue}{exemple de cues anterior} perquè cada ISR enviï la seva dada per una cua diferent ({\em queue\_buttons\_1}, {\em queue\_buttons\_2}).
+
+El primer que cal fer és crear el conjunt de cues ({\em Queue Sets}) tal com es veu al Llistat~\ref{QueueSetMain}. Cal veure que quan és crea el conjunt cal especificar la longitud de totes les cues i semàfors que s'agrupen. Per les cues cal sumar el nombre d'elements, pels semàfors binaris la longitud és 1 i pels semàfors comptadors la longitud és el valor màxim que poden tenir.
+
+\index{xQueueCreateSet()}\index{xQueueCreate()}
+\begin{lstlisting}[style=customc,caption={Creació del conjunt de cues}, label=QueueSetMain]
+...
+#define QUEUE_LENGTH (10)
+
+QueueSetHandle_t queue_set;
+QueueHandle_t queue_buttons_1;
+QueueHandle_t queue_buttons_2;
+
+void main() {
+  ...
+  queue_set = xQueueCreateSet( QUEUE_LENGTH + QUEUE_LENGTH );
+  queue_buttons_1 = xQueueCreate(QUEUE_LENGTH, sizeof(uint32_t));  
+  queue_buttons_2 = xQueueCreate(QUEUE_LENGTH, sizeof(uint32_t));
+  ...
+}
+\end{lstlisting}
+
+A la tasca s'ha canviat com es rep les dades de cada ISR i ara es consulta el conjunt de cues (Llistat~\ref{QueueSetTask}). Aquesta funció retorna el {\em handler} al mecanisme que té una dada disponible, de manera que a continuació es consulta al mecanisme i s'adquireix la dada rebuda. La resta del mecanisme és força similar a l'exemple anterior.
+
+\index{xQueueSelectFromSet()}\index{xQueueReceive()s}
+\begin{lstlisting}[style=customc,caption={Tasca que fa servir el conjunt de cues}, label=QueueSetTask]
+static void TaskLedToggle(void *pParameter) {
+  ...
+  for (;;) {
+    selected_queue = xQueueSelectFromSet(queue_set, 0);
+    if ( selected_queue == queue_buttons_1) {
+      xQueueReceive(queue_buttons_1, &my_delay, (TickType_t ) 0);
+    } else if (selected_queue == queue_buttons_2) {
+      xQueueReceive(queue_buttons_2, &my_delay, (TickType_t ) 0);     
+    } 
+    vTaskDelay(my_delay);
+    LedToggle();
+  }
+} 
+\end{lstlisting}
+
+Cal fer notar que l'exemple es fa amb només dues cues, però els {\em Queue Sets}, malgrat el nom, també poden incloure semàfors de la mateixa manera i consultar-los de la mateixa forma.
+
 \section{Notificacions a tasques}
 Les notificacions a tasques (en anglès {\em Direct to Task Notifications}) son  un mecanisme propi de FreeRTOS similar a les cues, semàfors i mútex però més simple i, en alguns casos, més eficient (aquest mecanisme pot ser fins a un 45\% més ràpid que un mecanisme basat en un semàfor binari). 
 
@@ -737,7 +787,7 @@ En aquesta secció valorarem els temps de resposta mesurats en els tres mecanism
 
 A la Taula~\ref{tb:IRQtoTaskTime} es resumeixen aquestes mesures i a les Figures~\ref{fig:IRQtoTaskTime_Semaphhore},\ref{fig:IRQtoTaskTime_Direct} i \ref{fig:IRQtoTaskTime_Group} es veuen les mesures fetes amb l'oscil·loscopi. Com es pot comprovar, el mecanisme més senzill i ràpid és el de la notificació directa, el semàfor afegeix una mica més de complexitat i per tant de temps de resposta i, per últim, el mecanisme més complex del grup d'esdeveniments és el mecanisme més lent amb diferència.
 
-Cal fer notar també que la resposta és de l'ordre de microsegons, que està per sota del temps de{\em  tick}, cosa que significa que la tasca que s'estigui executant en el moment d'ocorre l'esdeveniment s'interromp i es passa a executar la tasca que està esperant el mecanisme associat a l'esdeveniment.
+Cal fer notar també que la resposta és de l'ordre de microsegons, que està per sota del temps de {\em  tick}, cosa que significa que la tasca que s'estigui executant en el moment d'ocorre l'esdeveniment s'interromp i es passa a executar la tasca que està esperant el mecanisme associat a l'esdeveniment.
 
 \begin{table}
 \caption{Crides de notificacions de tasques i els mecanismes equivalents }

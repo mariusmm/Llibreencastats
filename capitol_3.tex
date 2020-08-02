@@ -768,6 +768,21 @@ Cal fixar-se que la freqüència no varia, sempre és \~13.5 Hz i el que va vari
 
 Per acabar, es pot provar de canviar la freqüència del \gls{PWM} per a que no es vegi el LED fent pampallugues. Cal augmentar la freqüència a un valor que superi els 100Hz i enlloc de veure el LED encendre's i apagar-se, es veurà com varia la intensitat amb la que llueix.
 
+
+\section{Controlant un servomotor}
+Un servomotor és un dispositiu electromecànic de control senzill. La majoria d'ells son rotatius i permeten controlar l'angle d'actuació del motor amb un senyal digital, normalment un senyal PWM. 
+Així, el que se sol necessitar és un senyal PWM a una freqüència determinada i un temps actiu entre certs valors que provocaran un moviment proporcional al motor. 
+En el cas del servo que tinc entre mans, un Parallax Standard Servo (\#900-00005) (link al seu DataSheet), cal un PWM a 50 Hz i uns temps mínims de 0.75 ms i màxim de 2.25 ms. Aquests temps faran que el servo es mogui entre els 0º i els 180º de rotació.
+
+
+\begin{displaymath}
+% \text{Freq. de PWM} = \frac{\text{Freq Clk}}{\text{prescaler} * \text{valor TOP}} - 1 = \frac{14.000.000 \text{ Hz}}{256 * (4000 +1 )} = 13.67 \text{ Hz}
+TOP = \frac{f_{CPU}}{ f_{PWM} * PRESCALER} - 1
+\end{displaymath}
+
+
+
+
 \chapter{\em Watchdog}
 \label{sec:Watchdog}
 En els microcontroladors actuals tenim un perifèric amb un funcionament força peculiar. Quan s'activa el {\em \gls{Watchdog}}, aquest comença a comptar un cert període de temps, i si no “s'alimenta”, reiniciarà tot el sistema \cite[123]{EFM32GRM}\cite[709]{STM32F4RM}.
