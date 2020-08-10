@@ -1350,3 +1350,190 @@ llenguatge C preparat, però per sort tenim aquestes biblioteques i els fitxers
 que ens donen els fabricants per fer-ho sense que ens n’haguem de preocupar.
 
 
+\chapter{Treballant amb punt flotant}
+Sempre s'ha dit que cal evitar l'ús de variables en punt flotant ({\it float} o 
+{\it double}) en sistemes encastats. Això ve dels temps en que els 
+microcontroladors disponibles no tenien cap unitat hardware de punt flotant i 
+aquestes operacions s'havien de fer per software i això penalitzava moltíssim el 
+rendiment.
+
+Això encara és aplicable per la majoria de casos, tot i que els nous 
+microcontroladors basats en Cortex-M4 o Cortex-M7 poden portar unitats de punt 
+flotant. Anem a veure amb detall una mica com treballar amb les eines i el codi 
+perquè tot funcioni correctament.
+
+Treballarem amb dos exemples molt senzills, que son les funcions {\bf mulf()} i 
+{\bf muld()} (Llistats~\ref{mulf} i \ref{muld}), que multipliquen dos valors de tipus 
+{\it float} i {\it double} respectivament. 
+Cal recordar que el tipus {\it float} correspon a un tipus de punt flotant de 32 bits 
+conegut com {\it single precision} seguint l'standard IEEE 754. {\it Double} correspon a 
+un tipus de 64 bits conegut com {\it double precision} del mateix standard \cite{wiki:IEEE754}.
+
+\index{mulf()}
+\begin{lstlisting}[style=customc,caption=funció mulf(),label=mulf]
+/* mulf.c */
+float mulf(float a, float b) {
+  return a*b;
+}
+\end{lstlisting}
+
+\index{muld()}
+\begin{lstlisting}[style=customc,caption=funció muld(),label=muld]
+/* muld.c */
+double mulf(double a, double b) {
+  return a*b;
+}
+\end{lstlisting}
+
+Les biblioteques estàndard de C incorporen funcions per operar amb aquests 
+tipus, i son les que es fan servir per defecte pel compilador si no li donem 
+ordres especials.
+
+Així doncs, si compilem el fitxer mulf.c amb la següent comanda
+
+\begin{lstlisting}
+> arm-none-eabi-gcc mulf.c -o- -S -mthumb -mcpu=cortex-m4 
+\end{lstlisting}
+
+ens mostrarà per pantalla el codi en assemblador que genera el compilador. Cal 
+fixar-se que els {\it flags} que li passem al compilador son només que el 
+microcontrolador és un Cortex-M4.
+
+\begin{lstlisting}[style=customasm,caption=codi assemblador de la funció mulf.c,label=ASMmulf]
+        push    {r7, lr}
+        sub     sp, sp, #8
+        add     r7, sp, #0
+        str     r0, [r7, #4]    @ float
+        str     r1, [r7]        @ float
+        ldr     r1, [r7]        @ float
+        ldr     r0, [r7, #4]    @ float
+        bl      __aeabi_fmul
+        mov     r3, r0
+        mov     r0, r3
+        adds    r7, r7, #8
+        mov     sp, r7
+        @ sp needed
+        pop     {r7, pc} 
+\end{lstlisting}
+
+\index{\_\_eabi\_fmul()}
+Aquí el que es veu és que es preparen uns registres i es crida una funció 
+anomenada \_\_eabi\_fmul que és la funció de la biblioteca encarregada de fer les 
+multiplicacions per software.
+
+Si ara especifiquem que el cortex-M4 te el mòdul d'operacions en punt flotant 
+amb la segúent comanda:
+
+\begin{lstlisting}
+> arm-none-eabi-gcc muld.c -o- -S -mthumb -mcpu=cortex-m4 
+   -mfloat-abi=hard -mfpu=fpv4-sp-d16
+\end{lstlisting}
+
+El resultat serà el següent, on ja es veu que es fan servir instruccions de punt 
+flotant (vstr, vldr, vmul, vmov, etc.)
+
+\begin{lstlisting}[style=customasm,caption=codi assemblador de la funció mulf.c usant FPU,label=ASMmulfFPU]
+        push    {r7}
+        sub     sp, sp, #12
+        add     r7, sp, #0
+        vstr.32 s0, [r7, #4]
+        vstr.32 s1, [r7]
+        vldr.32 s14, [r7, #4]
+        vldr.32 s15, [r7]
+        vmul.f32        s15, s14, s15
+        vmov.f32        s0, s15
+        adds    r7, r7, #12
+        mov     sp, r7
+        @ sp needed
+        ldr     r7, [sp], #4
+        bx      lr 
+\end{lstlisting}
+
+En aquest cas els {\it flags} del compilador indiquen quin mòdul FPU te el nostre 
+microcontrolador (fpv4-sp-d16): fp versió 4, single precision i 16 registres).
+
+Això seria pel cas de la funció que treballa amb precisió simple, si ara fem el 
+mateix per la funció que treballa amb dobles, fent servir els mateixos {\it flags}
+
+\begin{lstlisting}
+> arm-none-eabi-gcc muld.c -o- -S -mthumb -mcpu=cortex-m4 
+   -mfloat-abi=hard -mfpu=fpv4-sp-d16 
+\end{lstlisting}
+
+\begin{lstlisting}[style=customasm,caption=codi assemblador de la funció muld.c,label=ASMmuld]
+        push    {r7, lr}
+        sub     sp, sp, #16
+        add     r7, sp, #0
+        vstr.64 d0, [r7, #8]
+        vstr.64 d1, [r7]
+        ldrd    r2, [r7]
+        ldrd    r0, [r7, #8]
+        bl      __aeabi_dmul
+        mov     r2, r0
+        mov     r3, r1
+        vmov    d7, r2, r3
+        vmov.f32        s0, s14
+        vmov.f32        s1, s15
+        adds    r7, r7, #16
+        mov     sp, r7
+        @ sp needed
+        pop     {r7, pc}
+\end{lstlisting}
+
+\index{\_\_eabi\_dmul()}
+Veiem que altre cop es fa l'operació per software enlloc de fer-la via les 
+instruccions de punt flotant. Per què passa això? Doncs perquè l'arquitectura 
+Cortex-M4 només permet FPUs de precisió simple i no pot treballar amb precisió 
+doble i així li hem especificat al compilador. Per tant el compilador fa les 
+crides a la biblioteca software pertinent (\_\_eabi\_dmul). 
+
+Per tant, compte amb treballar amb doubles i arquitectures Cortex-M4 o 
+inferiors! Cal tenir en compte que algunes operacions en C que fan servir 
+constants poden acabar en un tipus double si no vigilem.
+
+Si ara fem la prova amb la mateixa funció però usant els {\it flags} per un Cortex-M7
+
+\begin{lstlisting}
+> arm-none-eabi-gcc muld.c -o- -S -mthumb -mcpu=cortex-m7 
+   -mfloat-abi=hard -mfpu=fpv5-d16
+\end{lstlisting}
+
+En aquest cas, els {\it flags} indiquen que el processador és un Cortex-M7 i la unitat 
+de punt flotant és la versió 5 (Tal com indica el ARM Cortex-M7 Processor 
+Technical Reference Manual (pàg 8-2)).
+
+Amb aquests {\it flags}, el codi assemblador que es genera és el que es veu al llistat següent
+
+\begin{lstlisting}[style=customasm,caption=codi assemblador de la funció muld.c usant FPU de Cortex-M7,label=ASMmuldFPU]
+        push    {r7}
+        sub     sp, sp, #20
+        add     r7, sp, #0
+        vstr.64 d0, [r7, #8]
+        vstr.64 d1, [r7]
+        vldr.64 d6, [r7, #8]
+        vldr.64 d7, [r7]
+        vmul.f64        d7, d6, d7
+        vmov.f64        d0, d7
+        adds    r7, r7, #20
+        mov     sp, r7
+        @ sp needed
+        ldr     r7, [sp], #4
+        bx      lr 
+\end{lstlisting}
+
+
+Aquí es veu que es torna a fer servir registres i instruccions pròpies del punt 
+flotant (vstr, vldr, vmul, vmov) amb el suffix .f64 que es correspon a la mida 
+del tipus double (64 bits) i que, per tant, les operacions no es fan 
+per una rutina software si no que les executa el mòdul de punt flotant del 
+microcontrolador.
+
+Per tant, podem veure clar que l'ús del tipus double només és recomanat 
+per arquitectures Cortex-M7 i posteriors si no volem tenir una pèrdua de 
+rendiment considerable.
+
+Per últim, no cal espantar ningú, ja que aquest {\it flags}> els maneguen les 
+eines de cada fabricant segons les característiques dels seus microcontroladors 
+i normalment no ens n'hem de preocupar.
+
+

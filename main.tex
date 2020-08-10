@@ -95,6 +95,29 @@
   float
 }
 
+\lstdefinelanguage
+[ARM]{Assembler}
+[x86masm]{Assembler}
+{morekeywords={push, sub, add, str, ldr, bl, mov, adds, pop, vstr.32, vldr.32, 
+                vmul.f32, vmov.f32, bx, vstr.64, ldrd, vmov, vldr.64, vmul.f64, 
+                vmov.f64}
+}
+
+\lstdefinestyle{customasm}{
+  breaklines=true,
+  frame=single,
+  xleftmargin=\parindent,
+  language=[ARM]Assembler,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+  framesep=8pt,
+  float
+}
+
 \lstset{
   rulecolor=\color{ocre},
   rulesepcolor=\color{ocre}
