@@ -129,7 +129,7 @@ Però, com saber quants elements cal atorgar a una cua en la seva creació? Aque
 
 Aquest mètode, però, no ens assegura que en qualsevol cas el sistema no acabi amb una cua plena. Per això, cal un anàlisi més analític del problema per trobar una solució.
 
-\subsection{Model M/M/1}
+\section{Model M/M/1}
 \label{sub:mm1}
 
 Aquest model de cues és dels models estadístics més senzills però que ens pot donar informació important només amb les dades més bàsiques del nostre sistema. Aquest model fa certes suposicions que podem donar per bones pels nostres sistemes \cite{mm1_1}\cite{mm1_2}\cite{mm1_3}\cite{mm1_4}:
@@ -259,7 +259,7 @@ Les tècniques més habituals es basen en programar un {\em timer} o una tasca p
 
 Un altre forma de fer-ho, potser més senzilla és la de un cop detectat un primer flanc, deixar de llegir l'entrada fins passat un temps i un cop transcorregut el temps, es llegeix el valor de l'entrada altre cop. Això es pot fer fàcilment controlant un Timer des de la ISR d'entrada del pin, tal com es veurà a continuació.
 
-\subsection{Un exemple de {\em debouce}}
+\section{Un exemple de {\em debouce}}
 El codi d'aquest examples està, com sempre, al \href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/GPIO_Debouncing}{repositori}.
 Primer cal configurar el Timer per què compti un cert temps i generi una IRQ un cop transcorregut aquest temps. Per això configurem el valor Top tal com ja vàrem fer a \fullref{sub:Timers}.
 
@@ -437,7 +437,7 @@ Fent servir aquest atribut es veu que està tot ben empaquetat i ens estalvia un
 
 Cal dir que en força casos aquestes estructures empaquetades poden ser més lentes d'accedir-hi, ja que la CPU haurà d'accedir a diferents posicions de memòria i reconstruir el valor original movent bits amunt i avall (veure per exemple, com es reconstruiran els camps fieldL1 o fieldL2)
 
-\chapter{Un exemple senzill}
+\section{Un exemple senzill}
 
 A l'\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/Structures}{exemple del repositori} es defineixen dos estructures iguals, una amb l'atribut per empaquetar-la i l'altra amb les opcions per defecte.
 
