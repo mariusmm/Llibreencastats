@@ -772,15 +772,121 @@ Per acabar, es pot provar de canviar la freqüència del \gls{PWM} per a que no 
 \section{Controlant un servomotor}
 Un servomotor és un dispositiu electromecànic de control senzill. La majoria d'ells son rotatius i permeten controlar l'angle d'actuació del motor amb un senyal digital, normalment un senyal PWM. 
 Així, el que se sol necessitar és un senyal PWM a una freqüència determinada i un temps actiu entre certs valors que provocaran un moviment proporcional al motor. 
-En el cas del servo que tinc entre mans, un Parallax Standard Servo (\#900-00005) (link al seu DataSheet), cal un PWM a 50 Hz i uns temps mínims de 0.75 ms i màxim de 2.25 ms. Aquests temps faran que el servo es mogui entre els 0º i els 180º de rotació.
+En el cas del servo que tinc entre mans, un Parallax Standard Servo (\#900-00005) (veure Figura~\ref{fig:servomotor}) 
+(\href{https://www.parallax.com/sites/default/files/downloads/900-00005-Standard-Servo-Product-Documentation-v2.2.pdf}{enllaç al seu DataSheet}), 
+cal un PWM a 50 Hz i uns temps mínims de 0.75 ms i màxim de 2.25 ms. 
+Aquests temps faran que el servo es mogui entre els 0º i els 180º de rotació.
 
+\begin{figure}
+ \centering
+ \includegraphics[width=0.40\textwidth, keepaspectratio]{imatges/servomotor.png}
+ \caption{Fotografia del servomotor Parallax usat}
+ \label{fig:servomotor}
+\end{figure}
+
+
+Cal aplicar la següent fórmula per saber el valor TOP del nostre TIMER:
 
 \begin{displaymath}
 % \text{Freq. de PWM} = \frac{\text{Freq Clk}}{\text{prescaler} * \text{valor TOP}} - 1 = \frac{14.000.000 \text{ Hz}}{256 * (4000 +1 )} = 13.67 \text{ Hz}
 TOP = \frac{f_{CPU}}{ f_{PWM} * PRESCALER} - 1
 \end{displaymath}
 
+Com que la freqüència d'entrada és 14.000.000 Hz, la freqüència del PWM ha de ser 50 Hz i TOP no pot ser més gran de 65.536 (16 bits) cal que triem el {\it prescaler} acuradament. 
+De fet, podríem triar un prescaler de 1024 i ens donaria un valor per TOP de 272. Però amb aquest valor perdem molta resolució per generar el PWM, ja que el {\em timer} 
+només podrà arribar fins a aquest valor. Si triem un valor més petit pel prescaler, augmentem la resolució  i la qualitat del senyal del PWM. Així, si triem un valor de pre-escalat de 8 ens 
+resulta que TOP  ha de valor 34999. Aquest valor és el més gran que podem generar d'aquesta forma i que càpiga en 16 bits, ja que el següent pre-escalat ens dona un valor 
+massa  gran.
 
+Així doncs, tenim que per generar un PWM 50 HZ calen 34999 {\em ticks} del {\em timer}. 
+Com  que la fulla d'especificacions del servomotor ens diu que el temps de pols positiu ha d'anar dels 0.75 ms fins els 2.25 ms, cal saber quants {\em ticks} els corresponent.
+
+Si fem una simple regla de tres tenim:
+
+\begin{displaymath}
+ 0 \degree \rightarrow \frac{0.75 \  ms}{20 \  ms} *  34.999 = 1312,4625 \simeq	 1312 
+\end{displaymath}
+
+i 
+
+\begin{displaymath}
+ 180 \degree \rightarrow \frac{2.25 \  ms}{20 \  ms} *  34.999 = 3937,3875 \simeq	 3937 
+\end{displaymath}
+
+I ja tenim els dos valors màxims i mínims per controlar correctament el servomotor en qüestió i ens podem muntar una funció que ens passi 
+de graus de rotació a {\em counts} del PWM per simplificar el codi (Llistat~\ref{degreestopwm}).
+
+\index{degrees\_to\_pwm()}
+\begin{lstlisting}[style=customc,caption={Funció que calcula els {\em counts} donat els graus que es vol del servomotor},label=degreestopwm] 
+#define PWM_FREQ (34999)
+#define PWM_0 (1312)
+#define PWM_180 (3937)
+ 
+uint32_t degrees_to_pwm(uint32_t degrees) {
+    uint32_t ret_value = 0;
+ 
+    if (degrees < 180) {
+        ret_value = (degree * (PWM_180 - PWM_0) / 180 ) + PWM_0;
+    } else {
+        ret_value = PWM_180;
+    }
+ 
+    return ret_value;
+}
+\end{lstlisting}
+
+A les figures~\ref{fig:pwm_0_servo} i \ref{fig:pwm_180_servo} es veu el senyal PWM generat pels casos de 0\degree i 180\degree. Es veu que les mesures de l'oscil·loscopi 
+donen 50 Hz i un temps del pols positiu de 0.5 ms i  2.25 ms.
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/Servo_0.png}
+ \caption{PWM per situar el servomotor a 0 \degree}
+ \label{fig:pwm_0_servo}
+\end{figure}
+
+\begin{figure}
+ \centering
+ \includegraphics[width=0.85\textwidth, keepaspectratio]{imatges/Servo_180.png}
+ \caption{PWM per situar el servomotor a 180 \degree}
+ \label{fig:pwm_180_servo}
+\end{figure}
+
+I posem un codi a les ISR dels dos botons perquè incrementi (decrementi) el valor en graus on volem situar el servo: La resta del codi està al repositori en aquest 
+\href{https://github.com/mariusmm/cursembedded/tree/master/Simplicity/PWM_2}{enllaç}.
+
+\index{GPIO\_EVEN\_IRQHandler()}
+\begin{lstlisting}[style=customc,caption={ISR del botó que incrementa la rotació  del servomotor},label=servoirq] 
+void GPIO_EVEN_IRQHandler(void) {
+    uint32_t aux;
+ 
+    aux = GPIO_IntGet();
+ 
+    /* clear flags */
+    GPIO_IntClear(aux);
+ 
+    degree += 30;
+ 
+    if (degree > 180) {
+        degree = 180;
+    }
+ 
+    pwm_value = degrees_to_pwm(degree);
+ 
+    TIMER_CompareBufSet(TIMER1, 1, pwm_value); 
+}
+\end{lstlisting}
+
+\begin{remark}
+ En el meu cas i amb el servomotor que tinc, s’observa que quan està en repòs de tant en tant se sent com el servo fa algun moviment o “crec”. 
+ No n’estic segur, però pot ser que sigui perquè la freqüència del PWM no sigui prou estable i s’escurci un pel i se surti d’especificacions. 
+ En aquest cas millora si s’allarga el període del PWM augmentant una mica el valor de PWM\_FREQ.
+\end{remark}
+
+\begin{remark}
+ També veig que si el mínim el poso a 0.75 ms el servo no arriba a fer 180º de rotació i puc baixar el mínim fins a 0.5ms i que tot segueixi funcionat. 
+ En aquest cas el valor de PWM\_0 és 875.
+\end{remark}
 
 
 \chapter{\em Watchdog}
