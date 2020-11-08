@@ -339,21 +339,52 @@ Aquesta part de l'especificació fixa la forma de comunicar-se amb les parts mé
 Així, i a tall d'exemple, les funcions que ja hem fet servir per controlar interrupcions com {\bf NVIC\_EnableIRQ()}\index{NVIC\_EnableIRQ()} a \fullref{ch:IRQ} no són pròpies de cap fabricant si no que són funcions definides per {\bf CMSIS-core}. També la manera en que es defineixen estructures per accedir als diferents perifèrics ve marcada per l'especificació {\bf CMSIS-Core} (veieu \fullref{devinfo}).
 
 \section{CMSIS-Driver}
-% \cite{CMSIS-DRIVER}
-Aquesta especificació defineix una \gls{API} per tot un seguit de perifèrics per tal que els fabricants puguin implementar el {\em driver} corresoonent i els desenvolupadors no hagin de dependre de llibreries pròpies de cada fabricant. Aquesta especificació inclou els següents perifèrics:
+\label{sec:CMSIS-Driver}
+Aquesta especificació defineix una \gls{API} per tot un seguit de perifèrics per tal que els fabricants puguin implementar el {\em driver} 
+corresponent i els desenvolupadors no hagin de dependre de llibreries pròpies de cada fabricant. Aquesta especificació inclou els següents perifèrics \cite{CMSIS-DRIVER}:
 \begin{itemize}
  \item \gls{CAN}
  \item Ethernet
- \item I2C
+ \item \gls{I2C}
  \item \gls{MCI}
  \item  NAND 
- \item Flash
+ \item \gls{FLASH}
  \item \gls{SAI}
- \item SPI
+ \item \gls{SPI}
  \item Storage
- \item USART
- \item USB
+ \item \gls{USART}
+ \item \gls{USB}
 \end{itemize}
+
+Hi ha una implementació d'alguns dels mòduls feta per l'autor al repositori \href{https://github.com/mariusmm/CMSIS_Drivers}{GitHub} pels dispositius de Silicon Labs i de ST.
+
+És interessant veure com s'ha organitzat el codi per part del dissenyador. El que fa és proporcionar un fitxer .h per cada driver on el que hi ha és una definició d'
+una estructura que guarda tot de punters a cada funció del {\em driver} ({\em Initialize()}, {\em Uninitialize()}, {\em MasterTransmit()}, etc.). En aquest mateix fitxer incorpora 
+la documentació de totes les funcions en format Doxygen. A més, el dissenyador demana que hi hagi una estructura per cada perifèric real del dispositiu, 
+de manera que si tenim un microcontrolador amb 2 controladors I2C, cal que la implementació publiqui dos instàncies de l'estructura: I2C0 i I2C1 (o potser I2C1 i I2C2).
+
+Això dona la possibilita d'escriure unes funcions adaptades a cada fabricant amb les seves biblioteques en un fitxer .c que queda ``ocult'' a l'usuari del {\em driver}. 
+En el cas de la implementació de l'autor aquestes estructures criden a funcions particulars per cada instància (I2C0\_Initialize(), I2C1\_Initialize(), etc.) que criden a 
+una única funció EFM32\_I2C\_Initialize() que rep com a paràmetre una estructura pròpia de cada perifèric (I2C0\_Resources o I2C1\_Resources de tipus EFM32\_I2C\_RESOURCES).
+Aquesta estructura guarda la informació d'estat per cada perifèric (configuració de pins, de transmissió i recepció, funció de {\em callback} registrada, etc.).
+
+Un cop fet això, cal escriure una funció per cada una de les funcionalitats que ha de proporcionar el {\em driver} i que rebi els paràmetres prestablers i a més l'estructura d'estat.
+Aquestes funcions poden fer ús de les biblioteques dels fabricants o accedir directament als perifèrics per tal d'implementar la funcionalitat que toqui. Tot això, no obstant, queda
+amagat cap a l'usuari del {\em driver}, que tant sols tindrà la instància del {\em driver} i les funcions estàndards publicades, com  es veu al Llistat~\ref{CMSISDriverexample}.
+
+\index{Driver\_I2C0.Initialize()}
+\index{Driver\_I2C0.PowerControl()}
+\index{Driver\_I2C0.MasterTransmit()}
+\begin{lstlisting}[style=customc, caption=Exemple d'ús del {\em driver CMSIS I2C}, label=CMSISDriverexample]
+#include "Driver_I2C.h"
+
+...
+  Driver_I2C0.Initialize(i2c_event);
+  Driver_I2C0.PowerControl(ARM_POWER_FULL);
+...
+  Driver_I2C0.MasterTransmit(dev_addr, tx_buff, 1, true);
+...
+\end{lstlisting}
 
 
 \section{CMSIS-DSP}
