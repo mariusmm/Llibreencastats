@@ -11,7 +11,7 @@ Aquest és un projecte viu, és a dir, seguiré ampliant i millorant el llibre, 
 [![made-with-latex](https://img.shields.io/badge/Made%20with-LaTeX-1f425f.svg)](https://www.latex-project.org/)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Commits des de l'ultima release](https://img.shields.io/github/commits-since/Mariusmm/Llibreencastats/latest)
+[![Commits des de l'ultima release](https://img.shields.io/github/commits-since/Mariusmm/Llibreencastats/latest)](https://img.shields.io/github/commits-since/Mariusmm/Llibreencastats/latest)
 [![version](https://img.shields.io/github/release/mariusmm/llibreencastats.svg?style=flat)](https://github.com/mariusmm/Llibreencastats/releases)
 [![Downloads](https://img.shields.io/github/downloads/mariusmm/Llibreencastats/total.svg?label=Downloads&style=flat)](https://github.com/mariusmm/Llibreencastats/releases)
 
